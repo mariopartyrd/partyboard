@@ -1,5 +1,5 @@
 Party Board
-[![Build Status]][actions] [![Progress]][progress site] [![DOL Progress]][progress site] [![RELs Progress]][progress site] [![Discord Badge]][discord]
+[![Discord Badge]][discord]
 =============
 
 [Build Status]: https://github.com/mariopartyrd/partyboard/actions/workflows/build.yml/badge.svg
