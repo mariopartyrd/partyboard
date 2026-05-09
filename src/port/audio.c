@@ -347,7 +347,7 @@ void HuAudSStreamAllStop(void) {
 }
 
 s32 HuAudSStreamStatGet(s32 seNo) {
-    return 12;
+    return 0;
     // return msmStreamGetStatus(seNo);
 }
 
