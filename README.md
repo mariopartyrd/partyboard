@@ -7,7 +7,7 @@ Party Board
 [Discord Badge]: https://img.shields.io/discord/994839212618690590?color=%237289DA&logo=discord&logoColor=%23FFFFFF
 [discord]: https://discord.gg/T4faGveujK
 
-A work-in-progress Windows/Linux/macOS port of Mario Party 4.
+A work-in-progress Windows/Linux/macOS/Android/iOS port of Mario Party 4.
 
 This repository does **not** contain any game assets or assembly whatsoever. An existing copy of the game is required.
 
