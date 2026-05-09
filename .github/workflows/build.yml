@@ -37,8 +37,7 @@ jobs:
     - name: Prepare
       run: cp -R /orig .
 
-    # Build the project
-    - name: Build
+    - name: Build 
       run: |
         python configure.py --map --version ${{ matrix.version }} \
             --binutils /binutils --compilers /compilers
@@ -80,17 +79,17 @@ jobs:
       matrix:
         include:
           - name: GCC x86_64
-            runner: [self-hosted, Linux]
+            runner: ubuntu-latest
             preset: gcc
             artifact_arch: x86_64
-          # - name: GCC aarch64
-          #   runner: ubuntu-24.04-arm
-          #   preset: gcc
-          #   artifact_arch: aarch64
-          # - name: Clang x86_64
-          #   runner: ubuntu-latest
-          #   preset: clang
-          #   artifact_arch: x86_64
+#          - name: GCC aarch64
+#            runner: ubuntu-24.04-arm
+#            preset: gcc
+#            artifact_arch: aarch64
+#          - name: Clang x86_64
+#            runner: ubuntu-latest
+#            preset: clang
+#            artifact_arch: x86_64
 
     steps:
       - uses: actions/checkout@v6
@@ -99,7 +98,6 @@ jobs:
           submodules: recursive
 
       - name: Install dependencies
-        if: 'false' # disabled for self-hosted
         run: |
           sudo apt-get update
           sudo apt-get -y install ninja-build clang lld openssl libcurl4-openssl-dev \
@@ -109,7 +107,6 @@ jobs:
             libxss-dev libfuse2 libusb-1.0-0-dev libdecor-0-dev libpipewire-0.3-dev libunwind-dev
 
       - name: Setup sccache
-        if: 'false' # disabled for self-hosted
         uses: mozilla-actions/sccache-action@v0.0.9
 
       - name: Print sccache stats
@@ -125,17 +122,16 @@ jobs:
         run: ci/build-appimage.sh
 
       - name: Upload artifacts
-        if: startsWith(github.event.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v7
         with:
           name: partyboard-${{env.PARTY_BOARD_VERSION}}-linux-${{matrix.preset}}-${{matrix.artifact_arch}}
           path: |
-            build/install/PartyBoard-*.AppImage
+            build/install/Party_Board-*.AppImage
             build/install/debug.tar.*
 
   build-apple:
     name: Build Apple (${{matrix.name}})
-    runs-on: [self-hosted, macOS]
+    runs-on: macos-latest
     strategy:
       fail-fast: false
       matrix:
@@ -144,14 +140,14 @@ jobs:
             platform: macos
             preset: x-macos-ci-arm64
             artifact_name: macos-appleclang-arm64
-          # - name: AppleClang macOS x86_64
-          #   platform: macos
-          #   preset: x-macos-ci-x86_64
-          #   artifact_name: macos-appleclang-x86_64
-          # - name: AppleClang iOS arm64
-          #   platform: ios
-          #   preset: x-ios-ci
-          #   artifact_name: ios-appleclang-arm64
+#          - name: AppleClang macOS x86_64
+#            platform: macos
+#            preset: x-macos-ci-x86_64
+#            artifact_name: macos-appleclang-x86_64
+#          - name: AppleClang iOS arm64
+#            platform: ios
+#            preset: x-ios-ci
+#            artifact_name: ios-appleclang-arm64
           # - name: AppleClang tvOS arm64
           #   platform: tvos
           #   preset: x-tvos-ci
@@ -164,7 +160,6 @@ jobs:
           submodules: recursive
 
       - name: Install dependencies
-        if: 'false'
         run: brew install cmake ninja
 
       - name: Install Rust iOS target
@@ -195,7 +190,6 @@ jobs:
         run: cmake --build --preset ${{matrix.preset}}
 
       - name: Upload artifacts
-        if: startsWith(github.event.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v7
         with:
           name: partyboard-${{env.PARTY_BOARD_VERSION}}-${{matrix.artifact_name}}
@@ -212,17 +206,17 @@ jobs:
       matrix:
         include:
           - name: MSVC x86_64
-            runner: [self-hosted, Windows]
+            runner: windows-latest
             preset: msvc
             msvc_arch: amd64
             vcpkg_arch: x64
             artifact_arch: x86_64
-          # - name: MSVC arm64
-          #   runner: windows-11-arm
-          #   preset: arm64-msvc
-          #   msvc_arch: arm64
-          #   vcpkg_arch: arm64
-          #   artifact_arch: arm64
+#          - name: MSVC arm64
+#            runner: windows-11-arm
+#            preset: arm64-msvc
+#            msvc_arch: arm64
+#            vcpkg_arch: arm64
+#            artifact_arch: arm64
           # - name: Clang x86_64
           #   runner: windows-latest
           #   preset: clang
@@ -249,7 +243,6 @@ jobs:
         uses: mozilla-actions/sccache-action@v0.0.9
 
       - name: Install dependencies
-        if: 'false' # disabled for self-hosted
         run: |
           choco install ninja
           vcpkg install freetype:${{matrix.vcpkg_arch}}-windows-static zstd:${{matrix.vcpkg_arch}}-windows-static
@@ -261,7 +254,6 @@ jobs:
         run: cmake --build --preset x-windows-ci-${{matrix.preset}}
 
       - name: Upload artifacts
-        if: startsWith(github.event.ref, 'refs/tags/v')
         uses: actions/upload-artifact@v7
         with:
           name: partyboard-${{env.PARTY_BOARD_VERSION}}-win32-msvc-${{matrix.artifact_arch}}
@@ -270,3 +262,77 @@ jobs:
             build/install/*.dll
             build/install/res/
             build/install/debug.7z
+
+  build-android:
+    name: Build Android (${{matrix.name}})
+    runs-on: ubuntu-latest
+    env:
+      ANDROID_NDK_VERSION: 29.0.14206865
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: arm64-v8a
+            preset: android-arm64
+            jni_dir: arm64-v8a
+            artifact_name: android-clang-arm64
+            rust_target: aarch64-linux-android
+#          - name: x86_64
+#            preset: android-x86_64
+#            jni_dir: x86_64
+#            artifact_name: android-clang-x86_64
+#            rust_target: x86_64-linux-android
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.9
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ninja-build
+
+      - name: Install Rust Android target
+        run: |
+          rustup toolchain install stable
+          rustup target add ${{matrix.rust_target}}
+
+      - name: Install NDK
+        run: |
+          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
+            "ndk;${{ env.ANDROID_NDK_VERSION }}"
+
+      - name: Set ANDROID_NDK
+        run: echo "ANDROID_NDK=$ANDROID_HOME/ndk/${{ env.ANDROID_NDK_VERSION }}" >> $GITHUB_ENV
+
+      - name: Configure CMake
+        run: cmake --preset ${{matrix.preset}}
+
+      - name: Build
+        run: cmake --build --preset ${{matrix.preset}}
+
+      - name: Stage JNI libraries
+        run: |
+          platforms/android/scripts/stage-jni-libs.sh
+
+      - name: Build APK
+        run: |
+          cd platforms/android
+          ./gradlew :app:assembleDebug
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v7
+        with:
+          name: partyboard-${{env.PARTY_BOARD_VERSION}}-${{matrix.artifact_name}}
+          path: platforms/android/app/build/outputs/apk/debug/app-${{matrix.jni_dir}}-debug.apk

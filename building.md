@@ -7,7 +7,7 @@
     * Windows: [Microsoft Store](https://go.microsoft.com/fwlink?linkID=2082640)
         * Verify it's added to `%PATH%` by typing `python` in `cmd`.
     * macOS: `brew install python@3`
-* ninja
+* ninja (optional)
     * Windows: [ninja](https://github.com/ninja-build/ninja/releases)
         * Quick install via pip: `pip install ninja`
         * Verify it's added to `%PATH%` by typing `python` in `cmd`.
@@ -51,48 +51,7 @@ git pull
 git submodule update --init --recursive
 ```
 
-# Building the game for the GameCube
-## Copy your game's disc image to `orig/[GAMEID]`.
-  - The supported game IDs are listed above.
-  - Supported formats: ISO (GCM), RVZ, WIA, WBFS, CISO, NFS, GCZ, TGC
-  - After the initial build, the disc image can be deleted to save space.
-
-## Configure:
-  ```
-  python configure.py
-  ```
-
-  To choose a version other than the USA Rev 0 one, add `--version [GAMEID]` to the command. 
-
-## Build C files:
-  ```
-  ninja
-  ```
-
-## Bundle into ISO:
-
-### Without uv
-
-```bash
-# Create venv and install dependencies
-python -m venv venv
-.\venv\Scripts\activate
-pip install pyisotools cutie
-
-# Run build_iso.py
-python tools/build_iso.py
-```
-
-### With uv
-
-```bash
-uv run tools/build_iso.py
-```
-  
-
 # Building the port
-**After you've built the files for GameCube, follow these instructions**:
-
 
 **CLion (Windows / macOS / Linux)**
 

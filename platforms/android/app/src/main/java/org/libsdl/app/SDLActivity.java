@@ -61,7 +61,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
     private static final String TAG = "SDL";
     private static final int SDL_MAJOR_VERSION = 3;
     private static final int SDL_MINOR_VERSION = 4;
-    private static final int SDL_MICRO_VERSION = 2;
+    private static final int SDL_MICRO_VERSION = 4;
 /*
     // Display InputType.SOURCE/CLASS of events and devices
     //
@@ -1963,7 +1963,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
             Intent i = new Intent(Intent.ACTION_VIEW);
             i.setData(Uri.parse(url));
 
-            int flags = Intent.FLAG_ACTIVITY_NO_HISTORY 
+            int flags = Intent.FLAG_ACTIVITY_NO_HISTORY
                       | Intent.FLAG_ACTIVITY_MULTIPLE_TASK
                       | Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
             i.addFlags(flags);
@@ -2032,7 +2032,7 @@ public class SDLActivity extends Activity implements View.OnSystemUiVisibilityCh
         try {
             ParcelFileDescriptor pfd = mSingleton.getContentResolver().openFileDescriptor(Uri.parse(uri), mode);
             return pfd != null ? pfd.detachFd() : -1;
-        } catch (FileNotFoundException e) {
+        } catch (FileNotFoundException | SecurityException e) {
             e.printStackTrace();
             return -1;
         }
@@ -2227,4 +2227,3 @@ class SDLClipboardHandler implements
         SDLActivity.onNativeClipboardChanged();
     }
 }
-

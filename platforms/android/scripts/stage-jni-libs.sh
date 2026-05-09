@@ -24,8 +24,22 @@ copy_libs() {
   local abi="$1"
   local src_dir="$2"
   local dst_dir="$APP_DIR/$abi"
+
+  # Skip if the build directory for this ABI doesn't exist
+  if [[ ! -d "$src_dir" ]]; then
+    echo "Skipping ABI '$abi': source directory '$src_dir' not found"
+    return 0
+  fi
+
+  # Skip if there are no .so files to stage
+  local libs=("$src_dir"/*.so)
+  if [[ ! -e "${libs[0]}" ]]; then
+    echo "Skipping ABI '$abi': no .so files found in '$src_dir'"
+    return 0
+  fi
+
   mkdir -p "$dst_dir"
-  for src in "$src_dir"/*.so; do
+  for src in "${libs[@]}"; do
     local dst="$dst_dir/$(basename "$src")"
     cp -f "$src" "$dst"
     if [[ "$ANDROID_STAGE_STRIP" != "0" ]] && [[ -n "$STRIP_TOOL" ]]; then

@@ -56,6 +56,9 @@ u16 Hu3DCameraExistF;
 static u16 NoSyncF;
 s32 modelKillAllF;
 
+#ifdef TARGET_PC
+#include "port/dolassets.h"
+#else
 #include "refMapData0.inc"
 #include "refMapData1.inc"
 #include "refMapData2.inc"
@@ -67,6 +70,7 @@ s32 modelKillAllF;
 #include "hiliteData2.inc"
 #include "hiliteData3.inc"
 #include "hiliteData4.inc"
+#endif
 
 void Hu3DInit(void) {
     ModelData* data;

@@ -80,6 +80,7 @@ set(GAME_FILES
 set(PORT_FILES
         src/port/audio.c
         src/port/byteswap.cpp
+        src/port/dolassets.cpp
         #        src/port/dvd.c
         src/port/imgui.cpp
         src/port/OS.c

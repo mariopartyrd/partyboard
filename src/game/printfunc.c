@@ -8,9 +8,10 @@
 
 #ifdef TARGET_PC
 #include <string.h>
-#endif
-
+#include "port/dolassets.h"
+#else
 extern u8 ank8x8_4b[];
+#endif
 
 struct strline_data {
     u16 type;

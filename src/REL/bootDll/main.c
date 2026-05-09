@@ -799,24 +799,25 @@ void ObjectSetup(void)
      return 0;
  }
 
- #include "nintendoData.inc"
+#ifndef TARGET_PC
+#include "nintendoData.inc"
+#endif
 
  void *NintendoDataDecode(void)
  {
+#ifdef TARGET_PC
+     return HuDataSelHeapReadNum(TITLE_NINTENDO_ANM, MEMORY_DEFAULT_NUM, HEAP_DATA);
+#else
      u32 *src = (u32 *)nintendoData;
+
      u32 size = *src++;
      void *dst;
      s32 decode_type;
-#ifdef TARGET_PC
-     byteswap_u32(&size);
-#endif
      dst = HuMemDirectMalloc(HEAP_DATA, size);
      decode_type = *src++;
-#ifdef TARGET_PC
-     byteswap_s32(&decode_type);
-#endif
      if(dst) {
          HuDecodeData(src, dst, size, decode_type);
      }
      return dst;
+#endif
  }
