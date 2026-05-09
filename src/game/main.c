@@ -109,6 +109,7 @@ void main(void)
             .mem1Size = 64 * 1024 * 1024,
             .mem2Size =  16 * 1024 * 1024,
         });
+    AuroraSetViewportPolicy(AURORA_VIEWPORT_FIT);
     aurora_dvd_open(imgui_get_image_path_from_popup());
     InitializeDol();
 #endif
