@@ -321,6 +321,10 @@ static void SMInit(omObjData *object)
     omDLLDBGOut();
     Hu3DBGColorSet(0, 0, 0);
     CopyPlayerCfg(smPlayerCfg, GWPlayerCfg);
+#ifdef TARGET_PC
+    // this stayed -1 which they later used to index into an array
+    smPlayerCfg[0].character = 0;
+#endif
     for (i = 0; i < 4; i++) {
         for (j = i + 1; j < 4; j++) {
             if (smPlayerCfg[i].character == smPlayerCfg[j].character) {
