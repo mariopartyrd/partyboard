@@ -53,6 +53,8 @@ git submodule update --init --recursive
 
 # Building the port
 
+The recommended presets are `RelWithDebInfo` and `Release`, since the game code is lightweight and already compiled in debug mode at all times.
+
 **CLion (Windows / macOS / Linux)**
 
 Open the project directory in CLion. Enable the appropriate presets for your platform:

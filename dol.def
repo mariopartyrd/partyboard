@@ -1097,3 +1097,4 @@ EXPORTS
     HuWinInsertMesSizeGetPtr
     HuWinKeyWaitNumGetPtr
     BoardWinInsertMesSetPtr
+    port_main

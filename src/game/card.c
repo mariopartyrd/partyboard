@@ -3,6 +3,10 @@
 #include "game/card.h"
 #include "version.h"
 
+#ifdef TARGET_PC
+#include "port/settings.h"
+#endif
+
 static void *cardWork;
 SHARED_SYM u8 UnMountCnt;
 
@@ -11,8 +15,7 @@ static void MountCallBack(s32 chan, s32 result);
 void HuCardInit(void)
 {
 #ifdef TARGET_PC
-        // TODO PC use gci and detect dolphin
-        CARDSetLoadType(CARD_RAWIMAGE);
+        CARDSetLoadType(partyboard_settings_card_file_type());
         CARDInit("Party Board", "mariopartyrd");
 #else
 	CARDInit();

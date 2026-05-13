@@ -1,0 +1,291 @@
+*, *:before, *:after {
+    box-sizing: border-box;
+}
+
+body {
+    overflow: visible;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    font-family: "FOT-NewRodin Pro";
+    font-weight: normal;
+    font-size: 16dp;
+    color: #E0DBC8;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: stretch;
+    z-index: 1;
+    pointer-events: none;
+}
+
+fps,
+toast {
+    position: absolute;
+    border: 1dp #009dda;
+    background-color: rgba(37, 59, 156, 100%);
+}
+
+toast {
+    top: 40dp;
+    right: 40dp;
+    display: flex;
+    flex-flow: column;
+    border-radius: 14dp;
+    overflow: hidden;
+    backdrop-filter: blur(5dp);
+    box-shadow: 0 0 15dp 3dp;
+    filter: opacity(0);
+    transform: scale(0.9);
+    transform-origin: center;
+    transition: filter transform 0.2s cubic-in-out;
+    padding: 18dp 24dp;
+    gap: 8dp;
+}
+
+toast[open] {
+    filter: opacity(1);
+    transform: scale(1);
+}
+
+/*toast:hover {
+    cursor: pointer;
+    background-color: rgba(61, 59, 36, 80%);
+}
+
+toast:active {
+    background-color: rgba(45, 43, 26, 80%);
+}*/
+
+toast heading {
+    display: flex;
+    gap: 18dp;
+    align-items: center;
+    font-size: 14dp;
+    font-weight: bold;
+    text-transform: uppercase;
+    color: #009dda;
+}
+
+toast heading > span {
+    flex: 1 0 auto;
+}
+
+toast heading > row {
+    flex: 1 0 auto;
+    display: flex;
+    align-items: center;
+    gap: 4dp;
+}
+
+toast message {
+    display: flex;
+    flex-flow: column;
+    gap: 8dp;
+}
+
+toast message row {
+    display: flex;
+}
+
+toast message row.muted {
+    opacity: 0.5;
+}
+
+toast progress {
+    height: 4dp;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    width: 100%;
+}
+
+toast progress fill {
+    background-color: rgba(194, 164, 45, 80%);
+}
+
+toast.achievement {
+    border: 1dp #00b4fa;
+}
+
+toast.achievement heading {
+    color: #00b4fa;
+}
+
+toast.controller-warning {
+    top: auto;
+    right: auto;
+    bottom: 40dp;
+    left: 50%;
+    width: 440dp;
+    max-width: 90%;
+    transform: translateX(-50%) scale(0.9);
+}
+
+toast.controller-warning[open] {
+    transform: translateX(-50%) scale(1);
+}
+
+toast.controller-warning heading {
+    color: #00b4fa;
+}
+
+toast.menu-notification {
+    top: 40dp;
+    right: auto;
+    bottom: auto;
+    left: 50%;
+    max-width: 90%;
+    transform: translateX(-50%) scale(0.9);
+}
+
+toast.menu-notification[open] {
+    transform: translateX(-50%) scale(1);
+}
+
+toast.menu-notification message {
+    align-items: center;
+    text-align: center;
+}
+
+toast.menu-notification message row {
+    align-items: center;
+    gap: 6dp;
+}
+
+icon {
+    font-family: "Material Symbols Rounded";
+    font-weight: normal;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+icon.arrow-forward {
+    width: 1.2em;
+    height: 1.2em;
+    font-size: 1.2em;
+    decorator: text("&#xe5c8;" center center);
+}
+
+icon.trophy {
+    width: 1.2em;
+    height: 1.2em;
+    font-size: 1.2em;
+    decorator: text("&#xe71a;" center center);
+}
+
+icon.controller {
+    width: 1.2em;
+    height: 1.2em;
+    font-size: 1.2em;
+    decorator: text("&#xf135;" center center);
+}
+
+icon.warning {
+    width: 1.2em;
+    height: 1.2em;
+    font-size: 1.2em;
+    decorator: text("&#xe002;" center center);
+}
+
+fps {
+    display: none;
+    z-index: 99;
+    font-family: "N64 Party";
+    font-size: 18dp;
+    font-weight: bold;
+    padding: 9dp 12dp;
+    border-radius: 7dp;
+    pointer-events: none;
+    white-space: nowrap;
+}
+
+fps[open] {
+    display: block;
+}
+
+fps[corner=tl] {
+    top: 12dp;
+    left: 12dp;
+}
+
+fps[corner=tr] {
+    top: 12dp;
+    right: 12dp;
+}
+
+fps[corner=bl] {
+    bottom: 12dp;
+    left: 12dp;
+}
+
+fps[corner=br] {
+    bottom: 12dp;
+    right: 12dp;
+}
+
+logo {
+    position: absolute;
+    width: 100dp;
+    height: 100dp;
+    bottom: 40dp;
+    left: 40dp;
+    opacity: 0;
+    transition: opacity 0.5s linear-in-out;
+}
+
+logo[open] {
+    opacity: 0.65;
+}
+
+logo img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    filter: drop-shadow(#0008 0 0 14dp);
+    transform-origin: center;
+}
+
+logo img.inner {
+    animation: 24s linear-in-out infinite logo-inner-spin;
+}
+
+logo img.outer {
+    animation: 8s linear-in-out infinite logo-outer-spin;
+}
+
+@keyframes logo-inner-spin {
+    from {
+        transform: rotate(360deg);
+    }
+    to {
+        transform: rotate(0deg);
+    }
+}
+
+@keyframes logo-outer-spin {
+    from {
+        transform: rotate(0deg);
+    }
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@media (max-height: 640dp) {
+    toast {
+        top: 20dp;
+        right: 20dp;
+    }
+
+    toast.controller-warning {
+        bottom: 20dp;
+    }
+
+    toast.menu-notification {
+        top: 20dp;
+    }
+}

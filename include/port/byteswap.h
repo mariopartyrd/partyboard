@@ -1,5 +1,5 @@
-#ifndef _SRC_BYTESWAP_H_
-#define _SRC_BYTESWAP_H_
+#ifndef PORT_BYTESWAP_H_
+#define PORT_BYTESWAP_H_
 #include <game/gamework_data.h>
 
 #ifdef __cplusplus

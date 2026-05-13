@@ -78,11 +78,66 @@ set(GAME_FILES
 )
 
 set(PORT_FILES
+        src/port/achievements.cpp
         src/port/audio.c
         src/port/byteswap.cpp
+        src/port/config.cpp
         src/port/dolassets.cpp
         #        src/port/dvd.c
+        src/port/file_select.cpp
+        src/port/file_select.hpp
         src/port/imgui.cpp
+        src/port/io.cpp
+        src/port/iso_validate.cpp
         src/port/OS.c
+        src/port/portmain.cpp
+        src/port/settings.cpp
         src/port/stubs.c
+
+        src/port/ui/achievements.cpp
+        src/port/ui/achievements.hpp
+        src/port/ui/bool_button.cpp
+        src/port/ui/bool_button.hpp
+        src/port/ui/button.cpp
+        src/port/ui/button.hpp
+        src/port/ui/component.cpp
+        src/port/ui/component.hpp
+        src/port/ui/controller_config.cpp
+        src/port/ui/controller_config.hpp
+        src/port/ui/document.cpp
+        src/port/ui/document.hpp
+        src/port/ui/event.cpp
+        src/port/ui/event.hpp
+        src/port/ui/graphics_tuner.cpp
+        src/port/ui/graphics_tuner.hpp
+        src/port/ui/input.cpp
+        src/port/ui/input.hpp
+        src/port/ui/modal.cpp
+        src/port/ui/modal.hpp
+        src/port/ui/nav_types.hpp
+        src/port/ui/number_button.cpp
+        src/port/ui/number_button.hpp
+        src/port/ui/overlay.cpp
+        src/port/ui/overlay.hpp
+        src/port/ui/pane.cpp
+        src/port/ui/pane.hpp
+        src/port/ui/menu_bar.cpp
+        src/port/ui/menu_bar.hpp
+        src/port/ui/prelaunch.cpp
+        src/port/ui/prelaunch.hpp
+        src/port/ui/preset.cpp
+        src/port/ui/preset.hpp
+        src/port/ui/select_button.cpp
+        src/port/ui/select_button.hpp
+        src/port/ui/settings.cpp
+        src/port/ui/settings.hpp
+        src/port/ui/compat.cpp
+        src/port/ui/string_button.cpp
+        src/port/ui/string_button.hpp
+        src/port/ui/tab_bar.cpp
+        src/port/ui/tab_bar.hpp
+        src/port/ui/ui.cpp
+        src/port/ui/ui.hpp
+        src/port/ui/window.cpp
+        src/port/ui/window.hpp
 )

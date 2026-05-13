@@ -12,7 +12,7 @@ extern "C" {
 
 typedef void (*IOSFileCallback)(void* userdata, const char* path, const char* error);
 
-void Dusk_iOS_ShowFileSelect(IOSFileCallback callback, void* userdata, SDL_Window* window,
+void PartyBoard_iOS_ShowFileSelect(IOSFileCallback callback, void* userdata, SDL_Window* window,
                              const SDL_DialogFileFilter* filters, int nfilters,
                              const char* default_location, bool allow_many);
 

@@ -5,7 +5,7 @@
 
 #ifdef TARGET_PC
 #include <stdio.h>
-#include "libco.h"
+#include "libco/libco.h"
 #else
 #include "game/jmp.h"
 #endif

@@ -23,7 +23,7 @@ static void RunOnMainThread(void (^block)(void))
 
 static NSError *MakeError(NSString *message)
 {
-    return [NSError errorWithDomain:@"org.twilitrealm.dusk.file-select"
+    return [NSError errorWithDomain:@"com.mariopartyrd.partyboard.file-select"
                                code:1
                            userInfo:@{NSLocalizedDescriptionKey: message}];
 }
@@ -108,7 +108,7 @@ didPickDocumentsAtURLs:(NSArray<NSURL *> *)urls
 
 @end
 
-void Dusk_iOS_ShowFileSelect(IOSFileCallback callback, void *userdata,
+void PartyBoard_iOS_ShowFileSelect(IOSFileCallback callback, void *userdata,
                                SDL_Window *window,
                                const SDL_DialogFileFilter *filters, int nfilters,
                                const char *default_location,

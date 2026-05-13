@@ -17,9 +17,14 @@
 #include "game/wipe.h"
 #include "version.h"
 
+
 #ifdef TARGET_PC
+#include "game/disp.h"
+#include "port/settings.h"
 #include "port/imgui.h"
+#include "port/main.h"
 #include "port/dolassets.h"
+#include "port/ui.h"
 #include "aurora/dvd.h"
 #include <aurora/aurora.h>
 #include <aurora/event.h>
@@ -29,6 +34,11 @@ const char *__asan_default_options()
 {
     return "new_delete_type_mismatch=0,sleep_before_dying=5,allocator_may_return_null=1";
 }
+
+bool PartyBoard_IsRunning = TRUE;
+bool PartyBoard_IsShuttingDown = FALSE;
+bool PartyBoard_IsGameLaunched = FALSE;
+bool PartyBoard_RestartRequested = FALSE;
 
 bool disableFrameLimiter = FALSE;
 #endif
@@ -58,61 +68,19 @@ s32 HuDvdErrWait;
 SHARED_SYM s32 SystemInitF;
 
 #ifdef TARGET_PC
-#include <stdio.h>
-void aurora_log_callback(AuroraLogLevel level, const char* module, const char *message, unsigned int len)
+void PartyBoard_RequestRestart(void)
 {
-    const char *levelStr = "??";
-    FILE *out = stdout;
-    switch (level) {
-        case LOG_DEBUG:
-            levelStr = "DEBUG";
-            break;
-        case LOG_INFO:
-            levelStr = "INFO";
-            break;
-        case LOG_WARNING:
-            levelStr = "WARNING";
-            break;
-        case LOG_ERROR:
-            levelStr = "ERROR";
-            out = stderr;
-            break;
-        case LOG_FATAL:
-            levelStr = "FATAL";
-            out = stderr;
-            break;
-    }
-    fprintf(out, "[%s | %s] %s\n", levelStr, module, message);
-    if (level == LOG_FATAL) {
-        fflush(out);
-        abort();
-    }
+    PartyBoard_RestartRequested = SUPPORTS_PROCESS_RESTART;
+    PartyBoard_IsRunning = FALSE;
 }
 #endif
 
 #ifdef TARGET_PC
-int game_main(int argc, char *argv[])
+int game_main(void)
 #else
 void main(void)
 #endif
 {
-#ifdef TARGET_PC
-    const AuroraInfo auroraInfo = aurora_initialize(argc, argv,
-        &(AuroraConfig) {
-            .appName = "Party Board",
-            .logCallback = &aurora_log_callback,
-            .desiredBackend = BACKEND_AUTO,
-            .windowPosX = 100,
-            .windowPosY = 100,
-            .windowWidth = 640,
-            .windowHeight = 480,
-            .mem1Size = 64 * 1024 * 1024,
-            .mem2Size =  16 * 1024 * 1024,
-        });
-    AuroraSetViewportPolicy(AURORA_VIEWPORT_FIT);
-    aurora_dvd_open(imgui_get_image_path_from_popup());
-    InitializeDol();
-#endif
     u32 met0;
     u32 met1;
     s16 i;
@@ -152,7 +120,11 @@ void main(void)
         OSReport("VI_FIELD_BELOW\n");
         VIWaitForRetrace();
     }
+#ifdef TARGET_PC
+    while (PartyBoard_IsRunning) {
+#else
     while (1) {
+#endif
 #ifdef TARGET_PC
         const AuroraEvent *event = aurora_update();
         bool exiting = false;
@@ -162,13 +134,16 @@ void main(void)
                 break;
             }
             if (event->type == AURORA_SDL_EVENT) {
-                if (event->sdl.type == SDL_EVENT_KEY_DOWN) {
-                    if (event->sdl.key.scancode == SDL_SCANCODE_SPACE) {
-                        disableFrameLimiter = TRUE;
-                    }
-                } else if (event->sdl.type == SDL_EVENT_KEY_UP) {
-                    if (event->sdl.key.scancode == SDL_SCANCODE_SPACE) {
-                        disableFrameLimiter = FALSE;
+                ui_handle_sdl_event(&event->sdl);
+                if (partyboard_settings_enableTurboKeybind()) {
+                    if (event->sdl.type == SDL_EVENT_KEY_DOWN) {
+                        if (event->sdl.key.scancode == SDL_SCANCODE_TAB) {
+                            disableFrameLimiter = TRUE;
+                        }
+                    } else if (event->sdl.type == SDL_EVENT_KEY_UP) {
+                        if (event->sdl.key.scancode == SDL_SCANCODE_TAB) {
+                            disableFrameLimiter = FALSE;
+                        }
                     }
                 }
             }
@@ -222,7 +197,7 @@ void main(void)
         GlobalCounter++;
 
 #ifdef TARGET_PC
-        imgui_main(&auroraInfo);
+        ui_update();
         aurora_end_frame();
         if (!disableFrameLimiter) {
             frame_limiter();
@@ -231,7 +206,6 @@ void main(void)
     }
 
 #ifdef TARGET_PC
-    aurora_shutdown();
     return 0;
 #endif
 }

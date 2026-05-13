@@ -1,0 +1,506 @@
+*, *:before, *:after {
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    width: 100%;
+    height: 100%;
+    padding: 64dp;
+    font-family: "FOT-NewRodin Pro";
+    font-weight: normal;
+    font-style: normal;
+    font-size: 12dp;
+    color: #E0DBC8;
+}
+
+window {
+    display: flex;
+    flex-flow: column;
+    position: relative;
+    height: 100%;
+    width: 100%;
+    max-width: 1088dp;
+    max-height: 768dp;
+    margin: auto;
+    border-radius: 14dp;
+    overflow: hidden;
+    border: 2dp #009dda;
+    backdrop-filter: blur(5dp);
+    box-shadow: 0 0 25dp 5dp;
+    background-color: rgba(37, 59, 156, 90%);
+    filter: opacity(0);
+    transform: scale(0.9);
+    transform-origin: center;
+    transition: filter transform 0.2s cubic-in-out;
+}
+
+window.small {
+    height: auto;
+    width: auto;
+}
+
+window.modal {
+    max-width: 640dp;
+}
+
+window[open] {
+    filter: opacity(1);
+    transform: scale(1);
+}
+
+@media (max-height: 640dp) {
+    body {
+        padding: 16dp;
+    }
+    window {
+        box-shadow: none;
+    }
+}
+
+window tab-bar {
+    flex: 0 0 64dp;
+    height: 64dp;
+    background-color: rgba(217, 217, 217, 10%);
+    font-family: "FOT-NewRodin Pro";
+    font-weight: bold;
+    font-size: 14dp;
+    border-bottom: 2dp #009dda;
+}
+
+window tab-bar tab {
+    opacity: 0.25;
+}
+
+window content {
+    display: flex;
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+}
+
+window content pane {
+    display: flex;
+    flex-flow: column;
+    flex: 1 1 0;
+    min-width: 0;
+    min-height: 0;
+    padding: 24dp;
+    padding-bottom: 0dp;
+    gap: 8dp;
+    overflow: hidden auto;
+    font-size: 16dp;
+}
+
+window content pane:not(:last-of-type) {
+    border-right: 1dp #009dda;
+}
+
+window content pane > * {
+    flex: 0 0 auto;
+}
+
+window content pane:last-of-type > div {
+    line-height: 1.625;
+}
+
+window content pane > spacer {
+    display: block;
+    /* Completes the 24dp bottom inset after the pane's 8dp gap. */
+    flex: 0 0 16dp;
+    height: 16dp;
+    pointer-events: none;
+}
+
+scrollbarvertical {
+    width: 8dp;
+    margin: 4dp 4dp 4dp 0;
+}
+
+scrollbarvertical sliderarrowdec,
+scrollbarvertical sliderarrowinc {
+    width: 0;
+    height: 0;
+}
+
+scrollbarvertical slidertrack {
+    width: 8dp;
+}
+
+scrollbarvertical sliderbar {
+    width: 8dp;
+    min-height: 24dp;
+    background-color: rgba(224, 219, 200, 45%);
+    border-radius: 2dp;
+    transition: background-color 0.2s cubic-in-out;
+}
+
+scrollbarvertical sliderbar:hover,
+scrollbarvertical sliderbar:active {
+    background-color: rgba(194, 164, 45, 80%);
+}
+
+scrollbarhorizontal {
+    height: 0;
+}
+
+scrollbarhorizontal sliderarrowdec,
+scrollbarhorizontal sliderarrowinc {
+    width: 0;
+    height: 0;
+}
+
+scrollbarhorizontal slidertrack,
+scrollbarhorizontal sliderbar {
+    width: 0;
+    height: 0;
+}
+
+.section-heading {
+    font-family: "FOT-NewRodin Pro";
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 18dp;
+    opacity: 0.25;
+}
+
+.section-heading:not(:first-of-type) {
+    padding-top: 12dp;
+}
+
+button {
+    text-align: center;
+    background-color: rgba(17, 16, 10, 20%);
+    opacity: 0.9;
+    padding: 8dp 16dp;
+    border-radius: 14dp;
+    box-shadow: rgba(146, 135, 91, 25%) 0 0 0 1dp;
+    font-size: 16dp;
+    transition: background-color 0.1s linear-in-out, opacity 0.1s linear-in-out;
+    cursor: pointer;
+    focus: auto;
+}
+
+button:not(:disabled):hover,
+button:not(:disabled):focus-visible {
+    background-color: rgba(0, 157, 218, 20%);
+    box-shadow: #00b4fa 0 0 0 2dp;
+}
+
+button:not(:disabled):selected {
+    opacity: 1;
+    background-color: rgba(0, 157, 218, 40%);
+}
+
+button:not(:disabled):active {
+    opacity: 1;
+    background-color: rgba(0, 157, 218, 40%);
+    box-shadow: #00b4fa 0 0 0 2dp;
+}
+
+button.modal-btn {
+    flex: 1 1 0;
+    text-align: center;
+}
+
+select-button {
+    display: flex;
+    align-items: center;
+    gap: 8dp;
+    background-color: rgba(17, 16, 10, 20%);
+    opacity: 0.9;
+    padding: 8dp 16dp;
+    border-radius: 14dp;
+    box-shadow: rgba(146, 135, 91, 25%) 0 0 0 1dp;
+    transition: background-color 0.1s linear-in-out, opacity 0.1s linear-in-out;
+    cursor: pointer;
+    focus: auto;
+}
+
+select-button:not(:disabled):hover,
+select-button:not(:disabled):focus-visible {
+    background-color: rgba(0, 157, 218, 20%);
+    box-shadow: #00b4fa 0 0 0 2dp;
+}
+
+select-button:not(:disabled):selected {
+    opacity: 1;
+    background-color: rgba(0, 157, 218, 40%);
+}
+
+select-button:not(:disabled):active {
+    opacity: 1;
+    background-color: rgba(0, 157, 218, 40%);
+    box-shadow: #00b4fa 0 0 0 2dp;
+}
+
+select-button:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+select-button key {
+    font-family: "FOT-NewRodin Pro";
+    font-weight: bold;
+    font-size: 14dp;
+    text-transform: uppercase;
+    flex: 0 1 auto;
+}
+
+select-button value {
+    flex: 1 1 auto;
+    text-align: right;
+    font-size: 16dp;
+}
+
+select-button value.modified {
+    font-weight: bold;
+}
+
+select-button input {
+    text-align: right;
+    font-size: 16dp;
+}
+
+icon {
+    width: 1em;
+    height: 1em;
+    font-family: "Material Symbols Rounded";
+    font-weight: normal;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+icon.warning {
+    decorator: text("&#xe002;" center center);
+}
+
+icon.error {
+    decorator: text("&#xe000;" center center);
+}
+
+icon.verifying {
+    decorator: text("&#xe8b5;" center center);
+}
+
+icon.celebration {
+    decorator: text("&#xea65;" center center);
+}
+
+icon.question-mark {
+    decorator: text("&#xeb8b;" center center);
+}
+
+.achievement-total {
+    position: absolute;
+    top: 0;
+    right: 64dp;
+    height: 64dp;
+    line-height: 64dp;
+    font-family: "FOT-NewRodin Pro";
+    font-weight: bold;
+    font-size: 13dp;
+    color: rgba(224, 219, 200, 55%);
+    pointer-events: none;
+}
+
+.achievement-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 10dp;
+    padding: 12dp 0;
+    border-bottom: 1dp rgba(146, 135, 91, 30%);
+}
+
+.achievement-info {
+    display: block;
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.achievement-header {
+    display: flex;
+    align-items: center;
+}
+
+.achievement-name {
+    flex: 1;
+    font-weight: bold;
+}
+
+.achievement-name.unlocked {
+    color: #ffa826;
+}
+
+.achievement-badge {
+    font-size: 14dp;
+    opacity: 0.7;
+}
+
+.achievement-badge.unlocked {
+    color: #44cc55;
+    opacity: 1;
+}
+
+.achievement-badge.locked {
+    color: #cc4444;
+    opacity: 1;
+}
+
+.achievement-desc {
+    display: block;
+    color: rgba(224, 219, 200, 55%);
+    font-size: 16dp;
+    margin: 4dp 0 0 0;
+}
+
+.achievement-progress {
+    display: block;
+    font-size: 13dp;
+    color: rgba(224, 219, 200, 45%);
+}
+
+progress {
+    display: block;
+    width: 100%;
+    height: 6dp;
+    border-radius: 3dp;
+    background-color: rgba(255, 255, 255, 10%);
+    margin: 6dp 0 2dp 0;
+}
+
+progress.progress-done fill {
+    background-color: #44aa22;
+    border-radius: 3dp;
+}
+
+progress.progress-ongoing fill {
+    background-color: #2255bb;
+    border-radius: 3dp;
+}
+
+button.achievement-clear {
+    flex: 0 0 auto;
+    align-self: center;
+    font-size: 14dp;
+    padding: 2dp 8dp;
+    opacity: 0.45;
+}
+
+.preset-grid {
+    display: flex;
+    flex-direction: row;
+    gap: 20dp;
+    flex: 0 1 auto;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.preset-col {
+    display: flex;
+    flex-flow: column;
+    gap: 12dp;
+    flex: 1 1 0;
+}
+
+.preset-desc {
+    display: block;
+    font-size: 16dp;
+    text-align: center;
+}
+
+.modal-dialog {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 24dp;
+    gap: 20dp;
+    flex: 0 1 auto;
+    width: 100%;
+    text-align: left;
+}
+
+window.modal.danger {
+    border: 2dp #852221;
+}
+
+.modal-header {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    flex: 0 0 auto;
+    gap: 16dp;
+}
+
+.modal-header icon {
+    font-size: 24dp;
+    color: #009dda;
+}
+
+.modal-title {
+    display: block;
+    font-family: "FOT-NewRodin Pro";
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 14dp;
+    color: #009dda;
+    flex: 1 1 auto;
+}
+
+window.modal.danger .modal-title,
+window.modal.danger .modal-header icon {
+    color: #B3261E;
+}
+
+.modal-body {
+    display: block;
+    width: 100%;
+    flex: 0 1 auto;
+    min-width: 0;
+    font-size: 16dp;
+    color: #FFFFFF;
+    font-weight: normal;
+}
+
+.modal-body span.tip {
+    font-size: 14dp;
+    color: #009dda;
+}
+
+.verification-progress {
+    display: flex;
+    flex-direction: column;
+    gap: 10dp;
+    width: 100%;
+}
+
+.verification-file {
+    display: block;
+    font-size: 17dp;
+    color: #FFFFFF;
+}
+
+progress.verification-progress-bar {
+    height: 8dp;
+    margin: 2dp 0 0 0;
+}
+
+.verification-detail {
+    display: block;
+    font-size: 14dp;
+    color: rgba(224, 219, 200, 65%);
+}
+
+.modal-actions {
+    display: flex;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 12dp;
+    width: 100%;
+    flex: 0 0 auto;
+    padding-top: 4dp;
+}

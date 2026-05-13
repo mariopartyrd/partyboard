@@ -1,5 +1,5 @@
-#ifndef _SRC_IMGUI_H_
-#define _SRC_IMGUI_H_
+#ifndef PORT_IMGUI_H_
+#define PORT_IMGUI_H_
 
 #include <aurora/aurora.h>
 

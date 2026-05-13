@@ -91,7 +91,16 @@ endif ()
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "_cmake")
 
-set(VERSION 0)
+include(FetchContent)
+
+FetchContent_Declare(json
+        URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz
+        URL_HASH SHA256=42f6e95cad6ec532fd372391373363b62a14af6d771056dbfc86160e6dfff7aa
+        DOWNLOAD_EXTRACT_TIMESTAMP TRUE
+)
+FetchContent_MakeAvailable(json)
+
+set(VERSION 1)
 set(PARTY_BOARD_BUNDLE_NAME PartyBoard)
 set(PARTY_BOARD_BUNDLE_IDENTIFIER com.mariopartyrd.partyboard)
 set(PARTY_BOARD_COMPANY_NAME "Mario Party R&D")
@@ -105,6 +114,7 @@ option(RUNTIME_SANITIZE "Runtime (stack) sanitization" OFF)
 
 set(USE_ASAN OFF CACHE BOOL "Disable ASan" FORCE)
 set(AURORA_ENABLE_DVD ON)
+set(AURORA_ENABLE_RMLUI ON CACHE BOOL "Enable RmlUi UI support" FORCE)
 set(RUNTIME_SANITIZE OFF)
 set(SKIP_HU_ALLOC OFF CACHE BOOL "Skip the built in allocator" FORCE)
 
@@ -125,7 +135,7 @@ add_subdirectory(extern/musyx EXCLUDE_FROM_ALL)
 
 include(extern/aurora/cmake/AuroraCopyRuntimeDLLs.cmake)
 
-configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_BINARY_DIR}/version.h)
+configure_file(${CMAKE_SOURCE_DIR}/version.h.in ${CMAKE_BINARY_DIR}/partyboard_version.h)
 include(files.cmake)
 
 source_group("Game" FILES ${GAME_FILES})
@@ -134,8 +144,8 @@ source_group("Port" FILES ${PORT_FILES})
 add_library(dol SHARED ${GAME_FILES} ${PORT_FILES} extern/libco/libco.c)
 set_target_properties(dol PROPERTIES C_VISIBILITY_PRESET default CXX_VISIBILITY_PRESET default)
 target_compile_definitions(dol PRIVATE TARGET_PC NON_MATCHING OPTIMIZED_TEXTURE_LOADING BYTESWAPPING TARGET_DOL VERSION=${VERSION} MUSY_VERSION_MAJOR=1 MUSY_VERSION_MINOR=5 MUSY_VERSION_PATCH=4)
-target_include_directories(dol PRIVATE include extern/aurora/include extern/aurora/include/dolphin extern/libco)
-target_link_libraries(dol PUBLIC aurora::core aurora::card aurora::dvd aurora::gx aurora::mtx aurora::os aurora::si aurora::vi aurora::pad musyx)
+target_include_directories(dol PRIVATE include extern extern/aurora/include extern/aurora/include/dolphin ${CMAKE_BINARY_DIR})
+target_link_libraries(dol PUBLIC aurora::core aurora::card aurora::dvd aurora::gx aurora::mtx aurora::os aurora::si aurora::vi aurora::pad musyx absl::flat_hash_map nlohmann_json::nlohmann_json fmt::fmt rmlui_debugger)
 # TODO it doesn't work on Linux yet
 if (WIN32)
     if(USE_ASAN)
@@ -172,13 +182,13 @@ else ()
 endif ()
 
 if(ANDROID)
-    add_library(partyboard SHARED src/port/portmain.c)
+    add_library(partyboard SHARED src/port/entry.cpp)
     set_target_properties(partyboard PROPERTIES OUTPUT_NAME main)
 else ()
-    add_executable(partyboard src/port/portmain.c)
+    add_executable(partyboard src/port/entry.cpp)
 endif ()
 target_compile_definitions(partyboard PRIVATE TARGET_PC NON_MATCHING VERSION=${VERSION})
-target_include_directories(partyboard PRIVATE include)
+target_include_directories(partyboard PRIVATE include ${CMAKE_BINARY_DIR})
 target_link_libraries(partyboard PRIVATE dol aurora::main)
 aurora_copy_runtime_dlls(partyboard dol)
 
@@ -206,7 +216,7 @@ foreach (dir ${REL_DIRS})
                 target_sources(${dir} PRIVATE src/REL/board_executor.c)
             endif()
             target_compile_definitions(${dir} PRIVATE TARGET_PC OPTIMIZED_TEXTURE_LOADING BYTESWAPPING NON_MATCHING VERSION=${VERSION})
-            target_include_directories(${dir} PRIVATE include extern/aurora/include extern/aurora/include/dolphin extern/libco)
+            target_include_directories(${dir} PRIVATE include extern extern/aurora/include extern/aurora/include/dolphin)
             if (MSVC)
                 set_target_properties(${dir} PROPERTIES LINK_FLAGS "/EXPORT:ObjectSetup")
                 # target_compile_options(${dir} PRIVATE "/WX")

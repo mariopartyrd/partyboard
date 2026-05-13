@@ -1,16 +1,19 @@
 #include "game/init.h"
-#include "game/disp.h"
-#include "game/memory.h"
-#include "game/fault.h"
-#include "game/sreset.h"
-#include "dolphin/os.h"
-#include "dolphin/gx.h"
 #include "dolphin/dvd.h"
-#include "dolphin/vi.h"
+#include "dolphin/gx.h"
+#include "dolphin/os.h"
 #include "dolphin/pad.h"
+#include "dolphin/vi.h"
+#include "game/disp.h"
+#include "game/fault.h"
+#include "game/memory.h"
+#include "game/sreset.h"
+
 
 #ifndef TARGET_PC
 #include "dolphin/demo/DEMOStats.h"
+#else
+#include <port/ui.h>
 #endif
 
 struct memory_info {
@@ -54,9 +57,6 @@ void HuSysInit(GXRenderModeObj *mode)
     OSInit();
     DVDInit();
     VIInit();
-    #ifdef TARGET_PC
-    VISetWindowTitle("Party Board");
-    #endif
     PADInit();
     #ifdef __MWERKS__
     #if VERSION_NTSC
@@ -88,7 +88,13 @@ void HuSysInit(GXRenderModeObj *mode)
     minimumVcount = minimumVcountf = 1.0f;
     worstVcount = 0;
     OSInitFastCast();
+#if TARGET_PC
+    if (!ui_is_prelaunch_open()) {
+        HuCardInit();
+    }
+#else
     HuCardInit();
+#endif
 }
 
 static void InitRenderMode(GXRenderModeObj *mode)

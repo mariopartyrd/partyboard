@@ -1,4 +1,4 @@
-package dev.twilitrealm.dusk;
+package com.mariopartyrd.partyboard;
 
 import android.app.ActionBar;
 import android.content.ClipData;
@@ -21,7 +21,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PartyBoardActivity extends SDLActivity {
-    private static final String TAG = "DuskActivity";
+    private static final String TAG = "PartyBoardActivity";
 
     private static String[] splitArgs(String raw) {
         List<String> out = new ArrayList<>();

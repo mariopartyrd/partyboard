@@ -1,5 +1,5 @@
-#ifndef _SRC_DOLASSETS_H_
-#define _SRC_DOLASSETS_H_
+#ifndef PORT_DOLASSETS_H_
+#define PORT_DOLASSETS_H_
 
 #ifdef __cplusplus
 extern "C" {

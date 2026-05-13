@@ -107,7 +107,7 @@ jobs:
             libxss-dev libfuse2 libusb-1.0-0-dev libdecor-0-dev libpipewire-0.3-dev libunwind-dev
 
       - name: Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.9
+        uses: mozilla-actions/sccache-action@v0.0.10
 
       - name: Print sccache stats
         run: sccache --show-stats
@@ -140,10 +140,10 @@ jobs:
             platform: macos
             preset: x-macos-ci-arm64
             artifact_name: macos-appleclang-arm64
-#          - name: AppleClang macOS x86_64
-#            platform: macos
-#            preset: x-macos-ci-x86_64
-#            artifact_name: macos-appleclang-x86_64
+          - name: AppleClang macOS x86_64
+            platform: macos
+            preset: x-macos-ci-x86_64
+            artifact_name: macos-appleclang-x86_64
 #          - name: AppleClang iOS arm64
 #            platform: ios
 #            preset: x-ios-ci
@@ -181,7 +181,7 @@ jobs:
           rustup target add x86_64-apple-darwin
 
       - name: Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.9
+        uses: mozilla-actions/sccache-action@v0.0.10
 
       - name: Configure CMake
         run: cmake --preset ${{matrix.preset}}
@@ -197,6 +197,73 @@ jobs:
             build/install/PartyBoard.app
             build/install/debug.tar.*
 
+  build-android:
+    name: Build Android (${{matrix.name}})
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Clang arm64-v8a
+            preset: x-android-ci-arm64
+            abi: arm64-v8a
+            artifact_arch: arm64
+            rust_target: aarch64-linux-android
+
+    env:
+      ANDROID_NDK_VERSION: "29.0.14206865"
+
+    steps:
+      - uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          submodules: recursive
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -y install ninja-build
+
+      - name: Setup Java
+        uses: actions/setup-java@v5
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install Android SDK packages
+        run: sdkmanager "platforms;android-36" "build-tools;36.1.0" "ndk;${ANDROID_NDK_VERSION}"
+
+      - name: Install Rust Android target
+        run: |
+          rustup toolchain install stable
+          rustup target add ${{matrix.rust_target}}
+
+      - name: Setup sccache
+        uses: mozilla-actions/sccache-action@v0.0.10
+
+      - name: Configure CMake
+        run: cmake --preset ${{matrix.preset}}
+
+      - name: Build native library
+        run: cmake --build --preset ${{matrix.preset}} --target partyboard
+
+      - name: Stage stripped JNI library
+        run: ANDROID_STAGE_ABIS="${{matrix.abi}}" platforms/android/scripts/stage-jni-libs.sh
+
+      - name: Build APK
+        working-directory: platforms/android
+        run: ./gradlew :app:assembleRelease --rerun-tasks
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: partyboard-${{env.PARTY_BOARD_VERSION}}-android-${{matrix.artifact_arch}}
+          path: platforms/android/app/build/outputs/apk/release/app-${{matrix.abi}}-release-unsigned.apk
+
   build-windows:
     name: Build Windows (${{matrix.name}})
     runs-on: ${{matrix.runner}}
@@ -211,12 +278,12 @@ jobs:
             msvc_arch: amd64
             vcpkg_arch: x64
             artifact_arch: x86_64
-#          - name: MSVC arm64
-#            runner: windows-11-arm
-#            preset: arm64-msvc
-#            msvc_arch: arm64
-#            vcpkg_arch: arm64
-#            artifact_arch: arm64
+          # - name: MSVC arm64
+          #   runner: windows-11-arm
+          #   preset: arm64-msvc
+          #   msvc_arch: arm64
+          #   vcpkg_arch: arm64
+          #   artifact_arch: arm64
           # - name: Clang x86_64
           #   runner: windows-latest
           #   preset: clang
@@ -262,77 +329,3 @@ jobs:
             build/install/*.dll
             build/install/res/
             build/install/debug.7z
-
-  build-android:
-    name: Build Android (${{matrix.name}})
-    runs-on: ubuntu-latest
-    env:
-      ANDROID_NDK_VERSION: 29.0.14206865
-    strategy:
-      fail-fast: false
-      matrix:
-        include:
-          - name: arm64-v8a
-            preset: android-arm64
-            jni_dir: arm64-v8a
-            artifact_name: android-clang-arm64
-            rust_target: aarch64-linux-android
-#          - name: x86_64
-#            preset: android-x86_64
-#            jni_dir: x86_64
-#            artifact_name: android-clang-x86_64
-#            rust_target: x86_64-linux-android
-
-    steps:
-      - uses: actions/checkout@v6
-        with:
-          fetch-depth: 0
-          submodules: recursive
-
-      - name: Set up JDK
-        uses: actions/setup-java@v4
-        with:
-          java-version: '17'
-          distribution: 'temurin'
-
-      - name: Setup sccache
-        uses: mozilla-actions/sccache-action@v0.0.9
-
-      - name: Install dependencies
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ninja-build
-
-      - name: Install Rust Android target
-        run: |
-          rustup toolchain install stable
-          rustup target add ${{matrix.rust_target}}
-
-      - name: Install NDK
-        run: |
-          echo "y" | $ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager \
-            "ndk;${{ env.ANDROID_NDK_VERSION }}"
-
-      - name: Set ANDROID_NDK
-        run: echo "ANDROID_NDK=$ANDROID_HOME/ndk/${{ env.ANDROID_NDK_VERSION }}" >> $GITHUB_ENV
-
-      - name: Configure CMake
-        run: cmake --preset ${{matrix.preset}}
-
-      - name: Build
-        run: cmake --build --preset ${{matrix.preset}}
-
-      - name: Stage JNI libraries
-        run: |
-          platforms/android/scripts/stage-jni-libs.sh
-
-      - name: Build APK
-        run: |
-          cd platforms/android
-          ./gradlew :app:assembleDebug
-
-      - name: Upload APK
-        uses: actions/upload-artifact@v7
-        with:
-          name: partyboard-${{env.PARTY_BOARD_VERSION}}-${{matrix.artifact_name}}
-          path: platforms/android/app/build/outputs/apk/debug/app-${{matrix.jni_dir}}-debug.apk

@@ -2,6 +2,16 @@ plugins {
     id 'com.android.application'
 }
 
+def partyboardRepoDir = rootProject.projectDir.parentFile.parentFile
+def partyboardGeneratedAssetsDir = layout.buildDirectory.dir('generated/assets/partyboard').get().asFile
+def syncPartyBoardAssets = tasks.register('syncPartyBoardAssets', Sync) {
+    from(new File(partyboardRepoDir, 'res')) {
+        into 'res'
+        exclude '**/.DS_Store'
+    }
+    into partyboardGeneratedAssetsDir
+}
+
 android {
     namespace 'com.mariopartyrd.partyboard'
     compileSdk 36
@@ -27,7 +37,7 @@ android {
     sourceSets {
         main {
             jniLibs.srcDirs = ['src/main/jniLibs']
-            assets.srcDirs = ['../../assets']
+            assets.srcDirs = [partyboardGeneratedAssetsDir]
         }
     }
 
@@ -47,4 +57,11 @@ android {
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
+}
+
+tasks.configureEach { task ->
+    if ((task.name.startsWith('merge') && task.name.endsWith('Assets')) ||
+        task.name.toLowerCase().contains('lint')) {
+        task.dependsOn(syncPartyBoardAssets)
+    }
 }
