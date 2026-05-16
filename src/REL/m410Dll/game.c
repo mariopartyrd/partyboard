@@ -876,7 +876,7 @@ void fn_1_67D4(omObjData *arg0)
     arg0->stat |= 0x100;
     var_r29 = HuMemDirectMallocNum(HEAP_SYSTEM, sizeof(UnkM410Struct2) * 60, MEMORY_DEFAULT_NUM);
     arg0->data = var_r29;
-    memset(var_r29, 0, 4320);
+    memset(var_r29, 0, sizeof(UnkM410Struct2) * 60);
 
     for (var_r30 = 0; var_r30 < 60; var_r30++, var_r29++) {
         var_r29->unk_32 = var_r30;
