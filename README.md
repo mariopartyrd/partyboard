@@ -41,7 +41,7 @@ RenderDoc has some conflict with asan. To turn off asan, you should delete the t
 
 # Credits
 
-Special thanks to the GC/Wii decompilation community, the [Aurora](https://github.com/encounter/aurora) developers, the Dusk developers, all [contributors](https://github.com/mariopartyrd/partyboard/graphs/contributors) and justcamtro for designing the assets.
+Special thanks to the GC/Wii decompilation community, the [Aurora](https://github.com/encounter/aurora) developers, the Dusk developers, all [contributors](https://github.com/mariopartyrd/partyboard/graphs/contributors), [ImWhoreHay](https://x.com/ImWhoreHay) for the font, and justcamtro for designing the assets.
 
 <br/>
 <div align="center">
