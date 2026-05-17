@@ -1965,7 +1965,16 @@ static s32 LoadTexture(ModelData *arg0, HsfBitmap *arg1, HsfAttribute *arg2, s16
     else {
         GXInitTexObjLOD(tex_obj, GX_LIN_MIP_LIN, GX_LINEAR, 0.0f, arg1->maxLod - 1, 0.0f, GX_TRUE, GX_TRUE, GX_ANISO_1);
     }
-    arg2->tex_initialized = TRUE;
+    // Animated HSF materials can reuse the same cached GXTexObj while swapping to another bitmap frame.
+    // Refresh only the backing data pointer so dice faces animate without rebuilding the whole texture object.
+    if (((tex_obj == &arg2->tex_obj && arg2->tex_initialized) || (tex_obj == &arg2->tex8000_obj && arg2->tex8000_initialized))
+        && GXGetTexObjData(tex_obj) != arg1->data) {
+        GXInitTexObjData(tex_obj, arg1->data);
+    }
+    // The 0x8000 texture path tracks its own initialized flag in the switch above.
+    if (tex_obj == &arg2->tex_obj) {
+        arg2->tex_initialized = TRUE;
+    }
     GXLoadTexObj(tex_obj, arg3);
     return 0;
 }
