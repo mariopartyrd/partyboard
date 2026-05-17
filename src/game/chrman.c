@@ -1,3 +1,4 @@
+#include "types.h"
 #include "game/chrman.h"
 #include "game/armem.h"
 #include "game/audio.h"
@@ -88,12 +89,13 @@ static void OrbitEffect(HsfanimStruct01 *arg0);
 static void UpdateNpcEffect(void);
 static s32 PlayStepFX(s16 arg0, s16 arg1, u8 arg2);
 
-static UnkCharInstanceStruct charInstance[8];
-static s16 effectMdl[8];
-static EffectParamData *particleData[8];
+static UnkCharInstanceStruct charInstance[CHARNO_MAX ];
+static s16 effectMdl[CHAR_EFFECT_AND_PARTICLE_MAX];
+static EffectParamData *particleData[CHAR_EFFECT_AND_PARTICLE_MAX];
 static Process *itemHookProcess[32];
-static u16 effectFlag[15];
-static u8 lbl_801975C0[0x82]; // Unused?
+//holds normal characters 0-7, then more characters 8-14
+static u16 effectFlag[CHARNO_MAX  + CHAR_NPC_MAX];
+static u8 lbl_801975CE[0x82]; // Unused?
 
 static s32 skipAnimUpdate;
 static void *effectAMemP;
@@ -115,7 +117,7 @@ static EffectData effectDataTbl[8] = {
     { DATA_MAKE_NUM(DATADIR_EFFECT, 0x07), 0x000C, 0x0000, 0x00000002 },
 };
 
-static s32 charDirTbl[8][3] = {
+static s32 charDirTbl[CHARNO_MAX ][3] = {
     { DATADIR_MARIOMDL0, DATADIR_MARIOMDL1, DATA_MAKE_NUM(DATADIR_MARIOMOT, 0x00) },
     { DATADIR_LUIGIMDL0, DATADIR_LUIGIMDL1, DATA_MAKE_NUM(DATADIR_LUIGIMOT, 0x00) },
     { DATADIR_PEACHMDL0, DATADIR_PEACHMDL1, DATA_MAKE_NUM(DATADIR_PEACHMOT, 0x00) },
@@ -155,10 +157,10 @@ void CharManInit(void)
     s16 i;
     s16 j;
 
-    for (i = 0; i < 8; i++) {
+    for (i = 0; i < CHARNO_MAX ; i++) {
         temp_r29 = &charInstance[i];
         temp_r29->unkC0 = NULL;
-        for (j = 0; j < 32; j++) {
+        for (j = 0; j < ARRAY_COUNT(temp_r29->unk0C); j++) {
             temp_r29->unk0C[j] = -1;
         }
         temp_r29->unk00 = -1;
@@ -167,11 +169,11 @@ void CharManInit(void)
     if (!effectAMemP) {
         effectAMemP = (void *)HuAR_DVDtoARAM(0x120000);
     }
-    for (i = 0; i < 8; i++) {
+    for (i = 0; i < CHAR_EFFECT_AND_PARTICLE_MAX; i++) {
         effectMdl[i] = -1;
         particleData[i] = NULL;
     }
-    for (i = 0; i < 32; i++) {
+    for (i = 0; i < ARRAY_COUNT(itemHookProcess); i++) {
         itemHookProcess[i] = NULL;
     }
 }
@@ -185,7 +187,7 @@ void CharARAMOpen(s16 character)
 {
     UnkCharInstanceStruct *temp_r31;
 
-    if (character >= 8 || character < 0 || character == 0xFF) {
+    if (character >= CHARNO_MAX  || character < 0 || character == 0xFF) {
         return;
     }
     temp_r31 = &charInstance[character];
@@ -714,12 +716,12 @@ static void InitEffect(void)
     s16 j;
 
     var_r27 = 0;
-    for (i = 0; i < 8; i++) {
+    for (i = 0; i < CHAR_EFFECT_AND_PARTICLE_MAX; i++) {
         if (effectMdl[i] == -1) {
             temp_r26 = HuDataSelHeapReadNum(effectDataTbl[i].unk00, MEMORY_DEFAULT_NUM, HEAP_DATA);
             temp_r25 = HuSprAnimRead(temp_r26);
             effectMdl[i] = Hu3DParticleCreate(temp_r25, effectDataTbl[i].unk04);
-            if (i == 7) {
+            if (i == CHAR_EFFECT_AND_PARTICLE_MAX - 1) {
                 Hu3DParticleAnimModeSet(effectMdl[i], 0);
             }
             Hu3DParticleHookSet(effectMdl[i], UpdateEffect);
@@ -1041,12 +1043,12 @@ s16 CharModelMotionCreate(s16 character, s32 data_num)
         return -1;
     }
     temp_r26 = data_num & 0xFFFF0000;
-    for (var_r28 = 0; var_r28 < 8; var_r28++) {
+    for (var_r28 = 0; var_r28 < CHARNO_MAX ; var_r28++) {
         if (temp_r26 == charDirTbl[var_r28][2]) {
             break;
         }
     }
-    if (var_r28 != 8 || temp_r26 == 0) {
+    if (var_r28 != CHARNO_MAX  || temp_r26 == 0) {
         data_num &= 0xFFFF;
         var_r27 = HuAR_ARAMtoMRAMFileRead(data_num | charDirTbl[character][2], MEMORY_DEFAULT_NUM, 2);
         if (!var_r27) {
@@ -1069,12 +1071,12 @@ void CharModelMotionIndexSet(s16 character, s16 arg1, s32 arg2)
     s16 i;
 
     temp_r30 = &charInstance[character];
-    for (i = 0; i < 32; i++) {
+    for (i = 0; i < ARRAY_COUNT(temp_r30->unk0C); i++) {
         if (temp_r30->unk0C[i] == arg1) {
             break;
         }
     }
-    if (i != 32) {
+    if (i != ARRAY_COUNT(temp_r30->unk0C)) {
         temp_r30->unk4C[i] = arg2;
     }
 }
@@ -1085,7 +1087,7 @@ void CharModelMotionKill(s16 character, u32 motion)
     s16 i;
 
     temp_r30 = &charInstance[character];
-    for (i = 0; i < 32; i++) {
+    for (i = 0; i < ARRAY_COUNT(temp_r30->unk0C); i++) {
         if (temp_r30->unk0C[i] == motion) {
             break;
         }
@@ -1099,7 +1101,7 @@ void CharModelMotionDataClose(s16 character)
     s16 i;
 
     if (character == -1) {
-        for (i = 0; i < 8; i++) {
+        for (i = 0; i < CHARNO_MAX ; i++) {
             CharModelMotionDataClose(i);
         }
     }
@@ -1113,7 +1115,7 @@ void CharModelDataClose(s16 arg0)
     s16 i;
 
     if (arg0 == -1) {
-        for (i = 0; i < 8; i++) {
+        for (i = 0; i < CHARNO_MAX ; i++) {
             CharModelDataClose(i);
             // Required to match.
             (void)i;
@@ -1133,17 +1135,17 @@ void CharModelKill(s16 character)
     s16 i;
 
     if (character == -1) {
-        for (i = 0; i < 8; i++) {
+        for (i = 0; i < CHARNO_MAX ; i++) {
             CharModelKill(i);
         }
-        for (i = 0; i < 15; i++) {
+        for (i = 0; i < ARRAY_COUNT(effectFlag); i++) {
             effectFlag[i] = 0;
         }
         return;
     }
     CharModelMotionDataClose(character);
     temp_r29 = &charInstance[character];
-    for (i = 0; i < 32; i++) {
+    for (i = 0; i < ARRAY_COUNT(temp_r29->unk0C); i++) {
         if (temp_r29->unk0C[i] != -1) {
             Hu3DMotionKill(temp_r29->unk0C[i]);
         }
@@ -1153,13 +1155,13 @@ void CharModelKill(s16 character)
         Hu3DModelKill(temp_r29->unk00);
     }
     temp_r29->unk00 = -1;
-    for (i = 0; i < 8; i++) {
+    for (i = 0; i < CHARNO_MAX ; i++) {
         if (charInstance[i].unk00 != -1) {
             break;
         }
     }
-    if (i == 8) {
-        for (i = 0; i < 8; i++) {
+    if (i == CHARNO_MAX ) {
+        for (i = 0; i < CHAR_EFFECT_AND_PARTICLE_MAX; i++) {
             if (effectMdl[i] != -1) {
                 Hu3DModelKill(effectMdl[i]);
             }
@@ -1169,7 +1171,7 @@ void CharModelKill(s16 character)
     if (temp_r29->unkC4) {
         HuMemDirectFree(temp_r29->unkC4->user_data);
         HuPrcKill(temp_r29->unkC4);
-        for (i = 0; i < 32; i++) {
+        for (i = 0; i < ARRAY_COUNT(itemHookProcess); i++) {
             if (itemHookProcess[i]) {
                 HuPrcKill(itemHookProcess[i]);
             }
@@ -1325,7 +1327,7 @@ void CharModelLayerSetAll(s16 arg0)
 {
     s16 i;
 
-    for (i = 0; i < 8; i++) {
+    for (i = 0; i < CHAR_EFFECT_AND_PARTICLE_MAX; i++) {
         if (effectMdl[i] != -1) {
             Hu3DModelLayerSet(effectMdl[i], arg0);
         }
@@ -1336,12 +1338,12 @@ static inline Process *CharModelItemHookCreateInlineFunc(void)
 {
     s16 i;
 
-    for (i = 0; i < 32; i++) {
+    for (i = 0; i < ARRAY_COUNT(itemHookProcess); i++) {
         if (!itemHookProcess[i]) {
             break;
         }
     }
-    if (i == 32) {
+    if (i == ARRAY_COUNT(itemHookProcess)) {
         return NULL;
     }
     else {
@@ -1429,7 +1431,7 @@ static void UpdateItemHook(void)
     }
     MTXIdentity(temp_r30->unk_F0);
     temp_r25 = HuPrcCurrentGet();
-    for (var_r28 = 0; var_r28 < 32; var_r28++) {
+    for (var_r28 = 0; var_r28 < ARRAY_COUNT(itemHookProcess); var_r28++) {
         if (itemHookProcess[var_r28] == temp_r25) {
             HuPrcKill(temp_r25);
             itemHookProcess[var_r28] = NULL;
@@ -1451,7 +1453,7 @@ void CharModelEffectCreate(s16 arg0, Vec *arg1)
     ParticleData *var_r27;
     ModelData *var_r26;
 
-    for (i = 0; i < 8; i++) {
+    for (i = 0; i < CHAR_EFFECT_AND_PARTICLE_MAX; i++) {
         temp_r28 = CreateEffect(effectMdl[3], arg0, arg1->x, arg1->y, arg1->z, 20.0f, &modelParticleParam);
         if (temp_r28 == -1) {
             break;
@@ -1468,7 +1470,7 @@ void CharModelEffectCreate(s16 arg0, Vec *arg1)
         var_r31->unk24 = 0.1f * (frandmod(20) - 10);
         var_r31->unk40.a = 0xFF - frandmod(3) * 16;
     }
-    for (i = 0; i < 8; i++) {
+    for (i = 0; i < CHAR_EFFECT_AND_PARTICLE_MAX; i++) {
         temp_r28 = CreateEffect(effectMdl[3], arg0, arg1->x, arg1->y, arg1->z, 10.0f, &modelParticleParam);
         if (temp_r28 == -1) {
             break;
@@ -1572,12 +1574,12 @@ void fn_8004EC74(s16 character)
 
     temp_r30 = &charInstance[character];
     temp_r31 = &Hu3DData[temp_r30->unk00];
-    for (i = 0; i < 32; i++) {
+    for (i = 0; i < ARRAY_COUNT(temp_r30->unk0C); i++) {
         if (temp_r30->unk0C[i] == temp_r31->unk_08) {
             break;
         }
     }
-    if (i != 32) {
+    if (i != ARRAY_COUNT(temp_r30->unk0C)) {
         Hu3DModelObjMtxGet(temp_r30->unk00, "test11_tex_we-itemhook-r", sp24);
         sp18.x = sp24[0][3];
         sp18.y = sp24[1][3];
@@ -1704,12 +1706,12 @@ void CharModelVoiceEnableSet(s16 character, s16 motion, s32 flag)
     if (temp_r31->unk00 == -1) {
         return;
     }
-    for (i = 0; i < 32; i++) {
+    for (i = 0; i < ARRAY_COUNT(temp_r31->unk0C); i++) {
         if (temp_r31->unk0C[i] == motion) {
             break;
         }
     }
-    if (i != 32) {
+    if (i != ARRAY_COUNT(temp_r31->unk0C)) {
         if (flag == 0) {
             temp_r31->unk8C[i] |= 1;
         }
@@ -1736,7 +1738,7 @@ void CharModelEffectEnableSet(s16 character, s32 arg1)
 {
     UnkCharInstanceStruct *temp_r31 = &charInstance[character];
 
-    if (character >= 8) {
+    if (character >= CHARNO_MAX ) {
         if (arg1 == 0) {
             effectFlag[character] |= 0x10;
         }
@@ -1944,14 +1946,14 @@ static void UpdateNpcEffect(void)
                 if (effectFlag[temp_r28] & 0x10) {
                     break;
                 }
-                for (i = 0; i < 8; i++) {
+                for (i = 0; i < CHAR_EFFECT_AND_PARTICLE_MAX; i++) {
                     effectStarParam.unk0C.x = 10.0 * sind(45.0f * i) * temp_r30->scale.x;
                     effectStarParam.unk0C.y = 0.0f;
                     effectStarParam.unk0C.z = 10.0 * cosd(45.0f * i) * temp_r30->scale.x;
                     CreateEffectStar(
                         temp_r25, temp_r30->pos.x, temp_r30->pos.y + 10.0f * temp_r30->scale.x, temp_r30->pos.z, 40.0f, &effectStarParam);
                 }
-                for (i = 0; i < 8; i++) {
+                for (i = 0; i < CHAR_EFFECT_AND_PARTICLE_MAX; i++) {
                     effectDustParam.unk0C.x = 4.0 * sind(45.0f * i + 22.5) * temp_r30->scale.x;
                     effectDustParam.unk0C.y = 0.0f;
                     effectDustParam.unk0C.z = 4.0 * cosd(45.0f * i + 22.5) * temp_r30->scale.x;

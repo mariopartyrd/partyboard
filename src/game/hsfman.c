@@ -2185,7 +2185,7 @@ void Hu3DMipMapSet(char* arg0, s16 arg1, char* arg2, f32 arg8) {
     temp_r31->palSize = var_r30->palNum;
     temp_r31->palData = var_r30->palData;
     temp_r31->maxLod = temp_r3->bmpNum;
-    switch (var_r30->dataFmt) {                        /* irregular */
+    switch (var_r30->dataFmt) {
         case 0:
             temp_r31->dataFmt = 6;
             break;

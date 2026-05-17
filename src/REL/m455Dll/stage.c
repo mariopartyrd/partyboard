@@ -13,6 +13,7 @@
 
 #include "ext_math.h"
 #include "math.h"
+#include "version.h"
 #include <string.h>
 
 Process *lbl_1_bss_70;
@@ -205,10 +206,10 @@ omObjData *fn_1_347C(void)
     Hu3DModelCameraSet(id, HU3D_CAM0);
     Hu3DModelLayerSet(id, 1);
     id = Hu3DTexScrollCreate(object->model[3], "S3TCsk");
-    Hu3DTexScrollPosMoveSet(id, -0.00009166667f, 0, 0);
+    Hu3DTexScrollPosMoveSet(id, -0.0055f * REFRESH_FREQ, 0, 0);
     id = Hu3DTexScrollCreate(object->model[3], "pa_sk3");
-    Hu3DTexScrollPosMoveSet(id, -0.00020833335f, 0, 0);
-
+    Hu3DTexScrollPosMoveSet(id, -0.0125f * REFRESH_FREQ, 0, 0);
+    
     object->model[4] = id = Hu3DModelCreateFile(DATA_MAKE_NUM(DATADIR_M455, 6));
     Hu3DModelPosSet(id, 0, 0, -3000);
     Hu3DModelScaleSet(id, 1.2f, 1.2f, 1.2f);
@@ -253,8 +254,8 @@ omObjData *fn_1_347C(void)
         workUnk74->unkC.x = 0;
         workUnk74->unkC.y = 0;
         workUnk74->unkC.z = 1;
-        workUnk74->unk18 = 0.016666668f;
-        workUnk74->unk1C = 60;
+        workUnk74->unk18 = REFRESH_FREQ;
+        workUnk74->unk1C = REFRESH_RATE;
         workUnk74->unk1E = 0;
     }
     return object;
@@ -275,13 +276,13 @@ void fn_1_3DDC(omObjData *object)
     for (i = 0; i < 4; i++) {
         Hu3DModelPosSet(object->model[i + 11], lbl_1_data_1D8[i].x, work->unkA44 + lbl_1_data_1D8[i].y, lbl_1_data_1D8[i].z);
     }
-    work->unkA54 += 0.001f;
-    work->unkA58 += 0.001f;
+    work->unkA54 += 6.0f / (REFRESH_RATE_F * 100.0f);
+    work->unkA58 += 6.0f / (REFRESH_RATE_F * 100.0f);
     work->unkA48++;
     work->unkA4C++;
-    if (work->unkA4C >= 60.0f && work->unkA4C <= 81.0f) {
-        float time = 1 - ((work->unkA4C - 60.0f) / 21.0f);
-        if (time < 0.0f) {
+    if(work->unkA4C >= REFRESH_RATE_F && work->unkA4C <= REFRESH_RATE_F * 1.35f) {
+        float time = 1 - ((work->unkA4C - REFRESH_RATE_F) / (REFRESH_RATE_F * 0.35f));
+        if(time < 0.0f) {
             time = 0.0f;
         }
         fn_1_9CFC(time);
@@ -886,7 +887,7 @@ s32 fn_1_6698(Vec *arg0, float arg1, float arg2, s32 arg3)
     work = lbl_1_bss_6C->data;
     work2 = work;
     workUnk74 = &work->unk74[0];
-    for (i = 0; i < 64; i++, workUnk74++) {
+    for(i = 0; i < 64; i++, workUnk74++) {
         if (workUnk74->unk1E == 0) {
             break;
         }
@@ -907,10 +908,9 @@ s32 fn_1_6698(Vec *arg0, float arg1, float arg2, s32 arg3)
     else {
         workUnk74->unkC.z = arg2;
     }
-    if (arg3 < 0) {
-        workUnk74->unk1C = 60;
-    }
-    else {
+    if(arg3 < 0) {
+        workUnk74->unk1C = REFRESH_RATE;
+    } else {
         workUnk74->unk1C = arg3;
     }
     workUnk74->unkC.y = (s32)frand() % 360;
@@ -1009,7 +1009,7 @@ void fn_1_6A6C(omObjData *object)
                 data->unk08.y -= 0.3103333379576603;
             }
         }
-        if (++work->unkC > 90.0f) {
+        if(++work->unkC > REFRESH_RATE_F * 1.5f) {
             Hu3DModelAttrSet(work->unk4, HU3D_ATTR_DISPOFF);
             work->unk8 = 0;
         }
@@ -1181,8 +1181,8 @@ void fn_1_76B0(omObjData *object)
         }
         temp_r30->unk34.x += temp_r30->unk08.x * sind(2.0f * temp_r30->unk00);
         temp_r30->unk34.y += temp_r30->unk08.y;
-        if (temp_r30->unk34.y >= 0.0f) {
-            fn_1_6698(&temp_r30->unk34, 0.00625f * temp_r30->unk2C, 1, 15);
+        if(temp_r30->unk34.y >= 0.0f) {
+            fn_1_6698(&temp_r30->unk34, 0.00625f*temp_r30->unk2C, 1, REFRESH_RATE / 4);
             temp_r30->unk2C = 0;
         }
     }
@@ -1214,11 +1214,17 @@ s32 fn_1_79C8(Vec *pos, float scale)
         scale = 1.0f;
     }
     temp_r31->unk34 = *pos;
-    temp_r31->unk08.x = (1.5f + (0.2f * (0.007874016f * ((s32)frand() & 0x7F)))) * 0.5f;
-    temp_r31->unk08.z = (1.5f + (0.2f * (0.007874016f * ((s32)frand() & 0x7F))));
-    temp_r31->unk08.y = (1.5f + (0.2f * (0.007874016f * ((s32)frand() & 0x7F)))) * 2.0f;
-    temp_r31->unk00 = (s32)frand() % 360;
-    temp_r31->unk2C = 20 * scale;
+#if VERSION_PAL
+    temp_r31->unk08.x = 1.2f * (1.5f+(0.2f*(0.007874016f*((s32)frand() & 0x7F)))) * 0.5f;
+    temp_r31->unk08.z = 1.2f * (1.5f+(0.2f*(0.007874016f*((s32)frand() & 0x7F))));
+    temp_r31->unk08.y = 1.2f * (1.5f+(0.2f*(0.007874016f*((s32)frand() & 0x7F)))) * 2.0f;
+#else
+    temp_r31->unk08.x = (1.5f+(0.2f*(0.007874016f*((s32)frand() & 0x7F))))*0.5f;
+    temp_r31->unk08.z = (1.5f+(0.2f*(0.007874016f*((s32)frand() & 0x7F))));
+    temp_r31->unk08.y = (1.5f+(0.2f*(0.007874016f*((s32)frand() & 0x7F))))*2.0f;
+#endif
+    temp_r31->unk00 = (s32)frand()%360;
+    temp_r31->unk2C = 20*scale;
     return i;
 }
 
@@ -1295,10 +1301,15 @@ void fn_1_8050(omObjData *object)
         else {
             vel = 3;
         }
-        workP->unk14.x += vel * (workP->unkC * sind(workP->unk10));
-        workP->unk14.z += vel * (workP->unkC * cosd(workP->unk10));
-        dx = workP->unk20.x - workP->unk14.x;
-        dz = workP->unk20.z - workP->unk14.z;
+#if VERSION_PAL
+        workP->unk14.x += vel * (workP->unkC * sind(workP->unk10)) * 1.2f;
+        workP->unk14.z += vel * (workP->unkC * cosd(workP->unk10)) * 1.2f;
+#else
+        workP->unk14.x += vel*(workP->unkC*sind(workP->unk10));
+        workP->unk14.z += vel*(workP->unkC*cosd(workP->unk10));
+#endif
+        dx = workP->unk20.x-workP->unk14.x;
+        dz = workP->unk20.z-workP->unk14.z;
         angle = atan2d(dx, dz);
         workP->unk10 = fn_1_9F18(angle, workP->unk10, 3.5f);
         if ((dx * dx) + (dz * dz) < 10000.0f) {
@@ -1388,12 +1399,12 @@ void fn_1_867C(omObjData *object)
         s32 unk8 = 0;
         VECSubtract(&workP->unk14, &workP->unk8, &diff);
         workP->unk2C = atan2d(diff.x, diff.z);
-        workP->unk28 = fn_1_8D90(workP->unk28, workP->unk2C + workP->unk3C, 0.08f);
-        workP->unk24 += 0.05f * (600.0f - workP->unk24);
-        workP->unk20 += 0.2f * (workP->unk24 - workP->unk20);
-        workP->unk8.x += (workP->unk20 * 0.016666668f) * sind(workP->unk28);
-        workP->unk8.z += (workP->unk20 * 0.016666668f) * cosd(workP->unk28);
-        workP->unk30 += workP->unk20 * 0.016666668f;
+        workP->unk28 = fn_1_8D90(workP->unk28, workP->unk2C+workP->unk3C, 0.08f);
+        workP->unk24 += 0.05f*(600.0f-workP->unk24);
+        workP->unk20 += 0.2f*(workP->unk24-workP->unk20);
+        workP->unk8.x += (workP->unk20*REFRESH_FREQ)*sind(workP->unk28);
+        workP->unk8.z += (workP->unk20*REFRESH_FREQ)*cosd(workP->unk28);
+        workP->unk30 += workP->unk20*REFRESH_FREQ;
     }
     fn_1_8578(object, object->data);
 }

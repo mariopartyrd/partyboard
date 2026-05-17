@@ -77,11 +77,11 @@ void fn_1_BCFC(void)
         HuPrcVSleep();
     }
     BoardModelRotYSet(lbl_1_bss_30[15], -90.0f);
-    fn_1_121C(MAKE_MESSID(0x13, 0x00));
+    W02MesExec(MAKE_MESSID(0x13, 0x00));
     HuAudFXPlay(0x44);
     temp_r29 = fn_1_BE88();
     BoardStatusShowSetAll(0);
-    fn_1_121C(MAKE_MESSID(0x13, 0x01));
+    W02MesExec(MAKE_MESSID(0x13, 0x01));
     temp_r30 = fn_1_C108(temp_r29);
     fn_1_CD04(temp_r30);
     BoardCameraViewSet(1);
@@ -115,7 +115,7 @@ s32 fn_1_BE88(void)
     if (coinAmount < 5) {
         return var_r30;
     }
-    fn_1_121C(MAKE_MESSID(0x13, 0x02));
+    W02MesExec(MAKE_MESSID(0x13, 0x02));
 
     do {
         BoardWinCreateChoice(2, MAKE_MESSID(19, 29), 4, 0);
@@ -181,7 +181,7 @@ s32 fn_1_BE88(void)
                     var_r30 = 0x1E; // 30%
                     break;
             }
-            fn_1_121C(mesg);
+            W02MesExec(mesg);
 
             for (i = 0; i < coinAmount; i++) {
                 BoardPlayerCoinsAdd(lbl_1_bss_388, -1);
@@ -196,7 +196,7 @@ s32 fn_1_BE88(void)
         }
     } while (rouletteChoice == 2); // While viewing map
     if (var_r30 == -1) {
-        fn_1_121C(MAKE_MESSID(0x13, 0x07));
+        W02MesExec(MAKE_MESSID(0x13, 0x07));
     }
     return var_r30;
 }
@@ -532,7 +532,7 @@ void fn_1_D3AC(void)
     Vec sp20;
     Vec sp14;
     float sp8[3] = { 1.0f, 0.3f, 2.5f };
-    fn_1_121C(MAKE_MESSID(0x13, 0x08));
+    W02MesExec(MAKE_MESSID(0x13, 0x08));
     BoardStatusShowSetAll(1);
     BoardPlayerMotBlendSet(lbl_1_bss_388, 0, 15);
     BoardPlayerPosGet(lbl_1_bss_388, &sp14);
@@ -618,7 +618,7 @@ s32 fn_1_D8C4(void)
     s16 temp_r22;
 
     u32 temp_r21;
-    fn_1_121C(MAKE_MESSID(0x13, 0x09));
+    W02MesExec(MAKE_MESSID(0x13, 0x09));
     temp_r29 = BoardSpaceGet(0, BoardSpaceFlagSearch(0, 0x800));
     BoardModelPosGet(lbl_1_bss_30[3], &sp40);
     for (temp_r31 = 0; temp_r31 < 4; temp_r31++) {

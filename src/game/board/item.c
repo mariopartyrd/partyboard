@@ -1,3 +1,4 @@
+#include "types.h"
 #include "game/board/item.h"
 #include "game/audio.h"
 #include "game/board/audio.h"
@@ -1026,7 +1027,7 @@ static void ExecItemSwap(void)
     }
     BoardModelRotSetV(suitMdl, &spA8);
     var_r23 = var_r22 = 0;
-    for (var_r31 = 0; var_r31 < 3; var_r31++) {
+    for (var_r31 = 0; var_r31 < ARRAY_COUNT(GWPlayer->items); var_r31++) {
         if (GWPlayer[currItemRestore].items[var_r31] != -1) {
             var_r23++;
         }

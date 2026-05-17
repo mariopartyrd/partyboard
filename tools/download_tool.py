@@ -97,6 +97,21 @@ TOOLS: Dict[str, Callable[[str], str]] = {
     "wibo": wibo_url,
 }
 
+def download(url, response, output) -> None:
+    if url.endswith(".zip"):
+        data = io.BytesIO(response.read())
+        with zipfile.ZipFile(data) as f:
+            f.extractall(output)
+        # Make all files executable
+        for root, _, files in os.walk(output):
+            for name in files:
+                os.chmod(os.path.join(root, name), 0o755)
+        output.touch(mode=0o755)  # Update dir modtime
+    else:
+        with open(output, "wb") as f:
+            shutil.copyfileobj(response, f)
+        st = os.stat(output)
+        os.chmod(output, st.st_mode | stat.S_IEXEC)
 
 def download(url, response, output) -> None:
     if url.endswith(".zip"):

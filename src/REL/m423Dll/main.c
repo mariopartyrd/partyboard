@@ -17,6 +17,7 @@
 #include "game/wipe.h"
 
 #include "ext_math.h"
+#include "version.h"
 #include <string.h>
 
 #ifndef __MWERKS__
@@ -504,7 +505,10 @@ void fn_1_318(omObjData *arg0)
 }
 
 s32 lbl_1_data_238[] = { 0, 4, 2, 3, 1, 5 };
-s32 lbl_1_data_250[] = { 186, 186, 186, 240, 240, 240 };
+s32 lbl_1_data_250[] = {
+    3.1 * REFRESH_RATE, 3.1 * REFRESH_RATE, 3.1 * REFRESH_RATE,
+    4 * REFRESH_RATE, 4 * REFRESH_RATE, 4 * REFRESH_RATE
+};
 
 void fn_1_3B0(omObjData *arg0)
 {
@@ -536,20 +540,20 @@ void fn_1_3B0(omObjData *arg0)
             }
             break;
         case 2:
-            if (++lbl_1_bss_110 >= 30.0f) {
+            if (++lbl_1_bss_110 >= REFRESH_RATE_F / 2) {
                 lbl_1_bss_114 = 3;
                 lbl_1_bss_110 = 0;
             }
             break;
         case 3:
-            var_f31 = lbl_1_bss_110 / 90.0f;
+            var_f31 = lbl_1_bss_110 / (REFRESH_RATE_F * 1.5f);
             if (var_f31 > 1.0f) {
                 var_f31 = 1.0f;
             }
             var_f31 = sind(90.0f * var_f31);
             var_f31 *= var_f31;
             fn_1_10540(2, 1, 0, var_f31);
-            if (++lbl_1_bss_110 >= 90.0f) {
+            if (++lbl_1_bss_110 >= (REFRESH_RATE_F * 1.5f)) {
                 lbl_1_bss_114 = 4;
                 lbl_1_bss_110 = 0;
             }
@@ -575,9 +579,9 @@ void fn_1_3B0(omObjData *arg0)
                 lbl_1_bss_11C = -1;
                 lbl_1_bss_114 = 6;
                 lbl_1_bss_110 = 0;
-                lbl_1_bss_108 = 1800;
+                lbl_1_bss_108 = REFRESH_RATE * 30;
                 fn_1_10028(1);
-                lbl_1_bss_118 = MGSeqTimerCreate(lbl_1_bss_108 / 60);
+                lbl_1_bss_118 = MGSeqTimerCreate(lbl_1_bss_108 / REFRESH_RATE);
             }
             break;
         case 6:
@@ -586,7 +590,7 @@ void fn_1_3B0(omObjData *arg0)
             if (lbl_1_bss_80 >= lbl_1_data_250[temp_r27] && ++lbl_1_bss_0 > 5) {
                 lbl_1_bss_0 = 0;
             }
-            var_r29 = (lbl_1_bss_108 + 59) / 60;
+            var_r29 = (lbl_1_bss_108 + REFRESH_RATE - 1) / REFRESH_RATE;
             if (var_r29 < 0) {
                 var_r29 = 0;
             }
@@ -657,7 +661,7 @@ void fn_1_3B0(omObjData *arg0)
             break;
         case 10:
             fn_1_3A8C();
-            if (++lbl_1_bss_108 >= 210.0f) {
+            if (++lbl_1_bss_108 >= REFRESH_RATE_F * 3.5f) {
                 lbl_1_bss_11C = -1;
                 lbl_1_bss_114 = 11;
                 lbl_1_bss_108 = 0;
@@ -1471,7 +1475,7 @@ void fn_1_3528(omObjData *arg0)
         var_r30->unk04 = 0;
         var_r30->unk08 = 0;
         var_r30->unk0A = 0;
-        var_r30->unk06 = 210.0f + (1.0f / 127) * frand7() * 60.0f;
+        var_r30->unk06 = (REFRESH_RATE_F * 3.5f) + (1.0f / 127) * frand7() * REFRESH_RATE_F;
         var_f30 = -lbl_1_data_3B8[i].x;
         var_f29 = -lbl_1_data_3B8[i].z;
         temp_f31 = atan2d(var_f30, var_f29);
@@ -1562,9 +1566,9 @@ void fn_1_3A8C(void)
             var_r31->unk08 = 0;
         }
         else {
-            var_r31->unk08 = (1.0f / 127) * frand7() * 0.25f * 60.0f;
+            var_r31->unk08 = (1.0f / 127) * frand7() * 0.25f * REFRESH_RATE_F;
         }
-        var_r31->unk0A = ((1.0f / 127) * frand7() + 2.0f) * 60.0f;
+        var_r31->unk0A = ((1.0f / 127) * frand7() + 2.0f) * REFRESH_RATE_F;
     }
 }
 
@@ -1729,7 +1733,7 @@ void fn_1_3FE0(omObjData *arg0)
         var_f31 = 0.0f;
         for (i = 0; i < 1000; i++) {
             var_f31 += temp_r31->unk7C;
-            temp_r31->unk7C -= 0.49f;
+            temp_r31->unk7C -= (VERSION_PAL) ? 29.4f / REFRESH_RATE_OFF_BY_1 : 29.4f * REFRESH_FREQ;
             if (var_f31 <= 0.0f) {
                 break;
             }
@@ -1739,7 +1743,7 @@ void fn_1_3FE0(omObjData *arg0)
         var_f31 = 0.0f;
         for (i = 0; i < 1000; i++) {
             var_f31 += temp_r31->unk7C;
-            temp_r31->unk7C -= 0.65333337f;
+            temp_r31->unk7C -= (VERSION_PAL) ? 39.2f / REFRESH_RATE_F : 0.65333337f;
             if (var_f31 <= 0.0f) {
                 break;
             }
@@ -1769,7 +1773,7 @@ void fn_1_3FE0(omObjData *arg0)
         temp_r31->unk78 = atan2d(lbl_1_data_150[0].x - temp_r31->unkB0, lbl_1_data_150[0].z - temp_r31->unkB8);
         temp_r31->unk7C = 0.0f;
         temp_r31->unk98 = 0;
-        temp_r31->unk9C = 300.0f + (1.0f / 127) * frand7() * 60.0f * 15.0f;
+        temp_r31->unk9C = (REFRESH_RATE_F * 5) + (1.0f / 127) * frand7() * REFRESH_RATE_F * 15.0f;
         if (lbl_1_bss_FC != 0) {
             temp_r31->unk08 = 3;
         }
@@ -1851,13 +1855,18 @@ void fn_1_4778(omObjData *arg0)
             spF8.x = temp_r31->unkB0 - arg0->trans.x;
             spF8.z = temp_r31->unkB8 - arg0->trans.z;
             temp_f29 = VECMagXZ(&spF8);
-            if (temp_f29 > 25.0f) {
+            if (temp_f29 > (VERSION_PAL ? 30.000002f : 25.0f)) {
                 spF8.x = temp_r31->unkB0 - arg0->trans.x;
                 spF8.z = temp_r31->unkB8 - arg0->trans.z;
                 temp_f30 = atan2d(spF8.x, spF8.z);
                 arg0->rot.y = fn_1_122F4(temp_f30, arg0->rot.y, 15.0f);
+#if VERSION_PAL
+                arg0->trans.x += 25.0 * sind(arg0->rot.y) * 0.5 * 1.2000000476837158;
+                arg0->trans.z += 25.0 * cosd(arg0->rot.y) * 0.5 * 1.2000000476837158;
+#else
                 arg0->trans.x += 25.0 * sind(arg0->rot.y) * 0.5;
                 arg0->trans.z += 25.0 * cosd(arg0->rot.y) * 0.5;
+#endif
                 if (temp_r31->unk16 != 2) {
                     temp_r31->unk16 = 2;
                     CharModelMotionSet(temp_r31->unk02, arg0->motion[temp_r31->unk16]);
@@ -1870,11 +1879,14 @@ void fn_1_4778(omObjData *arg0)
             temp_r31->unk18 = 1;
             if (temp_r31->unk16 != 0) {
                 temp_r31->unk16 = 0;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_LOOP);
+#if VERSION_PAL
+                temp_r27->unk_88 = 1.2f;
+#endif
             }
             break;
         case 1:
-            arg0->rot.y = fn_1_122F4(0.0f, arg0->rot.y, 5.0f);
+            arg0->rot.y = fn_1_122F4(0.0f, arg0->rot.y, VERSION_PAL ? 6.0f : 5.0f);
             if (fabs(fn_1_121DC(arg0->rot.y, 0.0f)) < 1.0) {
                 arg0->rot.y = 0.0f;
                 temp_r31->unk18 = 2;
@@ -1884,7 +1896,7 @@ void fn_1_4778(omObjData *arg0)
             temp_r31->unk18 = 3;
             break;
         case 3:
-            arg0->rot.y = fn_1_122F4(0.0f, arg0->rot.y, 10.0f);
+            arg0->rot.y = fn_1_122F4(0.0f, arg0->rot.y, VERSION_PAL ? 12.0f : 10.0f);
             if (fn_1_F00() >= 7) {
                 temp_r31->unk18 = 10;
                 temp_r31->unk68 = 0;
@@ -1916,16 +1928,19 @@ void fn_1_4778(omObjData *arg0)
                 break;
             }
             if (temp_r26 == 2) {
-                if (++temp_r31->unk68 >= 6.0f) {
+                if (++temp_r31->unk68 >= REFRESH_RATE_F / 10.0f) {
                     HuAudFXPlay(0x61A);
                     temp_r31->unk18 = 5;
                     temp_r31->unk68 = 0;
                 }
                 break;
             }
-            if (++temp_r31->unk68 >= 54.0f && temp_r31->unk16 != 3) {
+            if (++temp_r31->unk68 >= (0.9f * REFRESH_RATE_F) && temp_r31->unk16 != 3) {
                 temp_r31->unk16 = 3;
                 CharModelMotionSet(temp_r31->unk02, arg0->motion[temp_r31->unk16]);
+#if VERSION_PAL
+                CharModelMotionSpeedSet(temp_r31->unk02, 1.2f);
+#endif
                 Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_LOOP);
             }
             break;
@@ -1935,7 +1950,7 @@ void fn_1_4778(omObjData *arg0)
                 arg0->rot.y += temp_f30;
             }
             else {
-                arg0->rot.y += 10.0f;
+                arg0->rot.y += VERSION_PAL ? 12.0f : 10.0f;
             }
             sp104 = lbl_1_data_5E8;
             mtxRot(sp11C, arg0->rot.x, arg0->rot.y, arg0->rot.z);
@@ -1973,8 +1988,8 @@ void fn_1_4778(omObjData *arg0)
             }
             if (var_r24 & PAD_BUTTON_A) {
                 temp_r31->unk16 = 4;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_NONE);
-                temp_r27->unk_88 = 0.5f;
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_NONE);
+                temp_r27->unk_88 = VERSION_PAL ? 0.6f : 0.5f;
                 temp_r31->unkD4 = sp110;
                 temp_r31->unk18 = 7;
                 temp_r31->unk68 = 0;
@@ -1982,10 +1997,10 @@ void fn_1_4778(omObjData *arg0)
             break;
         case 7:
             temp_r31->unk68++;
-            if (temp_r31->unk68 > 90.0f) {
-                temp_r31->unk68 = 90;
+            if (temp_r31->unk68 > REFRESH_RATE_F * 1.5f) {
+                temp_r31->unk68 = REFRESH_RATE * 1.5;
             }
-            temp_f29 = 0.011111111f * temp_r31->unk68;
+            temp_f29 = (0.6666667f / REFRESH_RATE_F) * temp_r31->unk68;
             sp110.x = 0.0125f * var_r29 * 300.0f;
             sp110.y = -900.0f;
             sp110.z = -900.0f;
@@ -1999,10 +2014,18 @@ void fn_1_4778(omObjData *arg0)
             }
             if (!(var_r25 & PAD_BUTTON_A)) {
                 var_f25 = 15.000001f + 30.0f * temp_f29;
+#if VERSION_PAL
+                temp_r31->unk60 = var_f25 * 1.2f;
+#else
                 temp_r31->unk60 = var_f25;
+#endif
                 temp_r31->unk16 = 5;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_NONE);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_NONE);
+#if VERSION_PAL
+                temp_r27->unk_88 = 1.2f * (0.5f + 1.5f * temp_f29);
+#else
                 temp_r27->unk_88 = 0.5f + 1.5f * temp_f29;
+#endif
                 temp_r31->unk18 = 8;
                 temp_r31->unk68 = 0;
             }
@@ -2054,9 +2077,12 @@ void fn_1_4778(omObjData *arg0)
                 temp_r31->unk68 = 0;
                 break;
             }
-            if (++temp_r31->unk68 >= 12.0f) {
+            if (++temp_r31->unk68 >= REFRESH_RATE_F / 5) {
                 temp_r31->unk16 = 0;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_LOOP);
+#if VERSION_PAL
+                temp_r27->unk_88 = 1.2f;
+#endif
                 temp_r31->unk18 = 3;
                 temp_r31->unk68 = 0;
             }
@@ -2065,13 +2091,16 @@ void fn_1_4778(omObjData *arg0)
             arg0->rot.y = fn_1_122F4(0.0f, arg0->rot.y, 10.0f);
             if (CharModelMotionShiftIDGet(temp_r31->unk02) == -1 && temp_r31->unk16 != 0) {
                 temp_r31->unk16 = 0;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_LOOP);
+#if VERSION_PAL
+                temp_r27->unk_88 = 1.2f;
+#endif
             }
             break;
         case 11:
             if (CharModelMotionShiftIDGet(temp_r31->unk02) == -1 && temp_r31->unk16 != 6) {
                 temp_r31->unk16 = 6;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_NONE);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_NONE);
                 Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_LOOP);
                 Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_SHIFT_LOOP);
             }
@@ -2079,7 +2108,7 @@ void fn_1_4778(omObjData *arg0)
         case 12:
             if (CharModelMotionShiftIDGet(temp_r31->unk02) == -1 && temp_r31->unk16 != 7) {
                 temp_r31->unk16 = 7;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_NONE);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_NONE);
                 Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_LOOP);
                 Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_SHIFT_LOOP);
             }
@@ -2178,14 +2207,21 @@ void fn_1_5D18(omObjData *arg0)
             }
             if (temp_r31->unk16 != var_r25 && CharModelMotionShiftIDGet(temp_r31->unk02) == -1) {
                 temp_r31->unk16 = var_r25;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_LOOP);
+#if VERSION_PAL
+                temp_r27->unk_88 = 1.2f;
+#endif
             }
             if (temp_r31->unk16 == 1 && CharModelMotionShiftIDGet(temp_r31->unk02) == -1) {
                 var_f31 = fabs(0.1f * var_f30);
                 if (var_f31 < 0.25f) {
                     var_f31 = 0.25f;
                 }
+#if VERSION_PAL
+                CharModelMotionSpeedSet(temp_r31->unk02, var_f31 * 1.2f);
+#else
                 CharModelMotionSpeedSet(temp_r31->unk02, var_f31);
+#endif
             }
             if (var_r28 == 0.0f) {
                 var_f29 = 0.0f;
@@ -2202,7 +2238,11 @@ void fn_1_5D18(omObjData *arg0)
             if (arg0->rot.y > var_f29 && (arg0->rot.y -= 20.0f) < var_f29) {
                 arg0->rot.y = var_f29;
             }
+#if VERSION_PAL
+            arg0->trans.x += var_f30 * 1.2f;
+#else
             arg0->trans.x += var_f30;
+#endif
             arg0->trans.y = 0.0f;
             arg0->trans.z = temp_r31->unkB8;
             if (arg0->trans.x < -225.0f) {
@@ -2220,7 +2260,7 @@ void fn_1_5D18(omObjData *arg0)
                     temp_r27->unk_0C = -1;
                     temp_r31->unk16 = 3;
                     CharModelMotionSet(temp_r31->unk02, arg0->motion[temp_r31->unk16]);
-                    CharModelMotionSpeedSet(temp_r31->unk02, 1.0f);
+                    CharModelMotionSpeedSet(temp_r31->unk02, VERSION_PAL ? 1.2f : 1.0f);
                     Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_LOOP);
                     Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_SHIFT_LOOP);
                     temp_r31->unk7C = 6.5f;
@@ -2229,10 +2269,10 @@ void fn_1_5D18(omObjData *arg0)
                     i = 99;
                     if ((var_r26 = fn_1_B304(lbl_1_bss_40)) != 0) {
                         for (i = 0; i < var_r26; i++) {
-                            if (lbl_1_bss_40[0]->unk1C < lbl_1_bss_40[0]->unk14 || lbl_1_bss_40[0]->unk1C - lbl_1_bss_40[0]->unk14 > 6.0f) {
+                            if (lbl_1_bss_40[0]->unk1C < lbl_1_bss_40[0]->unk14 || lbl_1_bss_40[0]->unk1C - lbl_1_bss_40[0]->unk14 > REFRESH_RATE / 10.0f) {
                                 continue;
                             }
-                            if (lbl_1_bss_40[0]->unk1C < 36.0f) {
+                            if (lbl_1_bss_40[0]->unk1C < REFRESH_RATE * 0.6f) {
                                 var_f31 = lbl_1_bss_40[0]->unk68.z - arg0->trans.z;
                             }
                             else {
@@ -2262,7 +2302,7 @@ void fn_1_5D18(omObjData *arg0)
                     temp_r27->unk_0C = -1;
                     temp_r31->unk16 = 5;
                     CharModelMotionSet(temp_r31->unk02, arg0->motion[temp_r31->unk16]);
-                    CharModelMotionSpeedSet(temp_r31->unk02, 1.0f);
+                    CharModelMotionSpeedSet(temp_r31->unk02, VERSION_PAL ? 1.2f : 1.0f);
                     Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_LOOP);
                     Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_SHIFT_LOOP);
                     temp_r31->unk7C = 6.5f;
@@ -2271,10 +2311,10 @@ void fn_1_5D18(omObjData *arg0)
                     i = 99;
                     if ((var_r26 = fn_1_B304(lbl_1_bss_40)) != 0) {
                         for (i = 0; i < var_r26; i++) {
-                            if (lbl_1_bss_40[0]->unk1C < lbl_1_bss_40[0]->unk14 || lbl_1_bss_40[0]->unk1C - lbl_1_bss_40[0]->unk14 > 6.0f) {
+                            if (lbl_1_bss_40[0]->unk1C < lbl_1_bss_40[0]->unk14 || lbl_1_bss_40[0]->unk1C - lbl_1_bss_40[0]->unk14 > REFRESH_RATE / 10.0f) {
                                 continue;
                             }
-                            if (lbl_1_bss_40[0]->unk1C < 36.0f) {
+                            if (lbl_1_bss_40[0]->unk1C < REFRESH_RATE * 0.6f) {
                                 var_f31 = lbl_1_bss_40[0]->unk68.z - arg0->trans.z;
                             }
                             else {
@@ -2304,7 +2344,7 @@ void fn_1_5D18(omObjData *arg0)
                     temp_r27->unk_0C = -1;
                     temp_r31->unk16 = 7;
                     CharModelMotionSet(temp_r31->unk02, arg0->motion[temp_r31->unk16]);
-                    CharModelMotionSpeedSet(temp_r31->unk02, 1.0f);
+                    CharModelMotionSpeedSet(temp_r31->unk02, VERSION_PAL ? 1.2f : 1.0f);
                     Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_LOOP);
                     Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_SHIFT_LOOP);
                     temp_r31->unk7C = 10.5f;
@@ -2315,16 +2355,23 @@ void fn_1_5D18(omObjData *arg0)
             }
             break;
         case 2:
+#if VERSION_PAL
+            arg0->trans.x += temp_r31->unk8C * 1.2f;
+#else
             arg0->trans.x += temp_r31->unk8C;
+#endif
             if (arg0->trans.x > 225.0f) {
                 arg0->trans.x = 225.0f;
             }
             arg0->trans.y += temp_r31->unk7C;
-            temp_r31->unk7C -= 0.49f;
+            temp_r31->unk7C -= (VERSION_PAL) ? 29.4f / REFRESH_RATE_OFF_BY_1 : 29.4f * REFRESH_FREQ;
             temp_r31->unk68++;
-            if (temp_r31->unk68 == temp_r31->unk80 - 12.0f) {
+            if (temp_r31->unk68 == temp_r31->unk80 - REFRESH_RATE_F / 5) {
                 temp_r31->unk16 = 4;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_NONE);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_NONE);
+#if VERSION_PAL
+                temp_r27->unk_88 = 1.2f;
+#endif
                 Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_LOOP);
                 Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_SHIFT_LOOP);
             }
@@ -2350,22 +2397,32 @@ void fn_1_5D18(omObjData *arg0)
                 memset(&temp_r31->unk1C, 0, sizeof(temp_r31->unk1C));
                 temp_r31->unk58 = 0;
                 temp_r31->unk16 = 0;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_LOOP);
+#if VERSION_PAL
+                temp_r27->unk_88 = 1.2f;
+#endif
                 temp_r31->unk18 = 6;
                 temp_r31->unkAC = 0;
             }
             break;
         case 4:
+#if VERSION_PAL
+            arg0->trans.x -= temp_r31->unk8C * 1.2f;
+#else
             arg0->trans.x -= temp_r31->unk8C;
+#endif
             if (arg0->trans.x < -225.0f) {
                 arg0->trans.x = -225.0f;
             }
             arg0->trans.y += temp_r31->unk7C;
-            temp_r31->unk7C -= 0.49f;
+            temp_r31->unk7C -= (VERSION_PAL) ? 29.4f / REFRESH_RATE_OFF_BY_1 : 29.4f * REFRESH_FREQ;
             temp_r31->unk68++;
-            if (temp_r31->unk68 == temp_r31->unk80 - 12.0f) {
+            if (temp_r31->unk68 == temp_r31->unk80 - REFRESH_RATE_F / 5) {
                 temp_r31->unk16 = 6;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_NONE);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_NONE);
+#if VERSION_PAL
+                temp_r27->unk_88 = 1.2f;
+#endif
                 Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_LOOP);
                 Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_SHIFT_LOOP);
             }
@@ -2391,7 +2448,10 @@ void fn_1_5D18(omObjData *arg0)
                 memset(&temp_r31->unk1C, 0, sizeof(temp_r31->unk1C));
                 temp_r31->unk58 = 0;
                 temp_r31->unk16 = 0;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_LOOP);
+#if VERSION_PAL
+                temp_r27->unk_88 = 1.2f;
+#endif
                 temp_r31->unk18 = 6;
                 temp_r31->unkAC = 0;
             }
@@ -2404,11 +2464,14 @@ void fn_1_5D18(omObjData *arg0)
             break;
         case 7:
             arg0->trans.y += temp_r31->unk7C;
-            temp_r31->unk7C -= 0.65333337f;
+            temp_r31->unk7C -= (VERSION_PAL) ? 39.2f / REFRESH_RATE_F : 0.65333337f;
             temp_r31->unk68++;
             if (arg0->trans.y <= 0.0f) {
                 temp_r31->unk16 = 0;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_NONE);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_NONE);
+#if VERSION_PAL
+                temp_r27->unk_88 = 1.2f;
+#endif
                 Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_LOOP);
                 Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_SHIFT_LOOP);
                 arg0->trans.y = 0.0f;
@@ -2417,11 +2480,14 @@ void fn_1_5D18(omObjData *arg0)
             }
             break;
         case 8:
-            if (++temp_r31->unk68 > 12.0f) {
+            if (++temp_r31->unk68 > REFRESH_RATE_F / 5) {
                 memset(&temp_r31->unk1C, 0, sizeof(temp_r31->unk1C));
                 temp_r31->unk58 = 0;
                 temp_r31->unk16 = 0;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_LOOP);
+#if VERSION_PAL
+                temp_r27->unk_88 = 1.2f;
+#endif
                 temp_r31->unk18 = 1;
             }
             break;
@@ -2429,10 +2495,13 @@ void fn_1_5D18(omObjData *arg0)
             arg0->rot.y = fn_1_122F4(0.0f, arg0->rot.y, 10.0f);
             if (CharModelMotionShiftIDGet(temp_r31->unk02) == -1 && temp_r31->unk16 != 1) {
                 temp_r31->unk16 = 1;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_LOOP);
+#if VERSION_PAL
+                temp_r27->unk_88 = 1.2f;
+#endif
             }
             if (CharModelMotionShiftIDGet(temp_r31->unk02) == -1 && temp_r31->unk16 == 1) {
-                arg0->trans.z += 5.0f;
+                arg0->trans.z += (VERSION_PAL) ? 6.0f : 5.0f;
             }
             if (arg0->trans.z > lbl_1_data_150->z + 100.0f) {
                 temp_r31->unk18 = 10;
@@ -2442,13 +2511,16 @@ void fn_1_5D18(omObjData *arg0)
             arg0->rot.y = fn_1_122F4(0.0f, arg0->rot.y, 10.0f);
             if (CharModelMotionShiftIDGet(temp_r31->unk02) == -1 && temp_r31->unk16 != 0) {
                 temp_r31->unk16 = 0;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_LOOP);
+#if VERSION_PAL
+                temp_r27->unk_88 = 1.2f;
+#endif
             }
             break;
         case 11:
             if (CharModelMotionShiftIDGet(temp_r31->unk02) == -1 && temp_r31->unk16 != 9) {
                 temp_r31->unk16 = 9;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_NONE);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_NONE);
                 Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_LOOP);
                 Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_SHIFT_LOOP);
             }
@@ -2456,7 +2528,7 @@ void fn_1_5D18(omObjData *arg0)
         case 12:
             if (CharModelMotionShiftIDGet(temp_r31->unk02) == -1 && temp_r31->unk16 != 10) {
                 temp_r31->unk16 = 10;
-                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, 8.0f, HU3D_MOTATTR_NONE);
+                CharModelMotionShiftSet(temp_r31->unk02, arg0->motion[temp_r31->unk16], 0.0f, REFRESH_RATE_F / 7.5f, HU3D_MOTATTR_NONE);
                 Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_LOOP);
                 Hu3DModelAttrReset(arg0->model[0], HU3D_MOTATTR_SHIFT_LOOP);
             }
@@ -2694,9 +2766,19 @@ void fn_1_82C8(s32 arg0, s32 arg1, s32 arg2)
 s32 lbl_1_data_668[] = { 3, 4, 5, 6 };
 float lbl_1_data_678[] = { 0.6f, 0.65f, 0.7f, 0.7f };
 
-s32 lbl_1_data_688[][2] = { { 30, 60 }, { 24, 48 }, { 12, 24 }, { 0, 12 } };
+s32 lbl_1_data_688[][2] = {
+    { REFRESH_RATE / 2, REFRESH_RATE },
+    { REFRESH_RATE / 2.5, REFRESH_RATE / 1.25 },
+    { REFRESH_RATE / 5, REFRESH_RATE / 2.5 },
+    { 0, REFRESH_RATE / 5 }
+};
 
-s32 lbl_1_data_6A8[][2] = { { 36, 84 }, { 36, 78 }, { 33, 72 }, { 33, 66 } };
+s32 lbl_1_data_6A8[][2] = {
+    { REFRESH_RATE * 0.6, REFRESH_RATE * 1.4 },
+    { REFRESH_RATE * 0.6, REFRESH_RATE * 1.3 },
+    { REFRESH_RATE * 0.55, REFRESH_RATE * 1.2 },
+    { REFRESH_RATE * 0.55, REFRESH_RATE * 1.1 }
+};
 
 void fn_1_8338(omObjData *arg0)
 {
@@ -2766,7 +2848,7 @@ void fn_1_8338(omObjData *arg0)
                 temp_r31->unk6C = 0;
                 return;
             }
-            var_f31 = sind(180.0f * ((temp_r31->unk74 - temp_r31->unk6C) / 60.0f));
+            var_f31 = sind(180.0f * ((temp_r31->unk74 - temp_r31->unk6C) / REFRESH_RATE_F));
             if (temp_r31->unk74 & 1) {
                 var_f31 *= -1.0f;
             }
@@ -2805,13 +2887,28 @@ void fn_1_8338(omObjData *arg0)
     }
 }
 
-s32 lbl_1_data_6C8[] = { 60, 45, 30, 15 };
+s32 lbl_1_data_6C8[] = {
+    REFRESH_RATE * 1,
+    REFRESH_RATE * 0.75,
+    REFRESH_RATE * 0.5,
+    REFRESH_RATE * 0.25
+};
 
 float lbl_1_data_6D8[][2] = { { 200.0f, 150.0f }, { 125.0f, 100.0f }, { 0.0f, 0.0f }, { 0.0f, 0.0f } };
 
-s32 lbl_1_data_6F8[][2] = { { 48, 150 }, { 39, 114 }, { 33, 90 }, { 21, 42 } };
+s32 lbl_1_data_6F8[][2] = {
+    { REFRESH_RATE * 0.8, REFRESH_RATE * 2.5 },
+    { REFRESH_RATE * 0.65, REFRESH_RATE * 1.9 },
+    { REFRESH_RATE * 0.55, REFRESH_RATE * 1.5 },
+    { REFRESH_RATE * 0.35, REFRESH_RATE * 0.7 }
+};
 
-s32 lbl_1_data_718[][2] = { { 27, 39 }, { 15, 27 }, { 9, 15 }, { 0, 3 } };
+s32 lbl_1_data_718[][2] = {
+    { REFRESH_RATE * 0.45, REFRESH_RATE * 0.65 },
+    { REFRESH_RATE * 0.25, REFRESH_RATE * 0.45 },
+    { REFRESH_RATE * 0.15, REFRESH_RATE * 0.25 },
+    { 0, REFRESH_RATE * 0.05 }
+};
 
 void fn_1_8CB4(omObjData *arg0)
 {
@@ -2873,7 +2970,7 @@ void fn_1_8CB4(omObjData *arg0)
                 var_f26 = 60.000004f + arg0->trans.z;
 #endif
                 var_r28 = (var_f26 - temp_r30->unk38.z) / temp_r30->unk50.z;
-                if (var_r28 > 300.0f) {
+                if (var_r28 > REFRESH_RATE_F * 5) {
                     continue;
                 }
                 spC = temp_r30->unk50;
@@ -2884,9 +2981,9 @@ void fn_1_8CB4(omObjData *arg0)
                     var_f31 += spC.y;
                     spC.x *= temp_r30->unk8C;
                     spC.z *= temp_r30->unk8C;
-                    spC.y -= 0.32666668f;
+                    spC.y -= 19.6f / REFRESH_RATE_F;
                     if (var_f31 < 20.0) {
-                        var_f31 = 0.32666668f;
+                        var_f31 = 19.6f / REFRESH_RATE_F;
                         spC.y *= temp_r30->unk90;
                     }
                 }
@@ -2903,7 +3000,7 @@ void fn_1_8CB4(omObjData *arg0)
         if (temp_r30->unk38.z > 60.000004f + arg0->trans.z) {
             var_f26 = 60.000004f + arg0->trans.z;
             var_r28 = (var_f26 - temp_r30->unk38.z) / temp_r30->unk50.z;
-            if (var_r28 > 300.0f) {
+            if (var_r28 > REFRESH_RATE_F * 5) {
                 temp_r31->unk64 = -1;
                 return;
             }
@@ -2915,9 +3012,9 @@ void fn_1_8CB4(omObjData *arg0)
                 var_f31 += spC.y;
                 spC.x *= temp_r30->unk8C;
                 spC.z *= temp_r30->unk8C;
-                spC.y -= 0.32666668f;
+                spC.y -= 19.6f / REFRESH_RATE_F;
                 if (var_f31 < 20.0) {
-                    var_f31 = 0.32666668f;
+                    var_f31 = 19.6f / REFRESH_RATE_F;
                     spC.y *= temp_r30->unk90;
                 }
             }
@@ -3042,7 +3139,7 @@ void fn_1_98A0(omObjData *arg0)
             case 0:
                 break;
             case 1:
-                temp_f30 = var_r31->unk14 / 60.0f;
+                temp_f30 = var_r31->unk14 / REFRESH_RATE_F;
                 var_r31->unk14++;
                 if (temp_f30 > 1.0f) {
                     var_f31 = 1.0f;
@@ -3065,13 +3162,17 @@ void fn_1_98A0(omObjData *arg0)
                     var_f25 = 10.0f;
                 }
                 var_r31->unk38.y = 20.0 + var_f25 * sind(180.0f * var_f31);
-                if (var_r31->unk14 >= 75.0f) {
+                if (var_r31->unk14 >= REFRESH_RATE_F * 1.25f) {
                     var_r31->unk0C = 2;
                     var_r31->unk14 = 0;
                     var_r31->unk38.y = 20.0f;
                     var_r31->unk50.y = 0.0f;
                 }
-                if (var_r31->unk14 < 73.2f) {
+#if VERSION_PAL
+                if (var_r31->unk14 < 1.22f * REFRESH_RATE_F) {
+#else
+                if (var_r31->unk14 < 1.22f * REFRESH_RATE_OFF_BY_1) {
+#endif
                     spAC.x = var_r31->unk50.z;
                     spAC.z = -var_r31->unk50.x;
                     spAC.y = 0.0f;
@@ -3208,7 +3309,7 @@ void fn_1_98A0(omObjData *arg0)
                 if (var_r31->unk50.z > 0.0f) {
                     var_r31->unk08 = 1;
                 }
-                var_r31->unk50.y -= 0.32666668f;
+                var_r31->unk50.y -= 19.6f / REFRESH_RATE_F;
                 if (var_r23 == 0) {
                     var_r31->unk50.x *= var_r31->unk8C;
                     var_r31->unk50.z *= var_r31->unk8C;
@@ -3228,7 +3329,7 @@ void fn_1_98A0(omObjData *arg0)
                     else {
                         Hu3DModelAttrSet(var_r31->unk00, HU3D_ATTR_DISPOFF);
                     }
-                    if (var_r31->unk18 >= 120.0f) {
+                    if (var_r31->unk18 >= REFRESH_RATE_F * 2) {
                         Hu3DModelAttrSet(var_r31->unk00, HU3D_ATTR_DISPOFF);
                         var_r31->unk0C = 0;
                         var_r31->unk06 = 0;
@@ -3245,7 +3346,7 @@ void fn_1_98A0(omObjData *arg0)
                 if (fabs(var_r31->unk38.x) > 2000.0 || fabs(var_r31->unk38.y) > 2000.0 || fabs(var_r31->unk38.z) > 2000.0) {
                     var_r31->unk0C = 4;
                     var_r31->unk14 = 0;
-                    var_r31->unk18 = 120;
+                    var_r31->unk18 = REFRESH_RATE * 2;
                 }
                 var_r31->unk14++;
                 spAC.x = var_r31->unk50.z;
@@ -3266,7 +3367,7 @@ void fn_1_98A0(omObjData *arg0)
                 else {
                     Hu3DModelAttrSet(var_r31->unk00, HU3D_ATTR_DISPOFF);
                 }
-                if (var_r31->unk18 >= 120.0f) {
+                if (var_r31->unk18 >= REFRESH_RATE_F * 2) {
                     Hu3DModelAttrSet(var_r31->unk00, HU3D_ATTR_DISPOFF);
                     var_r31->unk0C = 0;
                     var_r31->unk06 = 0;
@@ -3328,7 +3429,7 @@ s32 fn_1_A9D4(s32 arg0, Vec arg1, Vec arg2)
     var_r31->unk2C = arg2;
     var_r31->unk38 = arg1;
     var_r31->unk44 = var_r31->unk48 = var_r31->unk4C = 0.0f;
-    var_r31->unk50.x = 0.016666668f * (arg2.x - arg1.x);
+    var_r31->unk50.x = 0.016666668f * (arg2.x - arg1.x); //! not updated for PAL
     var_r31->unk50.z = 0.016666668f * (arg2.z - arg1.z);
     var_r31->unk50.y = 5.0f;
     Hu3DModelPosSet(var_r31->unk00, var_r31->unk38.x, var_r31->unk38.y, var_r31->unk38.z);
@@ -4297,12 +4398,12 @@ void fn_1_E4EC(omObjData *arg0)
             continue;
         }
         var_r31->unk00++;
-        if (var_r31->unk00 < 12.0f) {
-            var_r31->unk04 += 0.058333337f;
+        if (var_r31->unk00 < REFRESH_RATE_F / 5) {
+            var_r31->unk04 += 3.5f * REFRESH_FREQ;
         }
         else {
-            var_r31->unk04 += 0.025000002f;
-            var_r31->unk10 -= 0.050000004f;
+            var_r31->unk04 += 1.5f * REFRESH_FREQ;
+            var_r31->unk10 -= 3.0f * REFRESH_FREQ;
         }
         if (var_r31->unk10 < 0.0f) {
             var_r31->unk00 = 0;
@@ -4683,10 +4784,15 @@ void fn_1_FA40(omObjData *arg0)
                 temp_r31->unk190[temp_r29][0] = 0;
             }
             if (temp_r31->unk190[temp_r29][0] != 0) {
-                if (temp_r31->unk190[temp_r29][1] < 15) {
+                if (temp_r31->unk190[temp_r29][1] < REFRESH_RATE / 4) {
                     temp_r31->unk190[temp_r29][1]++;
+#if VERSION_PAL
+                    var_f31 = 3.0f - 2.0f * (temp_r31->unk190[temp_r29][1] / 12.0f);
+                    var_f28 = temp_r31->unk190[temp_r29][1] / 12.0f;
+#else
                     var_f31 = 3.0f - 2.0f * (temp_r31->unk190[temp_r29][1] / 15.0f);
                     var_f28 = temp_r31->unk190[temp_r29][1] / 15.0f;
+#endif
                 }
                 else {
                     var_f31 = 1.0f;

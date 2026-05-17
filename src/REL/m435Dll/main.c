@@ -20,6 +20,7 @@
 #include <string.h>
 
 #include "ext_math.h"
+#include "version.h"
 
 s32 rand8(void);
 #ifndef __MWERKS__
@@ -765,7 +766,7 @@ void fn_1_281C(float* arg0, s32 arg1) {
 void fn_1_288C(s32 arg0) {
     if (lbl_1_bss_10 == 0) {
         lbl_1_bss_10 = 1;
-        lbl_1_bss_C = arg0 * 60;
+        lbl_1_bss_C = arg0 * REFRESH_RATE;
     }
 }
 
@@ -793,14 +794,14 @@ void fn_1_2920(omObjData* arg0) {
     switch (lbl_1_bss_10) {
         case 1:
             if (lbl_1_data_26C == -1) {
-                lbl_1_data_26C = MGSeqCreate(1, lbl_1_bss_C / 60, -1, -1);
+                lbl_1_data_26C = MGSeqCreate(1, lbl_1_bss_C / REFRESH_RATE, -1, -1);
             }
             lbl_1_bss_10 = 2;
             break;
         case 2:
             lbl_1_bss_C--;
             if (lbl_1_data_26C != -1) {
-                MGSeqParamSet(lbl_1_data_26C, 1, (lbl_1_bss_C + 59) / 60);
+                MGSeqParamSet(lbl_1_data_26C, 1, (lbl_1_bss_C + REFRESH_RATE - 1) / REFRESH_RATE);
             }
             if (lbl_1_bss_C <= 0) {
                 lbl_1_bss_C = 30;
@@ -908,7 +909,7 @@ void fn_1_2C1C(omObjData* arg0) {
         fn_1_230(1, 10, 4.0f);
     }
     if (var_r30->unk04 == 0) {
-        if (var_r30->unk14++ >= 300) {
+        if (var_r30->unk14++ >= REFRESH_RATE * 5) {
             var_r30->unk14 = 0;
             if (rand8() % 2 != 0) {
                 fn_1_2BFC(1);
@@ -2796,9 +2797,9 @@ void fn_1_CCBC(void) {
     HuAudFXPlay(0x6D2);
     fn_1_799C(3);
     fn_1_2798(sp8, MAKE_MESSID(29, 2));
-    fn_1_2594(sp8, 60);
+    fn_1_2594(sp8, REFRESH_RATE);
     fn_1_2BFC(3);
-    fn_1_2594(sp8, 60);
+    fn_1_2594(sp8, REFRESH_RATE);
     fn_1_799C(1);
     fn_1_24C4(sp8);
     lbl_1_bss_4 = 1;
@@ -3371,7 +3372,7 @@ void fn_1_10A14(void) {
     HU_WIN_INSERT_MES_SET_PTR(sp8, MAKE_MESSID_PTR(sp18), 1);
     fn_1_7D28(1, 2);
     fn_1_2798(sp8, MAKE_MESSID(29, 63));
-    fn_1_2594(sp8, 120);
+    fn_1_2594(sp8, REFRESH_RATE * 2);
     fn_1_7D28(1, 1);
     fn_1_24C4(sp8);
     lbl_1_bss_4 = 1;
@@ -3401,7 +3402,7 @@ void fn_1_10E1C(void) {
         HuAudFXPlayVolPan(0x65, 0x7F, 0x60);
         fn_1_8544(sp1C[i][1]);
         fn_1_2798(sp8, sp1C[i][0]);
-        fn_1_2594(sp8, 120);
+        fn_1_2594(sp8, REFRESH_RATE * 2);
         fn_1_24C4(sp8);
     }
     lbl_1_bss_4 = 1;
@@ -3435,7 +3436,7 @@ void fn_1_11220(void) {
     fn_1_799C(2);
     fn_1_2798(sp8, MAKE_MESSID(29, 62));
     HuPrcSleep(5);
-    for (i = 0; i < 120; i++) {
+    for (i = 0; i < REFRESH_RATE * 2; i++) {
         temp_f31 = fn_1_1539C(640.0f, temp_f30, i, 30.0f);
         HuWinPosSet(sp8, temp_f31, 100.0f);
         HuPrcVSleep();
@@ -3473,7 +3474,7 @@ void fn_1_116A8(void) {
     fn_1_799C(2);
     fn_1_2798(sp8, MAKE_MESSID(29, 57));
     HuPrcSleep(5);
-    for (i = 0; i < 120; i++) {
+    for (i = 0; i < REFRESH_RATE * 2; i++) {
         temp_f31 = fn_1_1539C(640.0f, temp_f30, i, 30.0f);
         HuWinPosSet(sp8, temp_f31, 100.0f);
         HuPrcVSleep();
@@ -3515,12 +3516,12 @@ void fn_1_11B04(void) {
             fn_1_799C(2);
         }
         fn_1_2798(sp8, sp1C[i]);
-        fn_1_2594(sp8, 60);
+        fn_1_2594(sp8, REFRESH_RATE);
         if (i == 0) {
             fn_1_799C(1);
         }
         if (i == 1) {
-            fn_1_2594(sp8, 60);
+            fn_1_2594(sp8, REFRESH_RATE);
         }
         fn_1_24C4(sp8);
     }
@@ -3598,7 +3599,7 @@ s32 fn_1_12260(void) {
 void fn_1_122A8(void) {
     if (lbl_1_bss_10 == 0) {
         lbl_1_bss_10 = 1;
-        lbl_1_bss_C = 300;
+        lbl_1_bss_C = REFRESH_RATE * 5;
     }
 }
 

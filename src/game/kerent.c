@@ -1,3 +1,5 @@
+#include <version.h>
+
 //fake function signatures
 void OSDumpStopwatch(void);
 void PSVECDotProduct(void);
@@ -25,6 +27,7 @@ void PSQUATMultiply(void);
 void PSQUATInverse(void);
 void PSQUATNormalize(void);
 void OSTicksToCalendarTime(void);
+void OSGetLanguage(void);
 void GXWaitDrawDone(void);
 void GXProject(void);
 void GXGetProjectionv(void);
@@ -334,9 +337,9 @@ void espSpeedSet(void);
 void espBankSet(void);
 void espDrawNoSet(void);
 void espPriSet(void);
-void lbl_80192060(void);
-void lbl_80192160(void);
-void lbl_80192260(void);
+void modelTable(void);
+void motionTable(void);
+void spriteTable(void);
 void lbl_801D3DA0(void);
 void fn_8003FF68(void);
 void HuPrcInit(void);
@@ -633,13 +636,14 @@ void GWMGCustomReset(void);
 void GWMGCustomSet(void);
 void GWMGCustomGet(void);
 void GWMGAvailGet(void);
+void GwLanguage(void);
 void fmod(void);
 void _savegpr_15(void);
 void _restgpr_15(void);
 void _savegpr_16(void);
 void _restgpr_16(void);
-void __save_gpr(void);
-void __restore_gpr(void);
+void _savegpr_14(void);
+void _restgpr_14(void);
 void omDBGMenuButton(void);
 void msmSeSetListener(void);
 void msmSeUpdataListener(void);
@@ -1042,6 +1046,7 @@ extern void _kerjmp_PSQUATMultiply(void);
 extern void _kerjmp_PSQUATInverse(void);
 extern void _kerjmp_PSQUATNormalize(void);
 extern void _kerjmp_OSTicksToCalendarTime(void);
+extern void _kerjmp_OSGetLanguage(void);
 extern void _kerjmp_GXWaitDrawDone(void);
 extern void _kerjmp_GXProject(void);
 extern void _kerjmp_GXGetProjectionv(void);
@@ -1351,9 +1356,9 @@ extern void _kerjmp_espSpeedSet(void);
 extern void _kerjmp_espBankSet(void);
 extern void _kerjmp_espDrawNoSet(void);
 extern void _kerjmp_espPriSet(void);
-extern void _kerjmp_lbl_80192060(void);
-extern void _kerjmp_lbl_80192160(void);
-extern void _kerjmp_lbl_80192260(void);
+extern void _kerjmp_modelTable(void);
+extern void _kerjmp_motionTable(void);
+extern void _kerjmp_spriteTable(void);
 extern void _kerjmp_lbl_801D3DA0(void);
 extern void _kerjmp_fn_8003FF68(void);
 extern void _kerjmp_HuPrcInit(void);
@@ -1650,13 +1655,14 @@ extern void _kerjmp_GWMGCustomReset(void);
 extern void _kerjmp_GWMGCustomSet(void);
 extern void _kerjmp_GWMGCustomGet(void);
 extern void _kerjmp_GWMGAvailGet(void);
+extern void _kerjmp_GwLanguage(void);
 extern void _kerjmp_fmod(void);
 extern void _kerjmp__savegpr_15(void);
 extern void _kerjmp__restgpr_15(void);
 extern void _kerjmp__savegpr_16(void);
 extern void _kerjmp__restgpr_16(void);
-extern void _kerjmp___save_gpr(void);
-extern void _kerjmp___restore_gpr(void);
+extern void _kerjmp__savegpr_14(void);
+extern void _kerjmp__restgpr_14(void);
 extern void _kerjmp_omDBGMenuButton(void);
 extern void _kerjmp_msmSeSetListener(void);
 extern void _kerjmp_msmSeUpdataListener(void);
@@ -2089,6 +2095,10 @@ asm void _kerent(void) {
     b PSQUATNormalize
     entry _kerjmp_OSTicksToCalendarTime
     b OSTicksToCalendarTime
+#if VERSION_PAL
+    entry _kerjmp_OSGetLanguage
+    b OSGetLanguage
+#endif
     entry _kerjmp_GXWaitDrawDone
     b GXWaitDrawDone
     entry _kerjmp_GXProject
@@ -2707,12 +2717,12 @@ asm void _kerent(void) {
     b espDrawNoSet
     entry _kerjmp_espPriSet
     b espPriSet
-    entry _kerjmp_lbl_80192060
-    b lbl_80192060
-    entry _kerjmp_lbl_80192160
-    b lbl_80192160
-    entry _kerjmp_lbl_80192260
-    b lbl_80192260
+    entry _kerjmp_modelTable
+    b modelTable
+    entry _kerjmp_motionTable
+    b motionTable
+    entry _kerjmp_spriteTable
+    b spriteTable
     entry _kerjmp_lbl_801D3DA0
     b lbl_801D3DA0
     entry _kerjmp_fn_8003FF68
@@ -3305,6 +3315,10 @@ asm void _kerent(void) {
     b GWMGCustomGet
     entry _kerjmp_GWMGAvailGet
     b GWMGAvailGet
+#if VERSION_PAL
+    entry _kerjmp_GwLanguage
+    b GwLanguage
+#endif
     entry _kerjmp_fmod
     b fmod
     entry _kerjmp__savegpr_15
@@ -3315,10 +3329,10 @@ asm void _kerent(void) {
     b _savegpr_16
     entry _kerjmp__restgpr_16
     b _restgpr_16
-    entry _kerjmp___save_gpr
-    b __save_gpr
-    entry _kerjmp___restore_gpr
-    b __restore_gpr
+    entry _kerjmp__savegpr_14
+    b _savegpr_14
+    entry _kerjmp__restgpr_14
+    b _restgpr_14
     entry _kerjmp_omDBGMenuButton
     b omDBGMenuButton
     entry _kerjmp_msmSeSetListener

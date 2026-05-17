@@ -191,6 +191,7 @@ Vec lbl_1_data_70 = { 200.0f, 15000.0f, -200.0f };
 
 Vec lbl_1_data_7C = { 0.0f, 1.0f, 0.0f };
 
+s32 lbl_1_bss_11F58;
 omObjData *lbl_1_bss_11F40;
 omObjData *lbl_1_bss_11F3C;
 omObjData *lbl_1_bss_11F38;
@@ -889,7 +890,7 @@ void fn_1_2254(omObjData *object)
                 if (var_f27 > 72.0f) {
                     var_f27 = 72.0f;
                 }
-                var_f26 = ((VERSION_NTSC ? 10.0f : 12.0f) * var_f27) / 72.0f;
+                var_f26 = ((600.0f/REFRESH_RATE) * var_f27) / 72.0f;
                 var_r31->unk_24.x = var_f31 * var_f26;
                 var_r31->unk_24.z = var_f30 * var_f26;
                 var_r31->unk_1C = var_f26;
@@ -900,7 +901,7 @@ void fn_1_2254(omObjData *object)
                 }
                 else {
                     var_r29 = 2;
-                    var_f28 = var_r31->unk_1C / (VERSION_NTSC ? 10.0f : 12.0f);
+                    var_f28 = var_r31->unk_1C / (600.0f/REFRESH_RATE);
                 }
             }
             else {
@@ -2108,7 +2109,7 @@ void fn_1_7890(ModelData *model, ParticleData *particle, Mtx matrix)
             var_r28++;
         }
         else {
-            var_r31->unk08.y += VERSION_NTSC ? -0.50000006f : -0.6f;
+            var_r31->unk08.y += -(1.2f/REFRESH_RATE)*25;
             var_r31->unk34.x += var_r31->unk08.x;
             var_r31->unk34.y += var_r31->unk08.y;
             var_r31->unk34.z += var_r31->unk08.z;

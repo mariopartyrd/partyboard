@@ -17,7 +17,7 @@ A work-in-progress Windows/Linux/macOS/Android/iOS port of Mario Party 4.
 
 This repository does **not** contain any game assets or assembly whatsoever. An existing copy of the game is required.
 
-Supported versions:
+Version Completion:
 
 - `GMPE01_00`: Rev 0 (USA)
 - `GMPE01_01`: Rev 1 (USA)

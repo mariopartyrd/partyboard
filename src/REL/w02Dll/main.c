@@ -9,24 +9,25 @@
 #include "game/board/shop.h"
 #include "game/board/star.h"
 #endif
+#include "game/board/player.h"
 
-// Temporary defines
-#define BOARD_ITEM_MINI 0x0
-#define BOARD_ITEM_MEGA 0x1
-#define BOARD_ITEM_SUPERMINI 0x2
-#define BOARD_ITEM_SUPERMEGA 0x3
-#define BOARD_ITEM_HAMMER 0x4
-#define BOARD_ITEM_PIPE 0x5
-#define BOARD_ITEM_CARD 0x6
-#define BOARD_ITEM_SPARKY 0x7
-#define BOARD_ITEM_GADDLIGHT 0x8
-#define BOARD_ITEM_CHOMPCALL 0x9
-#define BOARD_ITEM_SUIT 0xA
-#define BOARD_ITEM_BOO 0xB
-#define BOARD_ITEM_LAMP 0xC
-#define BOARD_ITEM_BAG 0xD
-#define BOARD_ITEM_MAX 0xE
-#define BOARD_ITEM_NONE -1
+// // Temporary defines
+// #define BOARD_ITEM_MINI 0x0
+// #define BOARD_ITEM_MEGA 0x1
+// #define BOARD_ITEM_SUPERMINI 0x2
+// #define BOARD_ITEM_SUPERMEGA 0x3
+// #define BOARD_ITEM_HAMMER 0x4
+// #define BOARD_ITEM_PIPE 0x5
+// #define BOARD_ITEM_CARD 0x6
+// #define BOARD_ITEM_SPARKY 0x7
+// #define BOARD_ITEM_GADDLIGHT 0x8
+// #define BOARD_ITEM_CHOMPCALL 0x9
+// #define BOARD_ITEM_SUIT 0xA
+// #define BOARD_ITEM_BOO 0xB
+// #define BOARD_ITEM_LAMP 0xC
+// #define BOARD_ITEM_BAG 0xD
+// #define BOARD_ITEM_MAX 0xE
+// #define BOARD_ITEM_NONE -1
 
 /* BSS */
 s16 lbl_1_bss_30[0x10]; // Model List
@@ -35,7 +36,7 @@ s16 lbl_1_bss_2C;
 Vec lbl_1_bss_20;
 Vec lbl_1_bss_14;
 s32 *lbl_1_bss_10;
-s16 lbl_1_bss_8[4]; // Item List
+s16 lbl_1_bss_8[ARRAY_COUNT(GWPlayer->items)]; // Item List
 Process *lbl_1_bss_4;
 u8 *lbl_1_bss_0;
 
@@ -213,7 +214,7 @@ s32 fn_1_800(void)
 {
     BoardSpace *currSpace;
     s32 currPlayer;
-    s32 var_r29;
+    s32 gambleSpaceIndex;
 
     currPlayer = GWSystem.player_curr;
     currSpace = BoardSpaceGet(0, GWPlayer[currPlayer].space_curr);
@@ -229,15 +230,15 @@ s32 fn_1_800(void)
         }
 
         if ((currSpace->flag & 0x20) != 0 && (currSpace->flag & 0x10) != 0) {
-            var_r29 = 2;
+            gambleSpaceIndex = 2; // Southwest gamble
         }
         else if ((currSpace->flag & 0x20) != 0) {
-            var_r29 = 1;
+            gambleSpaceIndex = 1; // Northwest gamble
         }
         else {
-            var_r29 = 0;
+            gambleSpaceIndex = 0; // Northeast gamble
         }
-        fn_1_394C(var_r29);
+        GambleMain(gambleSpaceIndex);
         return 1;
     }
     if ((currSpace->flag & 1) != 0) {
@@ -350,10 +351,10 @@ void fn_1_C50(void)
        the first item is MINI_MUSHROOM and the
        other two are not BOWSER_SUIT or ITEM_BAG.
     */
-    lbl_1_bss_8[0] = BOARD_ITEM_MINI;
-    for (i = 1; i < 3;) {
-        lbl_1_bss_8[i] = frandmod(BOARD_ITEM_MAX);
-        if (lbl_1_bss_8[i] != BOARD_ITEM_SUIT && lbl_1_bss_8[i] != BOARD_ITEM_BAG) {
+    lbl_1_bss_8[0] = BOARD_ITEM_MINI_MUSHROOM;
+    for (i = 1; i < ARRAY_COUNT(lbl_1_bss_8);) {
+        lbl_1_bss_8[i] = frandmod(BOARD_ITEMS_END);
+        if (lbl_1_bss_8[i] != BOARD_ITEM_BOWSER_SUIT && lbl_1_bss_8[i] != BOARD_ITEM_ITEM_BAG) {
             for (j = 0; j < i; j++) {
                 if (lbl_1_bss_8[i] == lbl_1_bss_8[j]) {
                     lbl_1_bss_8[i] = BOARD_ITEM_NONE;
@@ -405,7 +406,7 @@ void fn_1_C50(void)
     while (GWPlayer[currPlayer].moving) {
         HuPrcVSleep();
     }
-    BoardPlayerMotionStart((s32)currPlayer, 1, 0x40000001);
+    BoardPlayerMotionStart(currPlayer, 1, 0x40000001);
     BoardPlayerMotBlendSet(currPlayer, 0xB4, 0xF);
     while (BoardPlayerMotBlendCheck(currPlayer) == 0) {
         HuPrcVSleep();
@@ -420,7 +421,7 @@ void fn_1_C50(void)
         HuPrcVSleep();
     }
     fn_1_5F90();
-    BoardPlayerMotionStart((s32)currPlayer, 1, 0x40000001);
+    BoardPlayerMotionStart(currPlayer, 1, 0x40000001);
     HuPrcEnd();
 }
 
@@ -463,7 +464,15 @@ s32 fn_1_1128(void)
     // TODO PC
 }
 
-void fn_1_121C(u32 mesg)
+/**
+* @brief Display a message in a board window
+*
+* @details Handles the entire lifecycle of a text box displaying a message on 
+* the board. Creates the window, waits for user input, and then kills the window.
+*
+* @param mesg Message ID to display
+*/
+void W02MesExec(u32 mesg)
 {
     BoardWinCreate(2, mesg, 4);
     BoardWinWait();

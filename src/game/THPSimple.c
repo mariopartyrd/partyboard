@@ -9,7 +9,7 @@ static void THPAudioMixCallback(void);
 
 UnkThpStruct10 SimpleControl;
 static u8 SoundBuffer[2][0x280];
-static u8 WorkBuffer[0x40];
+static u8 WorkBuffer[0x40] ATTRIBUTE_ALIGN(32);
 
 static s32 SoundBufferIndex;
 static void *LastAudioBuffer;

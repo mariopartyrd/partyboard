@@ -17,6 +17,7 @@
 #include "game/objsub.h"
 
 #include "game/gamework_data.h"
+#include "version.h"
 
 #ifndef __MWERKS__
 #include "game/hsfex.h"
@@ -219,7 +220,7 @@ s32 lbl_1_data_6C8[] = { 6, 7, 8 };
 
 float lbl_1_data_6D4[][2] = { -52, -9, 53, -8, 35, -8, 23, -8, 9, -8, -9, -8, -17, -8, -31, -8, 53, 8, 35, 8, 23, 8, 9, 8, -9, 8, -17, 8, -31, 8 };
 
-s32 lbl_1_data_74C[] = { 3600, 7200, 10800 };
+s32 lbl_1_data_74C[] = { REFRESH_RATE * 60, REFRESH_RATE * 120, REFRESH_RATE * 180 };
 
 s32 lbl_1_data_758[] = { 58, 54, 48 };
 
@@ -345,9 +346,9 @@ void fn_1_918(s16 group, s16 base_member, u32 value, s32 state)
     s32 member;
     u32 time[3];
     if (state != 2) {
-        time[0] = (value % 60);
-        value = (value - time[0]) / 60;
-        time[0] = 100.0f * (time[0] / 60.0f);
+        time[0] = (value % REFRESH_RATE);
+        value = (value - time[0]) / REFRESH_RATE;
+        time[0] = 100.0f * (time[0] / REFRESH_RATE_F);
         time[1] = value % 60;
         value = (value - time[1]) / 60;
         time[2] = value;
@@ -957,7 +958,7 @@ void fn_1_2F08(void)
     Vec *temp_r31 = HuPrcCurrentGet()->user_data;
     float temp_f31;
     float temp_f30;
-    HuPrcSleep(frandmod(24));
+    HuPrcSleep(frandmod(REFRESH_RATE / 2.5));
     temp_f30 = temp_r31->x / 100.0f;
     temp_f31 = -7.0f;
     while (1) {
@@ -1161,7 +1162,7 @@ void fn_1_37C4(void)
     while (lbl_1_bss_CA8 == 0) {
         HuPrcVSleep();
     }
-    HuPrcSleep(180);
+    HuPrcSleep(REFRESH_RATE * 3);
     HuAudFXPlay(1391);
     for (temp_r29 = 0; temp_r29 < lbl_1_bss_B58; temp_r29++) {
         temp_r30 = &temp_r31->unk6C[temp_r29]->data.base;
@@ -1363,7 +1364,7 @@ void fn_1_48C4(void)
         }
         temp_r31++;
         fn_1_918(lbl_1_bss_CAE, 2, temp_r31, 1);
-        if (temp_r31 >= 35999) {
+        if (temp_r31 >= REFRESH_RATE * 600 - 1) {
             temp_r29 = -1;
             break;
         }
@@ -1409,13 +1410,13 @@ void fn_1_48C4(void)
             }
             HuAudSStreamPlay(1);
         }
-        HuPrcSleep(180);
+        HuPrcSleep(REFRESH_RATE * 3);
     }
     else {
-        mgRecordExtra = 36000;
-        HuPrcSleep(210);
+        mgRecordExtra = REFRESH_RATE * 600;
+        HuPrcSleep(REFRESH_RATE * 3.5);
     }
-    HuPrcSleep(30);
+    HuPrcSleep(REFRESH_RATE / 2);
     WipeCreate(WIPE_MODE_OUT, WIPE_TYPE_NORMAL, 60);
     HuPrcSleep(60);
     HuAudFadeOut(1);

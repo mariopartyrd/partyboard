@@ -168,7 +168,7 @@ void *__OSSavedRegionEnd;
 extern u32 BOOT_REGION_START AT_ADDRESS(0x812FDFF0); //(*(u32 *)0x812fdff0)
 extern u32 BOOT_REGION_END AT_ADDRESS(0x812FDFEC); //(*(u32 *)0x812fdfec)
 
-void ClearArena(void)
+static void ClearArena(void)
 {
     if ((u32)(OSGetResetCode() + 0x80000000) != 0U) {
         __OSSavedRegionStart = 0U;

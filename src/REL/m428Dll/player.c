@@ -17,6 +17,7 @@
 #include "string.h"
 
 #include "REL/m428Dll.h"
+#include "version.h"
 
 #ifndef __MWERKS__
 #include "game/esprite.h"
@@ -787,10 +788,10 @@ void fn_1_A4C8(omObjData *object)
                 var_r22 = 1;
             }
             if (var_r22 == 0) {
-                fn_1_9A30(var_r31->unk_0C, 12.0f, &sp14, &sp8, var_f29);
+                fn_1_9A30(var_r31->unk_0C, (REFRESH_RATE_F / 5), &sp14, &sp8, var_f29);
             }
             else {
-                fn_1_9A30(var_r31->unk_0C, 3.0f, &sp14, &sp8, var_f29);
+                fn_1_9A30(var_r31->unk_0C, (REFRESH_RATE_F / 20), &sp14, &sp8, var_f29);
             }
         }
         if (var_r31->unk_BC != -1) {
@@ -801,7 +802,7 @@ void fn_1_A4C8(omObjData *object)
                     omVibrate(var_r31->unk_08[1], 0xC, 6, 6);
                     return;
                 }
-                if (var_r31->unk_B8 >= 45.0f) {
+                if (var_r31->unk_B8 >= (REFRESH_RATE_F * 0.75f)) {
                     var_r31->unk_B8 = 0;
                 }
             }
@@ -812,7 +813,7 @@ void fn_1_A4C8(omObjData *object)
                     omVibrate(var_r31->unk_08[1], 0xC, 0xC, 0);
                     return;
                 }
-                if (var_r31->unk_B8 >= 6.0f) {
+                if (var_r31->unk_B8 >= REFRESH_RATE_F / 10.0f) {
                     var_r31->unk_B8 = 0;
                 }
             }
@@ -913,7 +914,7 @@ void fn_1_B43C(omObjData *object)
     var_r31->unk_90.z = lbl_1_data_150[var_r31->unk_04].z;
     strcpy(var_r31->unk_9C, MakeObjectName(CharModelHookNameGet(var_r31->unk_06, 4, 4)));
     var_r31->unk_19C = -1;
-    var_r31->unk_1A0 = 30.0f * ((frand() & 0x7FFF) % 5);
+    var_r31->unk_1A0 = (REFRESH_RATE_F / 2) * ((frand() & 0x7FFF) % 5);
     var_r31->unk_1A4 = 0;
     var_r31->unk_1A8 = 0;
     var_r31->unk_1AC = 0.0f;
@@ -1074,8 +1075,13 @@ void fn_1_BBD0(omObjData *object)
                 else {
                     var_f24 = 0.0f;
                 }
+#if VERSION_PAL
+                spE0.x = var_f27 * 1.2f;
+                spE0.y = var_f24 * 1.2f;
+#else
                 spE0.x = var_f27;
                 spE0.y = var_f24;
+#endif
                 spE0.z = 0.0f;
                 if (VECMag(&spE0) > 0.0f) {
                     spF8.x = object->trans.x + var_r31->unk_54.x;
@@ -1313,7 +1319,7 @@ void fn_1_BBD0(omObjData *object)
             spF8.x = object->trans.x;
             spF8.y = object->trans.y;
             spF8.z = object->trans.z;
-            var_r31->unk_3C.y -= 0.65333337f;
+            var_r31->unk_3C.y -= (VERSION_PAL) ? 0.9408001f : 0.65333337f; // 2352.0 * REFRESH_FREQ * REFRESH_FREQ
             if (var_r29->unk_38 == -1) {
                 var_r29->unk_30 = 400.0f;
                 var_r29->unk_94.x = var_r28->trans.x + var_r27->unk_54.x;
@@ -1376,7 +1382,7 @@ void fn_1_BBD0(omObjData *object)
                 var_r31->unk_3C.x = var_r31->unk_3C.y = var_r31->unk_3C.z = 0.0f;
                 var_r29->unk_34 = 0.0f;
                 var_r31->unk_1E = 4;
-                var_r31->unk_26 = 0x12;
+                var_r31->unk_26 = REFRESH_RATE * 0.3;
                 var_r31->unk_20 = 5;
                 var_r31->unk_22 = 0;
                 break;
@@ -1417,7 +1423,7 @@ void fn_1_BBD0(omObjData *object)
                 spF8.z = object->trans.z;
                 VECSubtract(&spF8, &var_r29->unk_94, &spEC);
                 if (fabs(spEC.x) < 100.0) {
-                    if ((var_r31->unk_3C.y += 0.65333337f) > 0.0f) {
+                    if ((var_r31->unk_3C.y += (VERSION_PAL) ? 0.9408001f : 0.65333337f) > 0.0f) {
                         var_r31->unk_3C.y = 0.0f;
                     }
                     var_r31->unk_3C.x *= 0.96f;
@@ -1426,7 +1432,7 @@ void fn_1_BBD0(omObjData *object)
                 else {
                     var_r31->unk_22++;
                 }
-                var_r29->unk_34 = fabs(0.45f * sqrtf((var_r31->unk_3C.x * var_r31->unk_3C.x) + (var_r31->unk_3C.y * var_r31->unk_3C.y)));
+                var_r29->unk_34 = fabs((27.0f / REFRESH_RATE_F) * sqrtf((var_r31->unk_3C.x * var_r31->unk_3C.x) + (var_r31->unk_3C.y * var_r31->unk_3C.y)));
                 spF8.x = object->trans.x;
                 spF8.y = object->trans.y;
                 spF8.z = object->trans.z;
@@ -1447,7 +1453,7 @@ void fn_1_BBD0(omObjData *object)
                 }
                 if (++var_r31->unk_24 > var_r31->unk_22) {
                     var_r31->unk_1E = 4;
-                    var_r31->unk_26 = 0x12;
+                    var_r31->unk_26 = REFRESH_RATE * 0.3;
                     var_r31->unk_20 = 5;
                     var_r31->unk_22 = 0;
                 }
@@ -1649,9 +1655,9 @@ void fn_1_E600(omObjData *object)
         }
         else {
             var_r25 = (s32)(50.0f * (0.007874016f * (frand() & 0x7F))) + var_r31->unk_0C * 0xF + 5;
-            var_r31->unk_1A0 = (u8)frand() % 90;
+            var_r31->unk_1A0 = (u8)frand() % (s32)(REFRESH_RATE * 1.5);
             if (var_r26 == 0) {
-                var_r31->unk_1A0 = (u8)frand() % 60;
+                var_r31->unk_1A0 = (u8)frand() % REFRESH_RATE;
             }
             if (var_r25 < 0x2D) {
                 var_r31->unk_19C = 0;
@@ -1702,8 +1708,8 @@ void fn_1_E600(omObjData *object)
         if ((VECMag(&spC) < 1.0f) && (lbl_1_bss_29C[var_r31->unk_02] != 0)) {
             var_r31->unk_1B4++;
         }
-        if (var_r31->unk_1B4 >= 180.0f) {
-            if (var_r31->unk_1B4 < 300.0f) {
+        if (var_r31->unk_1B4 >= REFRESH_RATE_F * 3) {
+            if (var_r31->unk_1B4 < REFRESH_RATE_F * 5) {
                 if ((var_r31->unk_1B0 >= 2) && (var_r31->unk_1B0 <= 3)) {
                     if (fabs(object->trans.x) < 500.0) {
                         if (object->trans.x > 0.0f) {
@@ -1741,7 +1747,7 @@ void fn_1_E600(omObjData *object)
             VECNormalize(&spC, &spC);
             var_r31->unk_14 = 64.0f * (spC.x * var_f31);
             var_r31->unk_18 = 64.0f * (spC.y * var_f31);
-            if (++var_r31->unk_1A4 > 180.0f) {
+            if (++var_r31->unk_1A4 > REFRESH_RATE_F * 3) {
                 var_r31->unk_1B8.x = 0.5f * (100.0f * ((0.007874016f * (frand() & 0x7F)) - 0.5f));
                 var_r31->unk_1B8.y = 0.5f * (100.0f * (0.007874016f * (frand() & 0x7F)));
                 var_r31->unk_1B8.z = 0.5f * (100.0f * ((0.007874016f * (frand() & 0x7F)) - 0.5f));
@@ -2449,7 +2455,7 @@ void fn_1_11014(omObjData *object)
             var_r26 = lbl_1_bss_2C8[var_r31]->data;
             var_r27 = var_r26->unk_00[var_r29];
             if (var_r30->unk_3C[var_r31][var_r29] > 0) {
-                var_f31 = (30.0f - var_r30->unk_3C[var_r31][var_r29]) / 6.0f;
+                var_f31 = ((REFRESH_RATE_F / 2) - var_r30->unk_3C[var_r31][var_r29]) / (REFRESH_RATE_F / 10);
                 if (var_f31 < 0.0f) {
                     var_f31 = 0.0f;
                 }
@@ -2468,7 +2474,7 @@ void fn_1_11014(omObjData *object)
                 fn_1_13D9C(object->model[var_r31 * 2], var_r29, 0);
             }
             if (var_r30->unk_4C[var_r31][var_r29] > 0) {
-                var_f31 = (30.0f - var_r30->unk_4C[var_r31][var_r29]) / 6.0f;
+                var_f31 = ((REFRESH_RATE_F / 2) - var_r30->unk_4C[var_r31][var_r29]) / (REFRESH_RATE_F / 10);
                 if (var_f31 < 0.0f) {
                     var_f31 = 0.0f;
                 }
@@ -2513,10 +2519,10 @@ void fn_1_116C4(s32 arg0, s32 arg1)
         M428DllPlayerWork3 *var_r30 = lbl_1_bss_2B4->data;
         for (var_r31 = 0; var_r31 < 2; var_r31++) {
             if (arg1 == 0) {
-                var_r30->unk_3C[arg0][var_r31] = 0x1E;
+                var_r30->unk_3C[arg0][var_r31] = REFRESH_RATE / 2;
             }
             else {
-                var_r30->unk_4C[arg0][var_r31] = 0x1E;
+                var_r30->unk_4C[arg0][var_r31] = REFRESH_RATE / 2;
             }
         }
     }

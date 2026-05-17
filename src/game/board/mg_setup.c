@@ -1,3 +1,4 @@
+#include "types.h"
 #include "game/board/mg_setup.h"
 #include "game/audio.h"
 #include "game/objsub.h"
@@ -167,7 +168,7 @@ static void ExecMGSetup(void) {
     mgNext = 0;
     GWSystem.player_curr = -1;
 	GWLuckyValueSet(1);
-    for (var_r31 = 0; var_r31 < 4; var_r31++) {
+    for (var_r31 = 0; var_r31 < ARRAY_COUNT(activeMG); var_r31++) {
         activeMG[var_r31].unk_00 = -1;
         activeMG[var_r31].unk_04 = 0;
     }
@@ -652,7 +653,7 @@ static void UpdateMGSetup(omObjData* arg0) {
 
     var_r31 = (bitcopy*) arg0->work;
     if (var_r31->field00_bit0 != 0 || BoardIsKill() != 0) {
-        for (var_r29 = 0; var_r29 < 4; var_r29++) {
+        for (var_r29 = 0; var_r29 < ARRAY_COUNT(activeMG); var_r29++) {
             if (activeMG[var_r29].unk_00 != -1) {
                 HuWinKill(activeMG[var_r29].unk_00);
                 activeMG[var_r29].unk_00 = -1;
@@ -1198,10 +1199,10 @@ static void UpdateMGList(bitcopy* arg0, omObjData* arg1) {
 
 void BoardMGSetupPlayClear(void) {
     mgPlay4PLen = mgPlay1Vs3Len = mgPlay2Vs2Len = mgPlayBattleLen = 0;
-    memset(mgPlay4P, 0, 0x10);
-    memset(mgPlay1Vs3, 0, 6);
-    memset(mgPlay2Vs2, 0, 6);
-    memset(mgPlayBattle, 0, 4);
+    memset(mgPlay4P, 0, sizeof(mgPlay4P));
+    memset(mgPlay1Vs3, 0, sizeof(mgPlay1Vs3));
+    memset(mgPlay2Vs2, 0, sizeof(mgPlay2Vs2));
+    memset(mgPlayBattle, 0, sizeof(mgPlayBattle));
 }
 
 s32 BoardMGSetupPlaySearch(s32 arg0, s16 arg1) {
@@ -1211,19 +1212,19 @@ s32 BoardMGSetupPlaySearch(s32 arg0, s16 arg1) {
 
     switch (arg0) {
         case 0:
-            var_r29 = 8;
+            var_r29 = ARRAY_COUNT(mgPlay4P);
             var_r31 = mgPlay4P;
             break;
         case 1:
-            var_r29 = 3;
+            var_r29 = ARRAY_COUNT(mgPlay1Vs3);
             var_r31 = mgPlay1Vs3;
             break;
         case 2:
-            var_r29 = 3;
+            var_r29 = ARRAY_COUNT(mgPlay2Vs2);
             var_r31 = mgPlay2Vs2;
             break;
         case 4:
-            var_r29 = 2;
+            var_r29 = ARRAY_COUNT(mgPlayBattle);;
             var_r31 = mgPlayBattle;
             break;
         default:
@@ -1246,25 +1247,25 @@ void BoardMGSetupPlayPush(s32 arg0, s16 arg1) {
     u8* var_r31;
     s16* var_r30;
 
-    switch (arg0) {                                 /* irregular */
+    switch (arg0) {
     case 0:
         var_r31 = &mgPlay4PLen;
-        var_r29 = 8;
+        var_r29 = ARRAY_COUNT(mgPlay4P);
         var_r30 = mgPlay4P;
         break;
     case 1:
         var_r31 = &mgPlay1Vs3Len;
-        var_r29 = 3;
+        var_r29 = ARRAY_COUNT(mgPlay1Vs3);
         var_r30 = mgPlay1Vs3;
         break;
     case 2:
         var_r31 = &mgPlay2Vs2Len;
-        var_r29 = 3;
+        var_r29 = ARRAY_COUNT(mgPlay2Vs2);
         var_r30 = mgPlay2Vs2;
         break;
     case 4:
         var_r31 = &mgPlayBattleLen;
-        var_r29 = 2;
+        var_r29 = ARRAY_COUNT(mgPlayBattle);
         var_r30 = mgPlayBattle;
         break;
     default:
@@ -1293,9 +1294,9 @@ void BoardMGSetupTutorialExec(void) {
     bitcopy* temp_r28;
 
     *boardTutorialData = 1;
-    BoardFilterFadeInit(0x1E, 0xA0U);
+    BoardFilterFadeInit(30, 0xA0);
     
-    for (var_r26 = 0; var_r26 < 4; var_r26++) {
+    for (var_r26 = 0; var_r26 < ARRAY_COUNT(activeMG); var_r26++) {
         activeMG[var_r26].unk_00 = -1;
         activeMG[var_r26].unk_04 = 0;
     }
@@ -1322,6 +1323,6 @@ void BoardMGSetupTutorialExec(void) {
     }
     temp_r24 = (bitcopy*) mgSetupObj->work;
     temp_r24->field00_bit0 = 1;
-    BoardFilterFadeOut(0x1E);
-    HuPrcSleep(0x1E);
+    BoardFilterFadeOut(30);
+    HuPrcSleep(30);
 }

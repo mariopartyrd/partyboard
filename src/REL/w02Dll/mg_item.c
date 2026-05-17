@@ -206,7 +206,7 @@ void fn_1_6248(omObjData *object)
                 temp_r31->unk2A[1] = temp_r31->unk24[1];
                 sp28 = lbl_1_bss_160[0];
                 sp34 = lbl_1_bss_160[1];
-                temp_f31 = (VERSION_PAL) ? 13 : 15;
+                temp_f31 = ((REFRESH_RATE+3)/4);
                 break;
 
             case 1:
@@ -214,13 +214,13 @@ void fn_1_6248(omObjData *object)
                 temp_r31->unk2A[1] = temp_r31->unk24[2];
                 sp28 = lbl_1_bss_160[1];
                 sp34 = lbl_1_bss_160[2];
-                temp_f31 = (VERSION_PAL) ? 13 : 15;
+                temp_f31 = ((REFRESH_RATE+3)/4);
                 break;
 
             case 2:
                 temp_r31->unk2A[0] = temp_r31->unk24[0];
                 temp_r31->unk2A[1] = temp_r31->unk24[2];
-                temp_f31 = (VERSION_PAL) ? 19.5f : 22.5f;
+                temp_f31 = ((REFRESH_RATE+3)/4)*1.5f;
                 break;
         }
         temp_r31->unk68 = temp_r28;
@@ -489,7 +489,7 @@ void fn_1_6EA8(void)
     }
     BoardAudSeqPause(0, 0, 1000);
     HuAudFXPlay(68);
-    fn_1_121C(MAKE_MESSID(0x13, 0x19));
+    W02MesExec(MAKE_MESSID(0x13, 0x19));
     lbl_1_bss_108->func = fn_1_72E4;
     HuPrcKill(NULL);
     while (1) {

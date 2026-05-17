@@ -415,7 +415,7 @@ void fn_1_4C8(omObjData *object)
                 break;
             }
             if (lbl_1_bss_54 == 0) {
-                lbl_1_bss_0 = 300;
+                lbl_1_bss_0 = REFRESH_RATE*5;
                 lbl_1_data_14E = MGSeqTimerCreate(10);
                 HuWinMesMaxSizeGet(1, sp180, MAKE_MESSID(40, 25));
                 lbl_1_bss_C = HuWinCreate(-10000.0f, 400.0f, sp180[0], sp180[1], 1);
@@ -425,7 +425,7 @@ void fn_1_4C8(omObjData *object)
             }
             lbl_1_bss_0--;
             if (lbl_1_data_14E != -1) {
-                MGSeqParamSet(lbl_1_data_14E, 1, (lbl_1_bss_0 + 59) / 60);
+                MGSeqParamSet(lbl_1_data_14E, 1, (lbl_1_bss_0 + (REFRESH_RATE-1)) / REFRESH_RATE);
             }
             if (lbl_1_bss_14 >= 4) {
                 lbl_1_bss_54 = 50;
@@ -934,6 +934,12 @@ s16 fn_1_4474(void)
     return var_r31;
 }
 
+#if VERSION_PAL
+#define FN45F8_CONST 452
+#else
+#define FN45F8_CONST 480
+#endif
+
 void fn_1_45F8(omObjData *arg0)
 {
     M463PlayerData *sp14[9];
@@ -1010,7 +1016,7 @@ void fn_1_45F8(omObjData *arg0)
             break;
         case 1004:
             lbl_1_bss_54++;
-            if (lbl_1_bss_54 == 90) {
+            if (lbl_1_bss_54 == (REFRESH_RATE*3)/2) {
                 lbl_1_bss_50++;
                 lbl_1_bss_54 = 0;
             }
@@ -1031,7 +1037,7 @@ void fn_1_45F8(omObjData *arg0)
                 HuWinBGTPLvlSet(lbl_1_bss_C, 0.0f);
                 HuWinMesSpeedSet(lbl_1_bss_C, 0);
                 HuWinMesSet(lbl_1_bss_C, MAKE_MESSID(48, 37));
-                lbl_1_bss_0 = 180;
+                lbl_1_bss_0 = REFRESH_RATE*3;
             }
             lbl_1_bss_54++;
             if (lbl_1_bss_54 == 30) {
@@ -1051,7 +1057,7 @@ void fn_1_45F8(omObjData *arg0)
                 }
                 else {
                     lbl_1_bss_0 -= (lbl_1_bss_0 > 0);
-                    MGSeqParamSet(lbl_1_data_14E, 1, (lbl_1_bss_0 + 59) / 60);
+                    MGSeqParamSet(lbl_1_data_14E, 1, (lbl_1_bss_0 + (REFRESH_RATE-1)) / REFRESH_RATE);
                 }
             }
             var_r28 = 0;
@@ -1101,7 +1107,7 @@ void fn_1_45F8(omObjData *arg0)
                     }
                 }
             }
-            if (lbl_1_bss_54 >= 480) {
+            if (lbl_1_bss_54 >= FN45F8_CONST) {
                 if (lbl_1_bss_38 != -1) {
                     if (MGSeqStatGet(lbl_1_data_14C) == 0 && lbl_1_bss_54 >= 510) {
                         lbl_1_bss_50 = 1007;
@@ -1132,7 +1138,7 @@ void fn_1_45F8(omObjData *arg0)
                     HuAudSStreamPlay(4);
                 }
             }
-            if (210.0f + (lbl_1_bss_38 == 9 ? 60 : 0) < lbl_1_bss_54) {
+            if (((REFRESH_RATE*7.0f)/2) + (lbl_1_bss_38 == 9 ? 60 : 0) < lbl_1_bss_54) {
                 if (lbl_1_data_154 != -1) {
                     HuAudFXStop(lbl_1_data_154);
                     lbl_1_data_154 = -1;

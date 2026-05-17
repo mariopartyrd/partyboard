@@ -2089,8 +2089,11 @@ void fn_1_75C8(void)
 {
     s16 var_r30;
     s32 var_r31;
-
+#if VERSION_PAL
+    for (var_r30 = 127; var_r30 > 0; var_r30 -= 5) {
+#else
     for (var_r30 = 127; var_r30 > 0; var_r30 -= 4) {
+#endif
         for (var_r31 = 0; var_r31 < lbl_1_bss_E28; var_r31++) {
             HuAudFXVolSet(lbl_1_bss_E2C[var_r31], var_r30);
         }
@@ -2110,7 +2113,11 @@ void fn_1_7680(void)
     s16 var_r30;
     s32 var_r31;
 
+#if VERSION_PAL
+    for (var_r30 = 0; var_r30 < 127; var_r30 += 5) {
+#else
     for (var_r30 = 0; var_r30 < 127; var_r30 += 4) {
+#endif
         for (var_r31 = 0; var_r31 < lbl_1_bss_E28; var_r31++) {
             HuAudFXVolSet(lbl_1_bss_E2C[var_r31], var_r30);
         }
@@ -2220,7 +2227,7 @@ void fn_1_7738(void)
         HuPrcVSleep();
     }
     Hu3DModelAttrSet(temp_r31->unk08, HU3D_ATTR_DISPOFF);
-    HuPrcSleep(60);
+    HuPrcSleep(REFRESH_RATE);
     lbl_1_bss_E98 = 2;
     for (var_r29 = 0; var_r29 < lbl_1_bss_E38; var_r29++) {
         sp70 = 0;
@@ -2750,8 +2757,8 @@ void fn_1_AD58(void)
     while (MGSeqStatGet(temp_r28) != 0) {
         HuPrcVSleep();
     }
-    var_r27 = 3659;
-    temp_r25 = MGSeqCreate(1, var_r27 / 60, -1, -1);
+    var_r27 = REFRESH_RATE * 60 + REFRESH_RATE - 1;
+    temp_r25 = MGSeqCreate(1, var_r27 / REFRESH_RATE, -1, -1);
     lbl_1_bss_E98 = 3;
     while (TRUE) {
         for (i = 0, var_r29 = 0; i < 4; i++) {
@@ -2772,11 +2779,11 @@ void fn_1_AD58(void)
             }
             break;
         }
-        else if (var_r27 < 59) {
+        else if (var_r27 < REFRESH_RATE - 1) {
             var_r30 = -1;
             break;
         }
-        MGSeqParamSet(temp_r25, 1, var_r27-- / 60);
+        MGSeqParamSet(temp_r25, 1, var_r27-- / REFRESH_RATE);
         HuPrcVSleep();
     }
     HuAudSeqFadeOut(var_r24, 100);

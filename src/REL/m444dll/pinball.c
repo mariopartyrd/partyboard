@@ -844,7 +844,7 @@ s16 fn_1_B1E8(Vec *arg0, Vec *arg1, s16 arg2)
                 if (temp_f31 < 0.0f) {
                     temp_f28 -= temp_f31;
                     temp_f31 = ABS(temp_f31);
-#if VERSION_REV1
+#if VERSION_REV2
                     if (temp_f31 == 0.0) {
                         sp1C.x = sp1C.y = sp1C.z = 0.0f;
                         break;
@@ -886,7 +886,7 @@ s16 fn_1_B1E8(Vec *arg0, Vec *arg1, s16 arg2)
         }
     }
     temp_f31 = VECMag(arg1);
-#if VERSION_REV1
+#if VERSION_REV2
     if (VECMag(&sp1C) == 0.0) {
         sp1C.x = 0.0f;
         sp1C.y = 1.0f;
@@ -912,7 +912,7 @@ s16 fn_1_B1E8(Vec *arg0, Vec *arg1, s16 arg2)
             break;
         }
         if (temp_f30 < 20.0f
-#if VERSION_REV1
+#if VERSION_REV2
             && !(temp_f30 < 0.000001)
 #endif
         ) {
@@ -925,7 +925,7 @@ s16 fn_1_B1E8(Vec *arg0, Vec *arg1, s16 arg2)
     }
     if (temp_r30 == lbl_1_data_3A4[arg2]) {
         arg1->y += 0.3;
-#if VERSION_REV1
+#if VERSION_REV2
         if (VECMag((Vec *)&arg1) < 0.000001) {
             arg1->y += 0.3;
         }
