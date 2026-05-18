@@ -362,7 +362,7 @@ void fn_1_1524(s16 arg0, char *arg1, f32 arg8, Mtx arg2)
     if (temp_r31->unk_0C != -1) {
         Hu3DSubMotionExec(arg0);
     }
-    if (temp_r31->hsfData->cenvCnt != 0) {
+    if (temp_r31->hsfData->cenvNum != 0) {
         EnvelopeProc(temp_r31->hsfData);
     }
     Hu3DModelObjMtxGet(arg0, arg1, arg2);
@@ -784,16 +784,16 @@ void fn_1_3208(omObjData *object)
 
     for (var_r28 = 0; var_r28 < 10; var_r28++) {
         if ((lbl_1_data_80[var_r28] & 0xFFFF0000) != 0) {
-            object->motion[var_r28] = CharModelMotionCreate(var_r31->unk1, var_r31->unk1 + lbl_1_data_80[var_r28]);
+            object->motion[var_r28] = CharMotionCreate(var_r31->unk1, var_r31->unk1 + lbl_1_data_80[var_r28]);
         }
         else {
-            object->motion[var_r28] = CharModelMotionCreate(var_r31->unk1, lbl_1_data_80[var_r28]);
+            object->motion[var_r28] = CharMotionCreate(var_r31->unk1, lbl_1_data_80[var_r28]);
         }
     }
-    CharModelMotionDataClose(var_r31->unk1);
-    CharModelMotionSet(var_r31->unk1, object->motion[var_r31->unk18]);
-    CharModelStepTypeSet(var_r31->unk1, 1);
-    CharModelVoiceEnableSet(var_r31->unk1, object->motion[2], 0);
+    CharMotionDataClose(var_r31->unk1);
+    CharMotionSet(var_r31->unk1, object->motion[var_r31->unk18]);
+    CharModelStepFxSet(var_r31->unk1, 1);
+    CharMotionVoiceOnSet(var_r31->unk1, object->motion[2], 0);
     object->model[2] = var_r29 = Hu3DModelCreateFile(var_r31->unk0 + DATA_MAKE_NUM(DATADIR_M415, 0x03));
     object->model[3] = Hu3DJointMotion(var_r29, HuDataSelHeapReadNum(DATA_MAKE_NUM(DATADIR_M415, 0x07), MEMORY_DEFAULT_NUM, HEAP_DATA));
     object->model[4] = Hu3DJointMotion(var_r29, HuDataSelHeapReadNum(DATA_MAKE_NUM(DATADIR_M415, 0x08), MEMORY_DEFAULT_NUM, HEAP_DATA));
@@ -964,7 +964,7 @@ void fn_1_3B44(omObjData *object)
             }
             break;
         case 3:
-            if (CharModelMotionEndCheck(temp_r31->unk1) != 0) {
+            if (CharMotionEndCheck(temp_r31->unk1) != 0) {
                 var_r29 = 0;
                 var_r28 = 1;
             }
@@ -1076,8 +1076,8 @@ void fn_1_3B44(omObjData *object)
     temp_r31->unk18 = var_r29;
     if (var_r29 != temp_r31->unk1A) {
         temp_r31->unk1A = var_r29;
-        CharModelMotionShiftSet(temp_r31->unk1, object->motion[temp_r31->unk18], 0.0f, 8.0f, var_r28);
-        temp_r31->unk28 = CharModelMotionMaxTimeGet(temp_r31->unk1);
+        CharMotionShiftSet(temp_r31->unk1, object->motion[temp_r31->unk18], 0.0f, 8.0f, var_r28);
+        temp_r31->unk28 = CharMotionMaxTimeGet(temp_r31->unk1);
         if (var_r25 != 0) {
             Hu3DMotionShiftSet(object->model[2], object->model[var_r25], 0.0f, 8.0f, HU3D_MOTATTR_NONE);
         }
@@ -1530,11 +1530,11 @@ void fn_1_64DC(void)
 void fn_1_6584(s16 arg0, char *arg1, u8 arg2, u8 arg3, u8 arg4)
 {
     char sp13[0x100];
-    HsfObject *var_r31;
-    HsfMaterial *temp_r30;
-    HsfData *temp_r29;
-    HsfBuffer *temp_r28;
-    HsfObject *var_r26;
+    HSFOBJECT *var_r31;
+    HSFMATERIAL *temp_r30;
+    HSFDATA *temp_r29;
+    HSFBUFFER *temp_r28;
+    HSFOBJECT *var_r26;
     s32 var_r25;
     s32 var_r27;
 
@@ -1546,9 +1546,9 @@ void fn_1_6584(s16 arg0, char *arg1, u8 arg2, u8 arg3, u8 arg4)
     strcpy(&sp13, MakeObjectName(arg1));
 #endif
 
-    for (var_r25 = 0; var_r25 < temp_r29->objectCnt; var_r25++, var_r26++) {
+    for (var_r25 = 0; var_r25 < temp_r29->objectNum; var_r25++, var_r26++) {
         var_r31 = var_r26;
-        temp_r28 = var_r31->data.face;
+        temp_r28 = var_r31->mesh.face;
 #ifdef NON_MATCHING
         if (var_r31->constData && strcmp(sp13, var_r31->name) == 0) {
 #else
@@ -1556,7 +1556,7 @@ void fn_1_6584(s16 arg0, char *arg1, u8 arg2, u8 arg3, u8 arg4)
 #endif
 
             for (var_r27 = 0; var_r27 < temp_r28->count; var_r27++) {
-                temp_r30 = &var_r31->data.material[((HsfFace *)temp_r28->data)[var_r27].mat & 0xFFF];
+                temp_r30 = &var_r31->mesh.material[((HSFFACE *)temp_r28->data)[var_r27].mat & 0xFFF];
                 temp_r30->color[0] = arg2;
                 temp_r30->color[1] = arg3;
                 temp_r30->color[2] = arg4;

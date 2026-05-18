@@ -246,7 +246,7 @@ s32 fn_1_E72C(void)
         HuPrcVSleep();
         fn_1_27418();
         for (temp_r31 = 0; temp_r31 < 4; temp_r31++) {
-            CharModelMotionSet(lbl_1_bss_2C24[temp_r31], lbl_1_bss_2BC4[temp_r31][2]);
+            CharMotionSet(lbl_1_bss_2C24[temp_r31], lbl_1_bss_2BC4[temp_r31][2]);
             Hu3DModelAttrSet(lbl_1_bss_2C14[temp_r31], HU3D_MOTATTR_LOOP);
             Hu3DModelRotSet(lbl_1_bss_2C14[temp_r31], 0, -90, 0);
         }
@@ -875,7 +875,7 @@ void fn_1_12BEC(void)
 {
     s16 temp_r31;
     ModelData *temp_r30;
-    HsfMaterial *temp_r29;
+    HSFMATERIAL *temp_r29;
     s32 *temp_r28;
     s16 temp_r27;
     s16 temp_r26;
@@ -900,7 +900,7 @@ void fn_1_12BEC(void)
             sp8[temp_r31] = temp_r26;
             temp_r30 = &Hu3DData[temp_r26];
             temp_r29 = temp_r30->hsfData->material;
-            for (temp_r24 = 0; temp_r24 < temp_r30->hsfData->materialCnt; temp_r24++, temp_r29++) {
+            for (temp_r24 = 0; temp_r24 < temp_r30->hsfData->materialNum; temp_r24++, temp_r29++) {
                 temp_r29->color[0] = lbl_1_data_152[temp_r31].r;
                 temp_r29->color[1] = lbl_1_data_152[temp_r31].g;
                 temp_r29->color[2] = lbl_1_data_152[temp_r31].b;

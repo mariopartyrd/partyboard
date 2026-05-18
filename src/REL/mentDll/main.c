@@ -203,7 +203,7 @@ void fn_1_658C(Process *arg0)
     fn_1_50C();
     fn_1_5E8(lbl_1_bss_A8[0]);
     if (lbl_1_bss_A8[0] != 0xB) {
-        CharKill(-1);
+        CharDataClose(-1);
     }
     lbl_1_bss_A8[4] = GWGameStat.open_w06;
     lbl_1_bss_A8[5] = GWGameStat.veryHardUnlock;
@@ -480,7 +480,7 @@ void fn_1_7304(void)
         GWPlayerCfg[var_r31].iscom = lbl_1_bss_3114[var_r31].unk_60;
     }
     BoardSaveInit(lbl_1_bss_A8[2]);
-    CharKill(-1);
+    CharDataClose(-1);
 }
 
 void fn_1_7684(void)
@@ -501,10 +501,10 @@ void fn_1_7684(void)
     } while (lbl_1_bss_D8 != 1);
     HuAudSeqAllFadeOut(0x3E8);
     HuAudSStreamAllFadeOut(0x3E8);
-    CharARAMOpen(GWPlayerCfg[0].character);
-    CharARAMOpen(GWPlayerCfg[1].character);
-    CharARAMOpen(GWPlayerCfg[2].character);
-    CharARAMOpen(GWPlayerCfg[3].character);
+    CharMotionInit(GWPlayerCfg[0].character);
+    CharMotionInit(GWPlayerCfg[1].character);
+    CharMotionInit(GWPlayerCfg[2].character);
+    CharMotionInit(GWPlayerCfg[3].character);
     omOvlCallEx(spC[GWSystem.board], 1, 0, 0);
     while (1) {
         fn_1_4D8();
@@ -1959,10 +1959,10 @@ void fn_1_C174(s32 arg0)
         do {
             fn_1_4D8();
         } while (lbl_1_bss_D8 != 1);
-        CharARAMOpen(GWPlayerCfg[0].character);
-        CharARAMOpen(GWPlayerCfg[1].character);
-        CharARAMOpen(GWPlayerCfg[2].character);
-        CharARAMOpen(GWPlayerCfg[3].character);
+        CharMotionInit(GWPlayerCfg[0].character);
+        CharMotionInit(GWPlayerCfg[1].character);
+        CharMotionInit(GWPlayerCfg[2].character);
+        CharMotionInit(GWPlayerCfg[3].character);
         HuAudSeqAllFadeOut(0x3E8);
         HuAudSStreamAllFadeOut(0x3E8);
     }
@@ -2659,11 +2659,11 @@ void fn_1_E654(s32 arg0)
     MGSeqKillAll();
     HuAudAllStop();
     HuDataDirClose(DATADIR_MENT);
-    CharARAMOpen(GWPlayerCfg[0].character);
+    CharMotionInit(GWPlayerCfg[0].character);
     if (arg0 == 0) {
-        CharARAMOpen(GWPlayerCfg[1].character);
-        CharARAMOpen(GWPlayerCfg[2].character);
-        CharARAMOpen(GWPlayerCfg[3].character);
+        CharMotionInit(GWPlayerCfg[1].character);
+        CharMotionInit(GWPlayerCfg[2].character);
+        CharMotionInit(GWPlayerCfg[3].character);
     }
 }
 
@@ -2685,10 +2685,10 @@ void fn_1_E71C(s32 arg0)
     do {
         fn_1_4D8();
     } while (lbl_1_bss_D8 != 1);
-    CharARAMOpen(GWPlayerCfg[0].character);
-    CharARAMOpen(GWPlayerCfg[1].character);
-    CharARAMOpen(GWPlayerCfg[2].character);
-    CharARAMOpen(GWPlayerCfg[3].character);
+    CharMotionInit(GWPlayerCfg[0].character);
+    CharMotionInit(GWPlayerCfg[1].character);
+    CharMotionInit(GWPlayerCfg[2].character);
+    CharMotionInit(GWPlayerCfg[3].character);
     HuAudSeqAllFadeOut(0x3E8);
     HuAudSStreamAllFadeOut(0x3E8);
     omOvlCallEx(spC[GWSystem.board], 1, 0, 0);
@@ -3317,8 +3317,8 @@ void fn_1_12A0C(omObjData *object, s32 arg1)
     {
         s32 sp8[6] = { 9, 14, 10, 11, 12, 13 };
         if (arg1 != 3) {
-            CharModelEffectNpcInit(object->model[1], object->motion[2], 0, sp8[arg1]);
-            CharModelEffectNpcInit(object->model[1], object->motion[3], 1, sp8[arg1]);
+            CharNpcDustSet(object->model[1], object->motion[2], 0, sp8[arg1]);
+            CharNpcDustSet(object->model[1], object->motion[3], 1, sp8[arg1]);
         }
     }
     fn_1_59A0(object, 1, 1, 0, 1);
@@ -3436,7 +3436,7 @@ void fn_1_137A4(omObjData *arg0, s32 arg1)
     var_r31->unk_68 = GWPlayerCfg[var_r31->unk_58].character;
     var_r31->unk_6C = GWPlayerCfg[var_r31->unk_58].pad_idx;
     arg0->model[1] = CharModelCreate(var_r31->unk_68, 1);
-    arg0->motion[1] = CharModelMotionCreate(var_r31->unk_68, DATA_MAKE_NUM(DATADIR_MARIOMOT, 0));
+    arg0->motion[1] = CharMotionCreate(var_r31->unk_68, DATA_MAKE_NUM(DATADIR_MARIOMOT, 0));
     arg0->motion[2] = Hu3DJointMotionFile(arg0->model[1], var_r31->unk_68 + DATA_MAKE_NUM(DATADIR_MENT, 0x00));
     fn_1_59A0(arg0, 1, 2, 0, 1);
     Hu3DModelPosSet(arg0->model[1], 1320.0f, 0.0f, 800.0f);

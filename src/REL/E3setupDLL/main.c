@@ -36,7 +36,7 @@ s32 lbl_2_bss_B0;
 OMOVL e3NextOvl;
 s32 e3NextEvent;
 u32 e3ExitMode;
-static s32 needCharKill;
+static s32 needCharDataClose;
 float e3CameraFov;
 omObjData *e3MenuMainObj;
 omObjData *e3ViewObj;
@@ -118,13 +118,13 @@ void ObjectSetup(void)
 		default:
 		case 0:
 			repBtn = 0;
-			needCharKill = 1;
+			needCharDataClose = 1;
 			E3MainInit();
 			break;
 			
 		case 1:
 			repBtn = 1;
-			needCharKill = 0;
+			needCharDataClose = 0;
 			E3MGSelectInit();
 			break;
 	}
@@ -301,11 +301,11 @@ s16 E3PadRead(void)
 float MotionMaxTimeGet(s16 arg0)
 {
     MotionData *temp_r31 = &Hu3DMotion[arg0];
-    HsfMotion *temp_r30;
+    HSFMOTION *temp_r30;
     s16 temp_r29;
 
     temp_r30 = temp_r31->hsfData->motion;
-    temp_r29 = temp_r30->len;
+    temp_r29 = temp_r30->maxTime;
     return temp_r29;
 }
 
@@ -411,10 +411,10 @@ static void UpdateOvlWatch(omObjData *object)
 		return;
 	}
 	HuSysVWaitSet(1);
-	if(needCharKill) {
-		CharKill(-1);
+	if(needCharDataClose) {
+		CharDataClose(-1);
 		for(i=0; i<4; i++) {
-			CharARAMOpen(GWPlayerCfg[i].character);
+			CharMotionInit(GWPlayerCfg[i].character);
 		}
 	}
 	if(e3ExitMode == 1) {

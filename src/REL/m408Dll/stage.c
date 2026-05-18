@@ -58,7 +58,7 @@ typedef struct work_f4b0 {
     s16 unk0;
     s16 unk2;
     GXColor *unk4;
-    HsfVector2f *unk8;
+    HuVec2f *unk8;
     u8 *unkC;
     union {
         s16 unk10[32];
@@ -392,21 +392,21 @@ void fn_1_D6F0(omObjData *object)
 s16 fn_1_D978(AnimData *arg0, s16 arg1, ParticleHook arg2)
 {
     s32 temp_r31;
-    HsfanimStruct01 *temp_r30;
+    HU3DPARTICLEDATA *temp_r30;
     ParticleData *temp_r29;
     s32 temp_r28;
-    HsfanimStruct01 *temp_r27;
+    HU3DPARTICLEDATA *temp_r27;
     temp_r28 = Hu3DParticleCreate(arg0, arg1);
     Hu3DParticleHookSet(temp_r28, arg2);
     Hu3DModelAttrSet(temp_r28, HU3D_ATTR_DISPOFF);
     temp_r29 = Hu3DData[temp_r28].unk_120;
-    temp_r27 = temp_r29->unk_48;
+    temp_r27 = temp_r29->data;
     for (temp_r31 = 0; temp_r31 < temp_r29->unk_30; temp_r31++, temp_r27++) {
         temp_r27->unk2C = 0;
     }
-    temp_r30 = HuMemDirectMallocNum(HEAP_SYSTEM, sizeof(HsfanimStruct01), MEMORY_DEFAULT_NUM);
+    temp_r30 = HuMemDirectMallocNum(HEAP_SYSTEM, sizeof(HU3DPARTICLEDATA), MEMORY_DEFAULT_NUM);
     temp_r29->unk_1C = temp_r30;
-    temp_r30->unk00 = temp_r28;
+    temp_r30->time = temp_r28;
     temp_r30->unk02 = 0;
     for (temp_r31 = 0; temp_r31 < 32; temp_r31++) {
         // Ugly expression to match store without new type
@@ -420,7 +420,7 @@ void fn_1_DA6C(ModelData *model, ParticleData *particle, Mtx matrix)
     float temp_f31;
     float temp_f30;
 
-    HsfanimStruct01 *temp_r31;
+    HU3DPARTICLEDATA *temp_r31;
     ParticleData *temp_r29;
     s32 temp_r28;
     s32 temp_r27;
@@ -428,9 +428,9 @@ void fn_1_DA6C(ModelData *model, ParticleData *particle, Mtx matrix)
     temp_r29 = particle->unk_1C;
     switch (temp_r29->unk_02) {
         case 0:
-            temp_r31 = particle->unk_48;
+            temp_r31 = particle->data;
             for (temp_r28 = 0; temp_r28 < particle->unk_30; temp_r28++, temp_r31++) {
-                temp_r31->unk00 = 0;
+                temp_r31->time = 0;
             }
             particle->unk_00 = 0;
             temp_r29->unk_02++;
@@ -440,9 +440,9 @@ void fn_1_DA6C(ModelData *model, ParticleData *particle, Mtx matrix)
 
         case 1:
             for (temp_r28 = 0; temp_r28 < 100; temp_r28++) {
-                temp_r31 = particle->unk_48;
+                temp_r31 = particle->data;
                 for (temp_r27 = 0; temp_r27 < particle->unk_30; temp_r27++, temp_r31++) {
-                    if (!temp_r31->unk00) {
+                    if (!temp_r31->time) {
                         break;
                     }
                 }
@@ -465,13 +465,13 @@ void fn_1_DA6C(ModelData *model, ParticleData *particle, Mtx matrix)
                 temp_r31->unk2C = (0.01 * (frand() % 2000)) + 30.0;
                 temp_r31->unk2C *= 0.1f;
                 temp_r31->unk40.a = 255;
-                temp_r31->unk00 = 30;
+                temp_r31->time = 30;
             }
             break;
     }
-    temp_r31 = particle->unk_48;
+    temp_r31 = particle->data;
     for (temp_r28 = 0; temp_r28 < particle->unk_30; temp_r28++, temp_r31++) {
-        if (temp_r31->unk00 == 0) {
+        if (temp_r31->time == 0) {
             continue;
         }
         temp_f30 = temp_r31->unk14.x;
@@ -486,11 +486,11 @@ void fn_1_DA6C(ModelData *model, ParticleData *particle, Mtx matrix)
         temp_r31->unk08.y += 0.1f;
         if (temp_r31->unk40.a < 2) {
             temp_r31->unk40.a = 0;
-            temp_r31->unk00 = 0;
+            temp_r31->time = 0;
             particle->unk_00++;
         }
     }
-    DCFlushRange(particle->unk_48, particle->unk_30 * sizeof(HsfanimStruct01));
+    DCFlushRange(particle->data, particle->unk_30 * sizeof(HU3DPARTICLEDATA));
     if (particle->unk_00 >= particle->unk_30 && temp_r29->unk_02 == 2) {
         temp_r29->unk_02 = 0;
         Hu3DModelAttrReset(temp_r29->unk_00, HU3D_ATTR_PARTICLE_KILL);
@@ -501,7 +501,7 @@ void fn_1_DA6C(ModelData *model, ParticleData *particle, Mtx matrix)
 void fn_1_DFD0(ModelData *model, ParticleData *particle, Mtx matrix)
 {
     float temp_f31;
-    HsfanimStruct01 *temp_r31;
+    HU3DPARTICLEDATA *temp_r31;
     ParticleData *temp_r30;
     s32 temp_r28;
     s16 temp_r27;
@@ -509,7 +509,7 @@ void fn_1_DFD0(ModelData *model, ParticleData *particle, Mtx matrix)
     temp_r30 = particle->unk_1C;
     switch (temp_r30->unk_02) {
         case 0:
-            temp_r31 = particle->unk_48;
+            temp_r31 = particle->data;
             temp_r30->unk_04.x = 10;
             for (temp_r28 = 0; temp_r28 < particle->unk_30; temp_r28++, temp_r31++) {
                 temp_r31->unk34.x = temp_r31->unk34.y = temp_r31->unk34.z = 0;
@@ -539,7 +539,7 @@ void fn_1_DFD0(ModelData *model, ParticleData *particle, Mtx matrix)
             }
             break;
     }
-    DCFlushRange(particle->unk_48, particle->unk_30 * sizeof(HsfanimStruct01));
+    DCFlushRange(particle->data, particle->unk_30 * sizeof(HU3DPARTICLEDATA));
 }
 
 void fn_1_E310(ModelData *model, ParticleData *particle, Mtx matrix)
@@ -547,7 +547,7 @@ void fn_1_E310(ModelData *model, ParticleData *particle, Mtx matrix)
     float temp_f31;
     float temp_f30;
 
-    HsfanimStruct01 *temp_r31;
+    HU3DPARTICLEDATA *temp_r31;
     ParticleData *temp_r29;
     s32 temp_r28;
     s32 temp_r27;
@@ -555,11 +555,11 @@ void fn_1_E310(ModelData *model, ParticleData *particle, Mtx matrix)
     temp_r29 = particle->unk_1C;
     switch (temp_r29->unk_02) {
         case 0:
-            temp_r31 = particle->unk_48;
+            temp_r31 = particle->data;
             temp_f30 = 360.0f / particle->unk_30;
 
             for (temp_r28 = 0; temp_r28 < particle->unk_30; temp_r28++, temp_r31++) {
-                temp_r31->unk00 = (s32)(360.0 * ((1.0 / 65536.0) * (float)fn_1_11670()));
+                temp_r31->time = (s32)(360.0 * ((1.0 / 65536.0) * (float)fn_1_11670()));
                 temp_r31->unk34.x = temp_r31->unk34.y = temp_r31->unk34.z = 0;
                 temp_r26 = (temp_f30 * temp_r28) + (int)((temp_f30 * 0.5f) * ((1.0 / 32768.0) * (float)(fn_1_11670() - 32768)));
                 temp_r31->unk20 = temp_r26;
@@ -589,28 +589,28 @@ void fn_1_E310(ModelData *model, ParticleData *particle, Mtx matrix)
             temp_r29->unk_02++;
 
         case 1:
-            temp_r31 = particle->unk_48;
+            temp_r31 = particle->data;
             for (temp_r28 = 0; temp_r28 < particle->unk_30; temp_r28++, temp_r31++) {
-                temp_r31->unk00 += 4;
-                if (temp_r31->unk00 >= 360) {
-                    temp_r31->unk00 -= 360;
+                temp_r31->time += 4;
+                if (temp_r31->time >= 360) {
+                    temp_r31->time -= 360;
                 }
                 temp_r31->unk34.x = temp_r31->unk14.x;
                 temp_r31->unk34.y = temp_r31->unk14.y;
                 temp_r31->unk34.z = temp_r31->unk14.z;
                 temp_r31->unk30 = M_PI * (90 + (temp_r31->unk20 + temp_r29->unk_04.z)) / 180;
-                temp_r31->unk2C = temp_r31->unk24 * ((0.1f * sind(temp_r31->unk00)) + 1.0);
+                temp_r31->unk2C = temp_r31->unk24 * ((0.1f * sind(temp_r31->time)) + 1.0);
             }
             break;
     }
-    DCFlushRange(particle->unk_48, particle->unk_30 * sizeof(HsfanimStruct01));
+    DCFlushRange(particle->data, particle->unk_30 * sizeof(HU3DPARTICLEDATA));
 }
 
 void fn_1_E9B4(ModelData *model, ParticleData *particle, Mtx matrix)
 {
     float temp_f30;
     float temp_f31;
-    HsfanimStruct01 *temp_r31;
+    HU3DPARTICLEDATA *temp_r31;
     ParticleData *temp_r30;
     s32 temp_r28;
     s16 temp_r27;
@@ -618,9 +618,9 @@ void fn_1_E9B4(ModelData *model, ParticleData *particle, Mtx matrix)
     temp_r30 = particle->unk_1C;
     switch (temp_r30->unk_02) {
         case 0:
-            temp_r31 = particle->unk_48;
+            temp_r31 = particle->data;
             for (temp_r28 = 0; temp_r28 < particle->unk_30; temp_r28++, temp_r31++) {
-                temp_r31->unk00 = fn_1_11670() % 360;
+                temp_r31->time = fn_1_11670() % 360;
                 temp_r31->unk34.x = temp_r31->unk34.y = temp_r31->unk34.z = 0;
                 temp_r27 = fn_1_11670() % 360;
                 temp_r31->unk20 = temp_r27;
@@ -644,33 +644,33 @@ void fn_1_E9B4(ModelData *model, ParticleData *particle, Mtx matrix)
             temp_r30->unk_02++;
 
         case 1:
-            temp_r31 = particle->unk_48;
+            temp_r31 = particle->data;
             for (temp_r28 = 0; temp_r28 < particle->unk_30; temp_r28++, temp_r31++) {
-                temp_r31->unk00 += 2;
-                if (temp_r31->unk00 >= 360) {
-                    temp_r31->unk00 -= 360;
+                temp_r31->time += 2;
+                if (temp_r31->time >= 360) {
+                    temp_r31->time -= 360;
                 }
                 temp_r31->unk34.x = temp_r31->unk14.x;
                 temp_r31->unk34.y = temp_r31->unk14.y;
                 temp_r31->unk34.z = temp_r31->unk14.z;
-                temp_r31->unk2C = temp_r31->unk24 * ((0.1f * sind(temp_r31->unk00)) + 1.0);
+                temp_r31->unk2C = temp_r31->unk24 * ((0.1f * sind(temp_r31->time)) + 1.0);
             }
             break;
     }
-    DCFlushRange(particle->unk_48, particle->unk_30 * sizeof(HsfanimStruct01));
+    DCFlushRange(particle->data, particle->unk_30 * sizeof(HU3DPARTICLEDATA));
 }
 
 void fn_1_EEF8(ModelData *model, ParticleData *particle, Mtx matrix)
 {
     float temp_f31;
-    HsfanimStruct01 *temp_r31;
+    HU3DPARTICLEDATA *temp_r31;
     ParticleData *temp_r29;
     s32 temp_r28;
     u8 temp_r27;
     temp_r29 = particle->unk_1C;
     switch (temp_r29->unk_02) {
         case 0:
-            temp_r31 = particle->unk_48;
+            temp_r31 = particle->data;
             for (temp_r28 = 0; temp_r28 < particle->unk_30; temp_r28++, temp_r31++) {
                 temp_r31->unk34.x = temp_r31->unk34.y = temp_r31->unk34.z = 0;
                 temp_r31->unk40.r = temp_r31->unk40.g = temp_r31->unk40.b = temp_r31->unk40.a = 255;
@@ -689,19 +689,19 @@ void fn_1_EEF8(ModelData *model, ParticleData *particle, Mtx matrix)
                 temp_f31 = 1.0f;
             }
             temp_r27 = 255 * temp_f31;
-            temp_r31 = particle->unk_48;
+            temp_r31 = particle->data;
             for (temp_r28 = 0; temp_r28 < particle->unk_30; temp_r28++, temp_r31++) {
                 temp_r31->unk40.a = temp_r27;
             }
             break;
     }
-    DCFlushRange(particle->unk_48, particle->unk_30 * sizeof(HsfanimStruct01));
+    DCFlushRange(particle->data, particle->unk_30 * sizeof(HU3DPARTICLEDATA));
 }
 
 void fn_1_F06C(ModelData *model, ParticleData *particle, Mtx matrix)
 {
     float temp_f31;
-    HsfanimStruct01 *temp_r31;
+    HU3DPARTICLEDATA *temp_r31;
     ParticleData *temp_r29;
     s32 temp_r28;
     s16 temp_r27;
@@ -709,18 +709,18 @@ void fn_1_F06C(ModelData *model, ParticleData *particle, Mtx matrix)
     temp_r29 = particle->unk_1C;
     switch (temp_r29->unk_02) {
         case 0:
-            temp_r31 = particle->unk_48;
+            temp_r31 = particle->data;
             for (temp_r28 = 0; temp_r28 < particle->unk_30; temp_r28++, temp_r31++) {
-                temp_r31->unk00 = temp_r31->unk02 = 0;
+                temp_r31->time = temp_r31->unk02 = 0;
             }
             temp_r29->unk_02++;
             break;
 
         case 1:
-            temp_r31 = particle->unk_48;
+            temp_r31 = particle->data;
             for (temp_r28 = 0; temp_r28 < particle->unk_30; temp_r28++, temp_r31++) {
-                if (temp_r31->unk00) {
-                    temp_r31->unk00--;
+                if (temp_r31->time) {
+                    temp_r31->time--;
                     continue;
                 }
                 if (temp_r31->unk02 == 0) {
@@ -732,7 +732,7 @@ void fn_1_F06C(ModelData *model, ParticleData *particle, Mtx matrix)
                     temp_r31->unk40.r = temp_r31->unk40.g = temp_r31->unk40.b = temp_r31->unk40.a = 192;
                     temp_r31->unk40.b = 160;
                     temp_r31->unk2C = 0;
-                    temp_r31->unk00 = (s32)(90.0 * ((1.0 / 65536.0) * (float)fn_1_11670()));
+                    temp_r31->time = (s32)(90.0 * ((1.0 / 65536.0) * (float)fn_1_11670()));
                     temp_r31->unk02 = 60;
                 }
                 temp_r31->unk40.a = 248 * sind(temp_r31->unk02 * 3);
@@ -746,7 +746,7 @@ void fn_1_F06C(ModelData *model, ParticleData *particle, Mtx matrix)
             }
             break;
     }
-    DCFlushRange(particle->unk_48, particle->unk_30 * sizeof(HsfanimStruct01));
+    DCFlushRange(particle->data, particle->unk_30 * sizeof(HU3DPARTICLEDATA));
 }
 
 WorkF4B0 *fn_1_F4B0(s16 arg0, s16 arg1)
@@ -772,33 +772,33 @@ void fn_1_F564(s16 arg0)
     float temp_f31;
     WorkF4B0 *temp_r31;
     s32 temp_r30;
-    HsfObject *temp_r29;
+    HSFOBJECT *temp_r29;
     s32 temp_r28;
     ModelData *temp_r27;
     temp_r27 = &Hu3DData[arg0];
     temp_r29 = temp_r27->hsfData->root;
     temp_r31 = temp_r27->unk_120;
     if (temp_r31->unk8 == NULL) {
-        temp_r31->unk8 = HuMemDirectMallocNum(HEAP_SYSTEM, temp_r29->data.st->count * sizeof(HsfVector2f), MEMORY_DEFAULT_NUM);
-        temp_r31->unkC = HuMemDirectMallocNum(HEAP_SYSTEM, temp_r29->data.st->count, MEMORY_DEFAULT_NUM);
-        for (temp_r30 = 0; temp_r30 < temp_r29->data.st->count; temp_r30++) {
-            temp_r31->unk8[temp_r30].x = ((HsfVector2f *)(temp_r29->data.st->data))[temp_r30].x;
-            temp_r31->unk8[temp_r30].y = ((HsfVector2f *)(temp_r29->data.st->data))[temp_r30].y;
+        temp_r31->unk8 = HuMemDirectMallocNum(HEAP_SYSTEM, temp_r29->mesh.st->count * sizeof(HuVec2f), MEMORY_DEFAULT_NUM);
+        temp_r31->unkC = HuMemDirectMallocNum(HEAP_SYSTEM, temp_r29->mesh.st->count, MEMORY_DEFAULT_NUM);
+        for (temp_r30 = 0; temp_r30 < temp_r29->mesh.st->count; temp_r30++) {
+            temp_r31->unk8[temp_r30].x = ((HuVec2f *)(temp_r29->mesh.st->data))[temp_r30].x;
+            temp_r31->unk8[temp_r30].y = ((HuVec2f *)(temp_r29->mesh.st->data))[temp_r30].y;
         }
     }
     temp_r31->unk10_f[0] += 2.0f;
-    for (temp_r30 = 0; temp_r30 < temp_r29->data.st->count; temp_r30++) {
+    for (temp_r30 = 0; temp_r30 < temp_r29->mesh.st->count; temp_r30++) {
         temp_r31->unkC[temp_r30] = 0;
     }
-    for (temp_r30 = 0; temp_r30 < temp_r29->data.st->count; temp_r30++) {
+    for (temp_r30 = 0; temp_r30 < temp_r29->mesh.st->count; temp_r30++) {
         if (temp_r31->unkC[temp_r30]) {
             continue;
         }
         temp_r31->unkC[temp_r30]++;
         temp_f31 = temp_r31->unk10_f[0] + (60.0f * temp_r30);
-        ((HsfVector2f *)(temp_r29->data.st->data))[temp_r30].x = temp_r31->unk8[temp_r30].x + (0.005f * sind(temp_f31));
-        ((HsfVector2f *)(temp_r29->data.st->data))[temp_r30].y = temp_r31->unk8[temp_r30].y + (0.005f * cosd(temp_f31));
-        for (temp_r28 = temp_r30; temp_r28 < temp_r29->data.st->count; temp_r28++) {
+        ((HuVec2f *)(temp_r29->mesh.st->data))[temp_r30].x = temp_r31->unk8[temp_r30].x + (0.005f * sind(temp_f31));
+        ((HuVec2f *)(temp_r29->mesh.st->data))[temp_r30].y = temp_r31->unk8[temp_r30].y + (0.005f * cosd(temp_f31));
+        for (temp_r28 = temp_r30; temp_r28 < temp_r29->mesh.st->count; temp_r28++) {
             if (temp_r31->unkC[temp_r28]) {
                 continue;
             }
@@ -806,22 +806,22 @@ void fn_1_F564(s16 arg0)
                 continue;
             }
             temp_r31->unkC[temp_r28]++;
-            ((HsfVector2f *)(temp_r29->data.st->data))[temp_r28].x = ((HsfVector2f *)(temp_r29->data.st->data))[temp_r30].x;
-            ((HsfVector2f *)(temp_r29->data.st->data))[temp_r28].y = ((HsfVector2f *)(temp_r29->data.st->data))[temp_r30].y;
+            ((HuVec2f *)(temp_r29->mesh.st->data))[temp_r28].x = ((HuVec2f *)(temp_r29->mesh.st->data))[temp_r30].x;
+            ((HuVec2f *)(temp_r29->mesh.st->data))[temp_r28].y = ((HuVec2f *)(temp_r29->mesh.st->data))[temp_r30].y;
         }
     }
 }
 
 typedef struct unk_fn_10484 {
     ModelData *unk0;
-    HsfObject *unk4;
+    HSFOBJECT *unk4;
     s32 unk8;
     Mtx unkC;
     float unk3C[2];
 
 } UnkFn10484;
 
-void fn_1_10484(UnkFn10484 *arg0, HsfFace *arg1, HsfDrawData *arg2, GXColor *arg3);
+void fn_1_10484(UnkFn10484 *arg0, HSFFACE *arg1, HsfDrawData *arg2, GXColor *arg3);
 
 void fn_1_F8A0(ModelData *arg0, Mtx arg1)
 {
@@ -829,8 +829,8 @@ void fn_1_F8A0(ModelData *arg0, Mtx arg1)
     GXColor *temp_r30;
     s16 temp_r29;
     s32 temp_r28;
-    HsfBuffer *temp_r27;
-    HsfFace *temp_r26;
+    HSFBUFFER *temp_r27;
+    HSFFACE *temp_r26;
 
     UnkFn10484 spA0;
     Mtx sp70;
@@ -856,21 +856,21 @@ void fn_1_F8A0(ModelData *arg0, Mtx arg1)
     }
     GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_NOOP);
     if (temp_r31->unk4 == NULL) {
-        temp_r31->unk4 = HuMemDirectMallocNum(HEAP_SYSTEM, spA0.unk4->data.color->count * sizeof(GXColor), MEMORY_DEFAULT_NUM);
-        for (temp_r29 = 0; temp_r29 < spA0.unk4->data.color->count; temp_r29++) {
+        temp_r31->unk4 = HuMemDirectMallocNum(HEAP_SYSTEM, spA0.unk4->mesh.color->count * sizeof(GXColor), MEMORY_DEFAULT_NUM);
+        for (temp_r29 = 0; temp_r29 < spA0.unk4->mesh.color->count; temp_r29++) {
             temp_r30 = &temp_r31->unk4[temp_r29];
             temp_r30->r = temp_r31->unk10[0];
             temp_r30->g = temp_r31->unk10[1];
             temp_r30->b = temp_r31->unk10[2];
-            if (((GXColor *)(spA0.unk4->data.color->data))[temp_r29].a == 255) {
+            if (((GXColor *)(spA0.unk4->mesh.color->data))[temp_r29].a == 255) {
                 temp_r30->a = temp_r31->unk10[3];
             }
             else {
-                temp_r30->a = ((GXColor *)(spA0.unk4->data.color->data))[temp_r29].a;
+                temp_r30->a = ((GXColor *)(spA0.unk4->mesh.color->data))[temp_r29].a;
             }
         }
     }
-    temp_r27 = spA0.unk4->data.face;
+    temp_r27 = spA0.unk4->mesh.face;
     temp_r26 = temp_r27->data;
     temp_r28 = 0;
     for (temp_r29 = 0; temp_r29 < temp_r27->count;) {
@@ -889,8 +889,8 @@ void fn_1_FB98(ModelData *arg0, Mtx arg1)
     s16 temp_r28;
     GXColor *temp_r27;
     s32 temp_r26;
-    HsfBuffer *temp_r25;
-    HsfFace *temp_r24;
+    HSFBUFFER *temp_r25;
+    HSFFACE *temp_r24;
     s32 temp_r23;
     void *temp_r22;
 
@@ -920,8 +920,8 @@ void fn_1_FB98(ModelData *arg0, Mtx arg1)
     }
     GXSetBlendMode(GX_BM_BLEND, GX_BL_SRCALPHA, GX_BL_ONE, GX_LO_NOOP);
     if (temp_r31->unk4 == NULL) {
-        temp_r31->unk4 = HuMemDirectMallocNum(HEAP_SYSTEM, sp120.unk4->data.color->count * sizeof(GXColor), MEMORY_DEFAULT_NUM);
-        for (temp_r30 = 0; temp_r30 < sp120.unk4->data.color->count; temp_r30++) {
+        temp_r31->unk4 = HuMemDirectMallocNum(HEAP_SYSTEM, sp120.unk4->mesh.color->count * sizeof(GXColor), MEMORY_DEFAULT_NUM);
+        for (temp_r30 = 0; temp_r30 < sp120.unk4->mesh.color->count; temp_r30++) {
             temp_r27 = &temp_r31->unk4[temp_r30];
             temp_r27->r = temp_r31->unk10[0];
             temp_r27->g = temp_r31->unk10[1];
@@ -930,11 +930,11 @@ void fn_1_FB98(ModelData *arg0, Mtx arg1)
         }
     }
     if (temp_r31->unk8 == NULL) {
-        temp_r31->unk8 = HuMemDirectMallocNum(HEAP_SYSTEM, sp120.unk4->data.st->count * sizeof(HsfVector2f), MEMORY_DEFAULT_NUM);
-        temp_r31->unkC = HuMemDirectMallocNum(HEAP_SYSTEM, sp120.unk4->data.st->count, MEMORY_DEFAULT_NUM);
-        for (temp_r30 = 0; temp_r30 < sp120.unk4->data.st->count; temp_r30++) {
-            temp_r31->unk8[temp_r30].x = ((HsfVector2f *)(sp120.unk4->data.st->data))[temp_r30].x;
-            temp_r31->unk8[temp_r30].y = ((HsfVector2f *)(sp120.unk4->data.st->data))[temp_r30].y;
+        temp_r31->unk8 = HuMemDirectMallocNum(HEAP_SYSTEM, sp120.unk4->mesh.st->count * sizeof(HuVec2f), MEMORY_DEFAULT_NUM);
+        temp_r31->unkC = HuMemDirectMallocNum(HEAP_SYSTEM, sp120.unk4->mesh.st->count, MEMORY_DEFAULT_NUM);
+        for (temp_r30 = 0; temp_r30 < sp120.unk4->mesh.st->count; temp_r30++) {
+            temp_r31->unk8[temp_r30].x = ((HuVec2f *)(sp120.unk4->mesh.st->data))[temp_r30].x;
+            temp_r31->unk8[temp_r30].y = ((HuVec2f *)(sp120.unk4->mesh.st->data))[temp_r30].y;
         }
     }
     temp_r31->unk10_f[15] += 0.5f;
@@ -943,31 +943,31 @@ void fn_1_FB98(ModelData *arg0, Mtx arg1)
         sp50[0][temp_r30] = sind(temp_f31);
         sp10[0][temp_r30] = cosd(temp_f31);
     }
-    for (temp_r30 = 0; temp_r30 < sp120.unk4->data.st->count; temp_r30++) {
+    for (temp_r30 = 0; temp_r30 < sp120.unk4->mesh.st->count; temp_r30++) {
         temp_r31->unkC[temp_r30] = 0;
     }
-    for (temp_r30 = 0, temp_r29 = 0; temp_r30 < sp120.unk4->data.st->count; temp_r30++, temp_r29++) {
+    for (temp_r30 = 0, temp_r29 = 0; temp_r30 < sp120.unk4->mesh.st->count; temp_r30++, temp_r29++) {
         if (temp_r31->unkC[temp_r30]) {
             continue;
         }
         temp_r31->unkC[temp_r30]++;
         if (temp_r31->unk10[4]) {
-            temp_r31->unk8[temp_r30].x = (1.5f * ((HsfVector2f *)(sp120.unk4->data.st->data))[temp_r30].x) + (0.04f * sp50[0][temp_r29 & 0x7]);
-            temp_r31->unk8[temp_r30].y = (2.0f * ((HsfVector2f *)(sp120.unk4->data.st->data))[temp_r30].y) + (0.04f * sp10[0][temp_r29 & 0x7]);
+            temp_r31->unk8[temp_r30].x = (1.5f * ((HuVec2f *)(sp120.unk4->mesh.st->data))[temp_r30].x) + (0.04f * sp50[0][temp_r29 & 0x7]);
+            temp_r31->unk8[temp_r30].y = (2.0f * ((HuVec2f *)(sp120.unk4->mesh.st->data))[temp_r30].y) + (0.04f * sp10[0][temp_r29 & 0x7]);
         }
         else {
-            temp_r31->unk8[temp_r30].x = (1.25f * ((HsfVector2f *)(sp120.unk4->data.st->data))[temp_r30].x) + (0.04f * sp50[0][temp_r29 & 0x7]);
-            temp_r31->unk8[temp_r30].y = (1.75f * ((HsfVector2f *)(sp120.unk4->data.st->data))[temp_r30].y) + (0.04f * sp10[0][temp_r29 & 0x7]);
+            temp_r31->unk8[temp_r30].x = (1.25f * ((HuVec2f *)(sp120.unk4->mesh.st->data))[temp_r30].x) + (0.04f * sp50[0][temp_r29 & 0x7]);
+            temp_r31->unk8[temp_r30].y = (1.75f * ((HuVec2f *)(sp120.unk4->mesh.st->data))[temp_r30].y) + (0.04f * sp10[0][temp_r29 & 0x7]);
         }
         temp_r23 = temp_r31->unk10[3] + ((0.8f * temp_r31->unk10[3]) * sind((3.0f * temp_r31->unk10_f[15]) + (120.0f * temp_r29)));
         temp_r31->unk4[temp_r30].a = temp_r23;
-        for (temp_r28 = temp_r30; temp_r28 < sp120.unk4->data.st->count; temp_r28++) {
+        for (temp_r28 = temp_r30; temp_r28 < sp120.unk4->mesh.st->count; temp_r28++) {
             temp_r29++;
             if (temp_r31->unkC[temp_r28]) {
                 continue;
             }
-            if (((HsfVector2f *)(sp120.unk4->data.st->data))[temp_r30].x != ((HsfVector2f *)(sp120.unk4->data.st->data))[temp_r28].x
-                || ((HsfVector2f *)(sp120.unk4->data.st->data))[temp_r30].y != ((HsfVector2f *)(sp120.unk4->data.st->data))[temp_r28].y) {
+            if (((HuVec2f *)(sp120.unk4->mesh.st->data))[temp_r30].x != ((HuVec2f *)(sp120.unk4->mesh.st->data))[temp_r28].x
+                || ((HuVec2f *)(sp120.unk4->mesh.st->data))[temp_r30].y != ((HuVec2f *)(sp120.unk4->mesh.st->data))[temp_r28].y) {
                 continue;
             }
             temp_r31->unkC[temp_r28]++;
@@ -977,9 +977,9 @@ void fn_1_FB98(ModelData *arg0, Mtx arg1)
             temp_r29--;
         }
     }
-    temp_r22 = sp120.unk4->data.st->data;
-    sp120.unk4->data.st->data = temp_r31->unk8;
-    temp_r25 = sp120.unk4->data.face;
+    temp_r22 = sp120.unk4->mesh.st->data;
+    sp120.unk4->mesh.st->data = temp_r31->unk8;
+    temp_r25 = sp120.unk4->mesh.face;
     temp_r24 = temp_r25->data;
     temp_r26 = 0;
     for (temp_r30 = 0; temp_r30 < temp_r25->count;) {
@@ -988,17 +988,17 @@ void fn_1_FB98(ModelData *arg0, Mtx arg1)
         temp_r30 += lbl_1_bss_11C[temp_r26 - 1].polyCnt;
         temp_r24 += lbl_1_bss_11C[temp_r26 - 1].polyCnt;
     }
-    sp120.unk4->data.st->data = temp_r22;
+    sp120.unk4->mesh.st->data = temp_r22;
 }
 
-void fn_1_10830(ModelData *arg0, HsfBitmap *arg1, HsfAttribute *arg2, s16 arg3);
-void fn_1_10B60(UnkFn10484 *arg0, HsfMaterial *arg1);
+void fn_1_10830(ModelData *arg0, HSFBITMAP *arg1, HSFATTRIBUTE *arg2, s16 arg3);
+void fn_1_10B60(UnkFn10484 *arg0, HSFMATERIAL *arg1);
 
-void fn_1_10484(UnkFn10484 *arg0, HsfFace *arg1, HsfDrawData *arg2, GXColor *arg3)
+void fn_1_10484(UnkFn10484 *arg0, HSFFACE *arg1, HsfDrawData *arg2, GXColor *arg3)
 {
-    HsfMaterial *temp_r31;
-    HsfObject *temp_r30;
-    HsfAttribute *temp_r29;
+    HSFMATERIAL *temp_r31;
+    HSFOBJECT *temp_r30;
+    HSFATTRIBUTE *temp_r29;
     s16 temp_r27;
     s16 temp_r25;
     HsfdrawStruct01 *temp_r24;
@@ -1008,7 +1008,7 @@ void fn_1_10484(UnkFn10484 *arg0, HsfFace *arg1, HsfDrawData *arg2, GXColor *arg
     GXColor sp14;
     temp_r30 = arg0->unk4;
     temp_r23 = arg0->unk0;
-    temp_r31 = &temp_r30->data.material[arg1->mat & 0xFFF];
+    temp_r31 = &temp_r30->mesh.material[arg1->mat & 0xFFF];
     sp14.r = temp_r31->litColor[0];
     sp14.g = temp_r31->litColor[1];
     sp14.b = temp_r31->litColor[2];
@@ -1025,17 +1025,17 @@ void fn_1_10484(UnkFn10484 *arg0, HsfFace *arg1, HsfDrawData *arg2, GXColor *arg
     else {
         GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
     }
-    if (temp_r31->numAttrs == 0) {
+    if (temp_r31->attrNum == 0) {
         return;
     }
-    temp_r25 = (temp_r30->data.color) ? 5 : 1;
+    temp_r25 = (temp_r30->mesh.color) ? 5 : 1;
     if (arg2->flags & 0x2) {
         temp_r25 |= 0x2;
     }
     GXClearVtxDesc();
     GXSetVtxDesc(GX_VA_POS, GX_INDEX16);
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_POS, GX_POS_XYZ, GX_F32, 0);
-    GXSETARRAY(GX_VA_POS, temp_r30->data.vertex->data, temp_r30->data.vertex->count * sizeof(HsfVector3f), sizeof(HsfVector3f), TRUE);
+    GXSETARRAY(GX_VA_POS, temp_r30->mesh.vertex->data, temp_r30->mesh.vertex->count * sizeof(HuVecF), sizeof(HuVecF), TRUE);
     if (temp_r25 & 0x2) {
         GXSetVtxDesc(GX_VA_NBT, GX_DIRECT);
         GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_NBT, GX_NRM_NBT, GX_S16, 8);
@@ -1043,20 +1043,20 @@ void fn_1_10484(UnkFn10484 *arg0, HsfFace *arg1, HsfDrawData *arg2, GXColor *arg
     else {
         GXSetVtxDesc(GX_VA_NRM, GX_INDEX16);
         GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_NRM, GX_NRM_XYZ, GX_F32, 0);
-        GXSETARRAY(GX_VA_NRM, temp_r30->data.normal->data, temp_r30->data.vertex->count * sizeof(HsfVector3f), sizeof(HsfVector3f), TRUE);
+        GXSETARRAY(GX_VA_NRM, temp_r30->mesh.normal->data, temp_r30->mesh.vertex->count * sizeof(HuVecF), sizeof(HuVecF), TRUE);
     }
     GXSetVtxDesc(GX_VA_TEX0, GX_INDEX16);
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
-    GXSETARRAY(GX_VA_TEX0, temp_r30->data.st->data, temp_r30->data.vertex->count * sizeof(HsfVector2f), sizeof(HsfVector2f), TRUE);
+    GXSETARRAY(GX_VA_TEX0, temp_r30->mesh.st->data, temp_r30->mesh.vertex->count * sizeof(HuVec2f), sizeof(HuVec2f), TRUE);
     if (temp_r25 & 0x4) {
         GXSetVtxDesc(GX_VA_CLR0, GX_INDEX16);
         GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_CLR0, GX_CLR_RGBA, GX_RGBA8, 0);
-        GXSETARRAY(GX_VA_CLR0, arg3, arg0->unk4->data.color->count * sizeof(GXColor), sizeof(GXColor), TRUE);
+        GXSETARRAY(GX_VA_CLR0, arg3, arg0->unk4->mesh.color->count * sizeof(GXColor), sizeof(GXColor), TRUE);
     }
     GXSetAlphaCompare(GX_GEQUAL, 1, GX_AOP_AND, GX_GEQUAL, 1);
     GXSetZCompLoc(GX_FALSE);
-    for (temp_r27 = 0; temp_r27 < temp_r31->numAttrs; temp_r27++) {
-        temp_r29 = &temp_r30->data.attribute[temp_r31->attrs[temp_r27]];
+    for (temp_r27 = 0; temp_r27 < temp_r31->attrNum; temp_r27++) {
+        temp_r29 = &temp_r30->mesh.attribute[temp_r31->attr[temp_r27]];
         if (temp_r29->animWorkP) {
             temp_r24 = temp_r29->animWorkP;
             temp_r22 = &Hu3DTexAnimData[temp_r24->unk02];
@@ -1073,7 +1073,7 @@ void fn_1_10484(UnkFn10484 *arg0, HsfFace *arg1, HsfDrawData *arg2, GXColor *arg
     GXCallDisplayList(temp_r20, arg2->dlSize);
 }
 
-void fn_1_10830(ModelData *arg0, HsfBitmap *arg1, HsfAttribute *arg2, s16 arg3)
+void fn_1_10830(ModelData *arg0, HSFBITMAP *arg1, HSFATTRIBUTE *arg2, s16 arg3)
 {
     GXTexObj sp1C;
     GXTlutObj sp10;
@@ -1083,8 +1083,8 @@ void fn_1_10830(ModelData *arg0, HsfBitmap *arg1, HsfAttribute *arg2, s16 arg3)
     s16 temp_r26;
     temp_r29 = arg1->sizeX;
     temp_r28 = arg1->sizeY;
-    temp_r27 = (arg2->wrap_s == 1) ? 1 : 0;
-    temp_r26 = (arg2->wrap_t == 1) ? 1 : 0;
+    temp_r27 = (arg2->wrapS == 1) ? 1 : 0;
+    temp_r26 = (arg2->wrapT == 1) ? 1 : 0;
     switch (arg1->dataFmt) {
         case 6:
             GXInitTexObj(&sp1C, arg1->data, temp_r29, temp_r28, GX_TF_RGBA8, temp_r27, temp_r26, GX_FALSE);
@@ -1145,15 +1145,15 @@ void fn_1_10830(ModelData *arg0, HsfBitmap *arg1, HsfAttribute *arg2, s16 arg3)
 
 SHARED_SYM extern u32 texMtxTbl[];
 
-void fn_1_10B60(UnkFn10484 *arg0, HsfMaterial *arg1)
+void fn_1_10B60(UnkFn10484 *arg0, HSFMATERIAL *arg1)
 {
     GXColor sp28;
     GXColor sp24;
     GXColor sp20;
     u16 temp_r31;
-    HsfAttribute *temp_r29;
+    HSFATTRIBUTE *temp_r29;
     u16 temp_r28;
-    HsfObject *temp_r27;
+    HSFOBJECT *temp_r27;
     HsfdrawStruct01 *temp_r26;
     u16 temp_r25;
     u16 temp_r24;
@@ -1166,7 +1166,7 @@ void fn_1_10B60(UnkFn10484 *arg0, HsfMaterial *arg1)
     }
     else {
         temp_r24 = 0;
-        if (arg1->vtxMode == 0 && !temp_r27->data.color) {
+        if (arg1->vtxMode == 0 && !temp_r27->mesh.color) {
             temp_r23 = 0;
         }
         else {
@@ -1174,9 +1174,9 @@ void fn_1_10B60(UnkFn10484 *arg0, HsfMaterial *arg1)
         }
     }
 
-    if (arg1->numAttrs == 1) {
+    if (arg1->attrNum == 1) {
         temp_r28 = temp_r31 = 1;
-        temp_r29 = &temp_r27->data.attribute[arg1->attrs[0]];
+        temp_r29 = &temp_r27->mesh.attribute[arg1->attr[0]];
         GXSetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
         if (temp_r29->animWorkP) {
             temp_r26 = temp_r29->animWorkP;
@@ -1225,11 +1225,11 @@ void fn_1_10B60(UnkFn10484 *arg0, HsfMaterial *arg1)
         temp_r22 = 0;
         temp_r28 = 1;
         GXSetTexCoordGen(GX_TEXCOORD0, GX_TG_MTX2x4, GX_TG_TEX0, GX_IDENTITY);
-        for (temp_r25 = temp_r31 = 0; temp_r25 < arg1->numAttrs; temp_r31++, temp_r25++) {
-            temp_r29 = &temp_r27->data.attribute[arg1->attrs[temp_r25]];
-            if (0.0f != temp_r29->unk14) {
+        for (temp_r25 = temp_r31 = 0; temp_r25 < arg1->attrNum; temp_r31++, temp_r25++) {
+            temp_r29 = &temp_r27->mesh.attribute[arg1->attr[temp_r25]];
+            if (0.0f != temp_r29->nbtTpLvl) {
                 GXSetTexCoordGen(GX_TEXCOORD1, GX_TG_BUMP0, GX_TG_TEXCOORD0, GX_IDENTITY);
-                SET_TEVCOLOR_ALPHA(GX_TEVREG1, sp24, 10 * temp_r29->unk14);
+                SET_TEVCOLOR_ALPHA(GX_TEVREG1, sp24, 10 * temp_r29->nbtTpLvl);
                 GXSetTevOrder(temp_r31, GX_TEXCOORD0, temp_r25, GX_COLOR0A0);
                 GXSetTevColorIn(temp_r31, GX_CC_ZERO, GX_CC_TEXC, GX_CC_A1, GX_CC_RASC);
                 GXSetTevColorOp(temp_r31, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
@@ -1272,7 +1272,7 @@ void fn_1_10B60(UnkFn10484 *arg0, HsfMaterial *arg1)
                     GXSetTevAlphaIn(temp_r31, GX_CA_ZERO, GX_CA_ZERO, GX_CA_ZERO, GX_CA_APREV);
                 }
                 else {
-                    SET_TEVCOLOR_ALPHA(GX_TEVREG2, sp20, 255 * temp_r29->unk0C);
+                    SET_TEVCOLOR_ALPHA(GX_TEVREG2, sp20, 255 * temp_r29->kColor);
                     GXSetTevColorIn(temp_r31, GX_CC_CPREV, GX_CC_TEXC, GX_CC_A2, GX_CC_ZERO);
                     GXSetTevAlphaIn(temp_r31, GX_CA_ZERO, GX_CA_TEXA, GX_CA_APREV, GX_CA_ZERO);
                 }
@@ -1300,10 +1300,10 @@ void fn_1_10B60(UnkFn10484 *arg0, HsfMaterial *arg1)
         GXSetNumTexGens(temp_r28);
         GXSetNumTevStages(temp_r31);
     }
-    lbl_1_bss_118 = Hu3DLightSet(arg0->unk0, &Hu3DCameraMtx, &Hu3DCameraMtxXPose, (temp_r24) ? arg1->hilite_scale : 0);
+    lbl_1_bss_118 = Hu3DLightSet(arg0->unk0, &Hu3DCameraMtx, &Hu3DCameraMtxXPose, (temp_r24) ? arg1->hiliteScale : 0);
     if (temp_r24) {
         GXSetNumChans(2);
-        if (temp_r27->data.color) {
+        if (temp_r27->mesh.color) {
             GXSetChanCtrl(GX_COLOR0A0, GX_TRUE, GX_SRC_REG, GX_SRC_VTX, lbl_1_bss_118, GX_DF_CLAMP, GX_AF_NONE);
             GXSetChanCtrl(GX_COLOR1A1, GX_TRUE, GX_SRC_REG, GX_SRC_VTX, lbl_1_bss_118, GX_DF_NONE, GX_AF_SPEC);
         }
@@ -1314,7 +1314,7 @@ void fn_1_10B60(UnkFn10484 *arg0, HsfMaterial *arg1)
     }
     else {
         GXSetNumChans(1);
-        if (temp_r27->data.color) {
+        if (temp_r27->mesh.color) {
             GXSetChanCtrl(GX_COLOR0A0, temp_r23, GX_SRC_REG, GX_SRC_VTX, lbl_1_bss_118, GX_DF_CLAMP, GX_AF_SPOT);
         }
         else {

@@ -53,7 +53,7 @@ omObjData *lbl_1_bss_5868;
 Vec lbl_1_bss_2868[1024];
 Bss2468Data lbl_1_bss_2468[64];
 s32 lbl_1_bss_2464;
-HsfVector2f lbl_1_bss_464[1024];
+HuVec2f lbl_1_bss_464[1024];
 AnimData *lbl_1_bss_460;
 AnimData *lbl_1_bss_45C;
 AnimData *lbl_1_bss_458;
@@ -97,7 +97,7 @@ void fn_1_1E64(omObjData *object)
 {
     s32 temp_r30;
     Vec *temp_r29;
-    HsfVector2f *temp_r28;
+    HuVec2f *temp_r28;
     s32 temp_r27;
     AnimData *temp_r26;
 
@@ -181,23 +181,23 @@ void fn_1_1E64(omObjData *object)
     object->func = fn_1_26A4;
 }
 
-HsfAttribute *fn_1_2608(s16 model, char *name)
+HSFATTRIBUTE *fn_1_2608(s16 model, char *name)
 {
-    HsfData *temp_r31;
-    HsfAttribute *temp_r30;
+    HSFDATA *temp_r31;
+    HSFATTRIBUTE *temp_r30;
     s32 temp_r29;
     ModelData *temp_r28;
-    HsfBitmap *temp_r27;
+    HSFBITMAP *temp_r27;
     temp_r28 = &Hu3DData[model];
     temp_r31 = temp_r28->hsfData;
     temp_r30 = temp_r31->attribute;
-    for (temp_r29 = 0; temp_r29 < temp_r31->attributeCnt; temp_r29++, temp_r30++) {
+    for (temp_r29 = 0; temp_r29 < temp_r31->attributeNum; temp_r29++, temp_r30++) {
         temp_r27 = temp_r30->bitmap;
         if (strcmp(name, temp_r27->name) == 0) {
             break;
         }
     }
-    if (temp_r29 >= temp_r31->attributeCnt) {
+    if (temp_r29 >= temp_r31->attributeNum) {
         return NULL;
     }
     return temp_r30;
@@ -207,8 +207,8 @@ void fn_1_26A4(omObjData *object)
 {
     s32 temp_r31;
     Bss2468Data *temp_r30;
-    HsfVector2f *temp_r29;
-    HsfAttribute *temp_r27;
+    HuVec2f *temp_r29;
+    HSFATTRIBUTE *temp_r27;
     Vec *temp_r25;
     s32 temp_r23;
     s32 temp_r22;
@@ -569,12 +569,12 @@ void fn_1_443C(ModelData *model, ParticleData *particle, Mtx matrix)
 {
     float temp_f31;
     float temp_f30;
-    HsfanimStruct01 *temp_r31;
+    HU3DPARTICLEDATA *temp_r31;
     s32 temp_r29;
     s32 temp_r28;
     if (particle->unk_00 == 0) {
         particle->unk_00 = 1;
-        temp_r31 = particle->unk_48;
+        temp_r31 = particle->data;
         for (temp_r29 = 0; temp_r29 < particle->unk_30; temp_r31++, temp_r29++) {
             temp_r31->unk2C = 10;
             temp_f31 = ((1.0f / 256.0f) * frand8()) * 360.0f;
@@ -590,7 +590,7 @@ void fn_1_443C(ModelData *model, ParticleData *particle, Mtx matrix)
         }
     }
     temp_r28 = 0;
-    temp_r31 = particle->unk_48;
+    temp_r31 = particle->data;
     for (temp_r29 = 0; temp_r29 < particle->unk_30; temp_r29++, temp_r31++) {
         if (temp_r31->unk40.a == 0) {
             temp_r28++;
@@ -605,7 +605,7 @@ void fn_1_443C(ModelData *model, ParticleData *particle, Mtx matrix)
     if (temp_r28 == particle->unk_30) {
         model->attr |= 0x1;
     }
-    DCStoreRangeNoSync(particle->unk_48, particle->unk_30 * sizeof(HsfanimStruct01));
+    DCStoreRangeNoSync(particle->data, particle->unk_30 * sizeof(HU3DPARTICLEDATA));
 }
 
 void fn_1_47EC(Vec *arg0)

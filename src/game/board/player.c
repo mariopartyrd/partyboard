@@ -67,7 +67,7 @@ typedef struct bitcopy {
     s16 unk_06[5];
 } bitcopy;
 
-static HsfMaterial *playerMatCopy[4];
+static HSFMATERIAL *playerMatCopy[4];
 static s32 (*postTurnHook[4])();
 static s32 (*preTurnHook[4])();
 
@@ -332,7 +332,7 @@ void BoardPlayerModelInit(void)
         temp_r27->space_prev = -1;
         CharModelDataClose(GWPlayer[var_r31].character);
     }
-    CharModelLayerSetAll(2);
+    CharEffectLayerSet(2);
 }
 
 void BoardPlayerModelKill(void)
@@ -727,13 +727,13 @@ void BoardPlayerSizeSet(s32 arg0, s32 arg1)
     temp_r27 = BoardPlayerGet(arg0);
     temp_r27->size = arg1;
     if (arg1 == 2) {
-        CharModelStepTypeSet(GWPlayer[arg0].character, 4);
+        CharModelStepFxSet(GWPlayer[arg0].character, 4);
     }
     else if (arg1 == 1) {
-        CharModelStepTypeSet(GWPlayer[arg0].character, 5);
+        CharModelStepFxSet(GWPlayer[arg0].character, 5);
     }
     else {
-        CharModelStepTypeSet(GWPlayer[arg0].character, 0);
+        CharModelStepFxSet(GWPlayer[arg0].character, 0);
     }
     BoardPlayerScaleSetV(arg0, &temp_r4[arg1]);
 }
@@ -2727,7 +2727,7 @@ static void MegaSquishFunc(omObjData *object)
     Vec pos;
     if (work->kill || BoardIsKill()) {
         if (work->coinchg != -1) {
-            BoardCoinChgHide(work->coinchg);
+            BoardCoinChgKill(work->coinchg);
         }
         megaSquishObj[work->player] = NULL;
         omDelObjEx(HuPrcCurrentGet(), object);
@@ -3049,14 +3049,14 @@ static s32 MegaExecJump(s32 player, s32 space)
 
 void BoardPlayerCopyEyeMat(s32 arg0, s32 arg1)
 {
-    HsfMaterial *var_r29;
+    HSFMATERIAL *var_r29;
     s32 var_r24;
     s32 var_r25;
     u32 var_r27;
-    HsfAttribute *temp_r26;
+    HSFATTRIBUTE *temp_r26;
     char **temp_r28;
-    HsfData *hsfData;
-    HsfMaterial *material;
+    HSFDATA *hsfData;
+    HSFMATERIAL *material;
     ModelData *model;
     s16 modelId = BoardModelIDGet(BoardPlayerModelGet(arg0));
     model = &Hu3DData[modelId];
@@ -3066,11 +3066,11 @@ void BoardPlayerCopyEyeMat(s32 arg0, s32 arg1)
     if (arg1 != 0) {
         temp_r28 = &eyeMatTbl[GWPlayer[arg0].character][0];
         (void)temp_r28;
-        for (var_r25 = 0; var_r25 < hsfData->materialCnt; var_r25++, material++, var_r29++) {
+        for (var_r25 = 0; var_r25 < hsfData->materialNum; var_r25++, material++, var_r29++) {
             var_r24 = 1;
 
-            for (var_r27 = 0; var_r27 < material->numAttrs; var_r27++) {
-                temp_r26 = &hsfData->attribute[(s32)material->attrs[var_r27]];
+            for (var_r27 = 0; var_r27 < material->attrNum; var_r27++) {
+                temp_r26 = &hsfData->attribute[(s32)material->attr[var_r27]];
                 if ((strcmp(temp_r28[0], temp_r26->bitmap->name) == 0) || (strcmp(temp_r28[1], temp_r26->bitmap->name) == 0)) {
                     var_r24 = 0;
                 }
@@ -3090,9 +3090,9 @@ void BoardPlayerCopyEyeMat(s32 arg0, s32 arg1)
         }
     }
     else {
-        memcpy(hsfData->material, var_r29, hsfData->materialCnt * 0x3C);
+        memcpy(hsfData->material, var_r29, hsfData->materialNum * 0x3C);
     }
-    DCStoreRange(hsfData->material, hsfData->materialCnt * 0x3C);
+    DCStoreRange(hsfData->material, hsfData->materialNum * 0x3C);
 }
 
 void BoardPlayerCopyMat(s32 arg0)
@@ -3100,12 +3100,12 @@ void BoardPlayerCopyMat(s32 arg0)
     s16 modelID;
     ModelData *model;
     void *temp_r3;
-    HsfData *temp_r31;
+    HSFDATA *temp_r31;
 
     modelID = BoardModelIDGet(BoardPlayerModelGet(arg0));
     model = &Hu3DData[modelID];
     temp_r31 = model->hsfData;
-    temp_r3 = HuMemDirectMallocNum(HEAP_SYSTEM, temp_r31->materialCnt * sizeof(HsfMaterial), MEMORY_DEFAULT_NUM);
-    memcpy(temp_r3, temp_r31->material, temp_r31->materialCnt * sizeof(HsfMaterial));
+    temp_r3 = HuMemDirectMallocNum(HEAP_SYSTEM, temp_r31->materialNum * sizeof(HSFMATERIAL), MEMORY_DEFAULT_NUM);
+    memcpy(temp_r3, temp_r31->material, temp_r31->materialNum * sizeof(HSFMATERIAL));
     playerMatCopy[arg0] = temp_r3;
 }

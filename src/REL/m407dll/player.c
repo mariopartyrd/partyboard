@@ -353,13 +353,13 @@ void fn_1_64C(omObjData *arg0)
     Hu3DModelAmbSet(arg0->model[1], 1.0f, 1.0f, 1.0f);
 
     for (i = 0; i < 8; i++) {
-        arg0->motion[i] = CharModelMotionCreate(temp_r31->unk_01, lbl_1_data_0[temp_r31->unk_01][i]);
+        arg0->motion[i] = CharMotionCreate(temp_r31->unk_01, lbl_1_data_0[temp_r31->unk_01][i]);
     }
 
     Hu3DModelShadowSet(arg0->model[0]);
     Hu3DModelShadowSet(arg0->model[1]);
-    CharModelMotionDataClose(temp_r31->unk_01);
-    CharModelMotionSet(temp_r31->unk_01, arg0->motion[1]);
+    CharMotionDataClose(temp_r31->unk_01);
+    CharMotionSet(temp_r31->unk_01, arg0->motion[1]);
     Hu3DModelAttrSet(arg0->model[0], HU3D_MOTATTR_LOOP);
     Hu3DModelHookSet(arg0->model[0], lbl_1_data_13C[temp_r31->unk_01], arg0->model[1]);
     temp_r31->unk_10 = (600.0f - (400.0f * temp_r29));
@@ -412,7 +412,7 @@ void fn_1_A8C(omObjData *arg0)
     }
 
     if (var_r29 != 0) {
-        CharModelMotionShiftSet(temp_r31->unk_01, arg0->motion[2], 0.0f, 0.0f, HU3D_MOTATTR_NONE);
+        CharMotionShiftSet(temp_r31->unk_01, arg0->motion[2], 0.0f, 0.0f, HU3D_MOTATTR_NONE);
         fn_1_4544(4, 0x10, 600.0f - (400.0f * temp_r31->unk_00), -20.0f, -450.0f);
         fn_1_26CC(temp_r31->unk_00);
         temp_r31->unk_34 = 1;
@@ -420,7 +420,7 @@ void fn_1_A8C(omObjData *arg0)
     }
 
     if ((temp_r31->unk_34 != 0) && (Hu3DMotionEndCheck(arg0->model[0]) != 0)) {
-        CharModelMotionShiftSet(temp_r31->unk_01, arg0->motion[1], 0.0f, 0.0f, HU3D_MOTATTR_LOOP);
+        CharMotionShiftSet(temp_r31->unk_01, arg0->motion[1], 0.0f, 0.0f, HU3D_MOTATTR_LOOP);
         temp_r31->unk_34 = 0;
     }
 }
@@ -431,7 +431,7 @@ void fn_1_C58(omObjData *arg0)
 
     temp_r30 = arg0->data;
     if (Hu3DMotionEndCheck(arg0->model[0]) != 0) {
-        CharModelMotionShiftSet(temp_r30->unk_01, arg0->motion[1], 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
+        CharMotionShiftSet(temp_r30->unk_01, arg0->motion[1], 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
         temp_r30->unk_34 = 0;
         SetDominationDataStuff(arg0, 0, 0);
     }
@@ -443,8 +443,8 @@ void fn_1_CF4(omObjData *arg0)
 
     temp_r31 = arg0->data;
     if (temp_r31->unk_20 == 0) {
-        CharModelMotionShiftSet(temp_r31->unk_01, arg0->motion[1], 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
-        CharModelItemHookCreate(temp_r31->unk_01, lbl_1_data_13C[temp_r31->unk_01]);
+        CharMotionShiftSet(temp_r31->unk_01, arg0->motion[1], 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
+        CharModelHookDustCreate(temp_r31->unk_01, lbl_1_data_13C[temp_r31->unk_01]);
     }
     if (temp_r31->unk_20++ >= 30) {
         SetDominationDataStuff(arg0, 0, 0);
@@ -460,8 +460,8 @@ void fn_1_DB4(omObjData *arg0)
     temp_r31 = arg0->data;
 
     if (temp_r31->unk_20 == 0) {
-        CharModelVoiceEnableSet(temp_r31->unk_01, arg0->motion[3], 0);
-        CharModelMotionShiftSet(temp_r31->unk_01, arg0->motion[3], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
+        CharMotionVoiceOnSet(temp_r31->unk_01, arg0->motion[3], 0);
+        CharMotionShiftSet(temp_r31->unk_01, arg0->motion[3], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
         temp_r31->unk_24 = 0.0f;
         temp_r31->unk_20++;
     }
@@ -477,7 +477,7 @@ void fn_1_DB4(omObjData *arg0)
     }
 
     temp_r31->unk_14 = 30.0f;
-    CharModelMotionShiftSet(temp_r31->unk_01, arg0->motion[4], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
+    CharMotionShiftSet(temp_r31->unk_01, arg0->motion[4], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
     SetDominationDataStuff(arg0, 0, 0);
 }
 
@@ -491,12 +491,12 @@ void fn_1_F8C(omObjData *arg0)
     temp_r31 = arg0->data;
 
     if (temp_r31->unk_20 == 0) {
-        CharModelMotionShiftSet(temp_r31->unk_01, arg0->motion[5], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
+        CharMotionShiftSet(temp_r31->unk_01, arg0->motion[5], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
         HuAudFXPlay(lbl_1_rodata_70[temp_r31->unk_01]);
     }
 
     if (temp_r31->unk_20++ >= 120) {
-        CharModelMotionShiftSet(temp_r31->unk_01, arg0->motion[0], 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
+        CharMotionShiftSet(temp_r31->unk_01, arg0->motion[0], 0.0f, 10.0f, HU3D_MOTATTR_LOOP);
         SetDominationDataStuff(arg0, 0, 0);
     }
 }
@@ -507,8 +507,8 @@ void fn_1_1074(omObjData *arg0)
 
     temp_r31 = arg0->data;
     if (temp_r31->unk_20 == 0) {
-        CharModelVoiceEnableSet(temp_r31->unk_01, arg0->motion[3], 0);
-        CharModelMotionShiftSet(temp_r31->unk_01, arg0->motion[3], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
+        CharMotionVoiceOnSet(temp_r31->unk_01, arg0->motion[3], 0);
+        CharMotionShiftSet(temp_r31->unk_01, arg0->motion[3], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
         temp_r31->unk_24 = 0.0f;
         temp_r31->unk_20 = 1;
     }
@@ -517,7 +517,7 @@ void fn_1_1074(omObjData *arg0)
     temp_r31->unk_24 += 0.3f;
 
     if (!(temp_r31->unk_14 < 1000.0f)) {
-        CharModelMotionShiftSet(temp_r31->unk_01, arg0->motion[4], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
+        CharMotionShiftSet(temp_r31->unk_01, arg0->motion[4], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
         SetDominationDataStuff(arg0, 7, 0);
     }
 }
@@ -526,8 +526,8 @@ void fn_1_11CC(omObjData *arg0)
 {
     unkDominationData *temp_r31 = arg0->data;
     if (temp_r31->unk_20 == 0) {
-        CharModelVoiceEnableSet(temp_r31->unk_01, arg0->motion[3], 0);
-        CharModelMotionShiftSet(temp_r31->unk_01, arg0->motion[3], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
+        CharMotionVoiceOnSet(temp_r31->unk_01, arg0->motion[3], 0);
+        CharMotionShiftSet(temp_r31->unk_01, arg0->motion[3], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
         temp_r31->unk_14 = 1000.0f;
         temp_r31->unk_18 = 200.0f * (fn_1_28B8(temp_r31->unk_00) + 2);
         temp_r31->unk_24 = 0.0f;
@@ -540,8 +540,8 @@ void fn_1_11CC(omObjData *arg0)
     if (!(temp_r31->unk_14 > 300.0f)) {
         s16 temp;
         temp_r31->unk_14 = 300.0f;
-        CharModelVoiceEnableSet(temp_r31->unk_01, arg0->motion[4], 0);
-        CharModelMotionShiftSet(temp_r31->unk_01, arg0->motion[4], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
+        CharMotionVoiceOnSet(temp_r31->unk_01, arg0->motion[4], 0);
+        CharMotionShiftSet(temp_r31->unk_01, arg0->motion[4], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
         temp = fn_1_28E4(temp_r31->unk_00);
         Hu3DModelHookSet(temp, "itemhook_c", arg0->model[0]);
         temp_r31->unk_10 = 0.0f;
@@ -556,7 +556,7 @@ void fn_1_13E4(omObjData *arg0)
     unkDominationData *temp_r30;
 
     temp_r30 = arg0->data;
-    CharModelMotionShiftSet(temp_r30->unk_01, arg0->motion[6], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
+    CharMotionShiftSet(temp_r30->unk_01, arg0->motion[6], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
     SetDominationDataStuff(arg0, 0, 0);
 }
 
@@ -565,7 +565,7 @@ void fn_1_1460(omObjData *arg0)
     unkDominationData *temp_r30;
 
     temp_r30 = arg0->data;
-    CharModelVoiceEnableSet(temp_r30->unk_01, arg0->motion[7], 0);
-    CharModelMotionShiftSet(temp_r30->unk_01, arg0->motion[7], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
+    CharMotionVoiceOnSet(temp_r30->unk_01, arg0->motion[7], 0);
+    CharMotionShiftSet(temp_r30->unk_01, arg0->motion[7], 0.0f, 10.0f, HU3D_MOTATTR_NONE);
     SetDominationDataStuff(arg0, 0, 0);
 }

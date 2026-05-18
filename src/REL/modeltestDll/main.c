@@ -233,19 +233,19 @@ void fn_1_29C(omObjData *arg0)
             Hu3DModelLayerSet(lbl_1_bss_98A[var_r31], 1);
         }
 
-        lbl_1_bss_88A[var_r31][0] = CharModelMotionCreate(chrIdx, lbl_1_data_0[0]);
-        lbl_1_bss_88A[var_r31][1] = CharModelMotionCreate(chrIdx, lbl_1_data_0[1]);
-        lbl_1_bss_88A[var_r31][2] = CharModelMotionCreate(chrIdx, lbl_1_data_0[2]);
-        lbl_1_bss_88A[var_r31][3] = CharModelMotionCreate(chrIdx, lbl_1_data_0[3]);
-        lbl_1_bss_88A[var_r31][4] = CharModelMotionCreate(chrIdx, lbl_1_data_0[4]);
-        lbl_1_bss_88A[var_r31][5] = CharModelMotionCreate(chrIdx, lbl_1_data_0[5]);
-        lbl_1_bss_88A[var_r31][6] = CharModelMotionCreate(chrIdx, lbl_1_data_0[6]);
-        lbl_1_bss_88A[var_r31][7] = CharModelMotionCreate(chrIdx, lbl_1_data_0[7]);
-        lbl_1_bss_88A[var_r31][0] = CharModelMotionCreate(chrIdx, DATA_MAKE_NUM(DATADIR_MARIOMOT, 0x4D));
-        CharModelMotionSet(chrIdx, lbl_1_bss_88A[var_r31][0]);
+        lbl_1_bss_88A[var_r31][0] = CharMotionCreate(chrIdx, lbl_1_data_0[0]);
+        lbl_1_bss_88A[var_r31][1] = CharMotionCreate(chrIdx, lbl_1_data_0[1]);
+        lbl_1_bss_88A[var_r31][2] = CharMotionCreate(chrIdx, lbl_1_data_0[2]);
+        lbl_1_bss_88A[var_r31][3] = CharMotionCreate(chrIdx, lbl_1_data_0[3]);
+        lbl_1_bss_88A[var_r31][4] = CharMotionCreate(chrIdx, lbl_1_data_0[4]);
+        lbl_1_bss_88A[var_r31][5] = CharMotionCreate(chrIdx, lbl_1_data_0[5]);
+        lbl_1_bss_88A[var_r31][6] = CharMotionCreate(chrIdx, lbl_1_data_0[6]);
+        lbl_1_bss_88A[var_r31][7] = CharMotionCreate(chrIdx, lbl_1_data_0[7]);
+        lbl_1_bss_88A[var_r31][0] = CharMotionCreate(chrIdx, DATA_MAKE_NUM(DATADIR_MARIOMOT, 0x4D));
+        CharMotionSet(chrIdx, lbl_1_bss_88A[var_r31][0]);
         Hu3DModelAttrSet(lbl_1_bss_98A[var_r31], HU3D_MOTATTR_LOOP);
         Hu3DModelPosSet(lbl_1_bss_98A[var_r31], (var_r31 / 4 * 0xC8) - 100, 0.0f, -(var_r31 % 4) * 0x96);
-        CharModelMotionDataClose(chrIdx);
+        CharMotionDataClose(chrIdx);
     }
     temp_r26 = OSGetTick();
 
@@ -540,7 +540,7 @@ void fn_1_20F4(void)
 {
     s16 temp_r3;
     s16 var_r29;
-    HsfObject *temp_r3_2;
+    HSFOBJECT *temp_r3_2;
     HuObjUnk *temp_r31;
     Mtx spC0;
     Vec sp24;
@@ -565,34 +565,34 @@ void fn_1_20F4(void)
 
         Hu3DMotionNoMotSet(temp_r3, lbl_1_data_D8[var_r29], 0x380);
 
-        lbl_1_bss_40[var_r29].pos.x = temp_r3_2->data.base.pos.x;
-        lbl_1_bss_40[var_r29].pos.y = temp_r3_2->data.base.pos.y;
-        lbl_1_bss_40[var_r29].pos.z = temp_r3_2->data.base.pos.z;
-        lbl_1_bss_40[var_r29].rot.x = temp_r3_2->data.base.rot.x;
-        lbl_1_bss_40[var_r29].rot.y = temp_r3_2->data.base.rot.y;
-        lbl_1_bss_40[var_r29].rot.z = temp_r3_2->data.base.rot.z;
-        lbl_1_bss_40[var_r29].scale.x = temp_r3_2->data.base.scale.x;
-        lbl_1_bss_40[var_r29].scale.y = temp_r3_2->data.base.scale.y;
-        lbl_1_bss_40[var_r29].scale.z = temp_r3_2->data.base.scale.z;
+        lbl_1_bss_40[var_r29].pos.x = temp_r3_2->mesh.base.pos.x;
+        lbl_1_bss_40[var_r29].pos.y = temp_r3_2->mesh.base.pos.y;
+        lbl_1_bss_40[var_r29].pos.z = temp_r3_2->mesh.base.pos.z;
+        lbl_1_bss_40[var_r29].rot.x = temp_r3_2->mesh.base.rot.x;
+        lbl_1_bss_40[var_r29].rot.y = temp_r3_2->mesh.base.rot.y;
+        lbl_1_bss_40[var_r29].rot.z = temp_r3_2->mesh.base.rot.z;
+        lbl_1_bss_40[var_r29].scale.x = temp_r3_2->mesh.base.scale.x;
+        lbl_1_bss_40[var_r29].scale.y = temp_r3_2->mesh.base.scale.y;
+        lbl_1_bss_40[var_r29].scale.z = temp_r3_2->mesh.base.scale.z;
 
-        OSReport("%d:(%3.2f,%3.2f,%3.2f),(%3.2f,%3.2f,%3.2f)\n", var_r29, temp_r3_2->data.base.pos.x, temp_r3_2->data.base.pos.y,
-            temp_r3_2->data.base.pos.z, temp_r3_2->data.base.rot.x, temp_r3_2->data.base.rot.y, temp_r3_2->data.base.rot.z);
+        OSReport("%d:(%3.2f,%3.2f,%3.2f),(%3.2f,%3.2f,%3.2f)\n", var_r29, temp_r3_2->mesh.base.pos.x, temp_r3_2->mesh.base.pos.y,
+            temp_r3_2->mesh.base.pos.z, temp_r3_2->mesh.base.rot.x, temp_r3_2->mesh.base.rot.y, temp_r3_2->mesh.base.rot.z);
     }
     while (TRUE) {
         Hu3DModelObjMtxGet(temp_r3, "ske_skirt", sp30);
 
         for (var_r29 = 0; var_r29 < 8; ++var_r29) {
             temp_r31 = &lbl_1_bss_40[var_r29 * 2];
-            temp_r31->obj->data.curr.rot.x = temp_r31->rot.x;
-            temp_r31->obj->data.curr.rot.y = temp_r31->rot.y;
-            temp_r31->obj->data.curr.rot.z = temp_r31->rot.z;
+            temp_r31->obj->mesh.curr.rot.x = temp_r31->rot.x;
+            temp_r31->obj->mesh.curr.rot.y = temp_r31->rot.y;
+            temp_r31->obj->mesh.curr.rot.z = temp_r31->rot.z;
 
             Hu3DModelObjMtxGet(temp_r3, lbl_1_data_D8[var_r29 * 2], sp90);
 
             temp_r31 = &lbl_1_bss_40[(var_r29 * 2) + 1];
-            temp_r31->obj->data.curr.rot.x = temp_r31->rot.x;
-            temp_r31->obj->data.curr.rot.y = temp_r31->rot.y;
-            temp_r31->obj->data.curr.rot.z = temp_r31->rot.z;
+            temp_r31->obj->mesh.curr.rot.x = temp_r31->rot.x;
+            temp_r31->obj->mesh.curr.rot.y = temp_r31->rot.y;
+            temp_r31->obj->mesh.curr.rot.z = temp_r31->rot.z;
 
             Hu3DModelObjMtxGet(temp_r3, lbl_1_data_D8[(var_r29 * 2) + 1], spC0);
             Hu3DMtxTransGet(spC0, &sp18);
@@ -603,9 +603,9 @@ void fn_1_20F4(void)
 
             temp_f27 = atan2d(sp18.z, sp18.x);
             temp_r31 = &lbl_1_bss_40[var_r29 * 2];
-            temp_r31->obj->data.curr.rot.x = temp_r31->rot.x + (var_f29 * (2.0 * (sind(temp_f27) * sind(var_r27))));
-            temp_r31->obj->data.curr.rot.y = temp_r31->rot.y;
-            temp_r31->obj->data.curr.rot.z = temp_r31->rot.z + (var_f29 * cosd(var_r27));
+            temp_r31->obj->mesh.curr.rot.x = temp_r31->rot.x + (var_f29 * (2.0 * (sind(temp_f27) * sind(var_r27))));
+            temp_r31->obj->mesh.curr.rot.y = temp_r31->rot.y;
+            temp_r31->obj->mesh.curr.rot.z = temp_r31->rot.z + (var_f29 * cosd(var_r27));
 
             Hu3DModelObjMtxGet(temp_r3, lbl_1_data_D8[(var_r29 * 2) + 1], spC0);
             Hu3DMtxTransGet(spC0, &sp24);

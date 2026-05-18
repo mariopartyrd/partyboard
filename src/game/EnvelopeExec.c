@@ -3,70 +3,70 @@
 
 #include "string.h"
 
-static void SetEnvelopMtx(HsfObject *arg0, HsfObject *arg1, Mtx arg2);
-static void SetEnvelopMain(HsfData *arg0);
-static void SetEnvelop(HsfCenv *arg0);
-static void SetMtx(HsfObject *arg0, Mtx arg1);
+static void SetEnvelopMtx(HSFOBJECT *arg0, HSFOBJECT *arg1, Mtx arg2);
+static void SetEnvelopMain(HSFDATA *arg0);
+static void SetEnvelop(HSFCENV *arg0);
+static void SetMtx(HSFOBJECT *arg0, Mtx arg1);
 static void SetRevMtx(void);
-static HsfSkeleton *SearchSklenton(char *arg0);
+static HSFSKELETON *SearchSklenton(char *arg0);
 
 Vec *Vertextop;
 Mtx *MtxTop;
 static u32 nObj;
 static u32 nMesh;
-static HsfObject *objtop;
-static HsfData *CurHsf;
+static HSFOBJECT *objtop;
+static HSFDATA *CurHsf;
 static Vec *vtxenv;
 static Vec *normenv;
 static Vec *normtop;
 static s32 Meshcnt;
 static s32 Meshno;
 
-void InitEnvelope(HsfData *arg0) {
-    HsfBuffer *spC;
-    HsfBuffer *sp8;
-    HsfMatrix *temp_r28;
-    HsfObject *var_r31;
-    HsfSkeleton *var_r30;
+void InitEnvelope(HSFDATA *arg0) {
+    HSFBUFFER *spC;
+    HSFBUFFER *sp8;
+    HSFMATRIX *temp_r28;
+    HSFOBJECT *var_r31;
+    HSFSKELETON *var_r30;
     Mtx sp10;
     s32 i;
     s32 j;
 
-    if (arg0->cenvCnt != 0) {
+    if (arg0->cenvNum != 0) {
         var_r31 = arg0->object;
-        for (Meshcnt = i = 0; i < arg0->objectCnt; i++, var_r31++) {
+        for (Meshcnt = i = 0; i < arg0->objectNum; i++, var_r31++) {
             if (var_r31->type == 2) {
-                if (var_r31->data.vtxtop) {
-                    spC = var_r31->data.vertex;
-                    sp8 = var_r31->data.normal;
+                if (var_r31->mesh.vtxtop) {
+                    spC = var_r31->mesh.vertex;
+                    sp8 = var_r31->mesh.normal;
                     Meshcnt++;
                 } else {
                     continue;
                 }
             }
             var_r30 = arg0->skeleton;
-            for (j = 0; j < arg0->skeletonCnt; j++, var_r30++) {
+            for (j = 0; j < arg0->skeletonNum; j++, var_r30++) {
                 if (strcmp(var_r31->name, var_r30->name) == 0) {
-                    var_r31->data.base.pos.x = var_r30->transform.pos.x;
-                    var_r31->data.base.pos.y = var_r30->transform.pos.y;
-                    var_r31->data.base.pos.z = var_r30->transform.pos.z;
-                    var_r31->data.base.rot.x = var_r30->transform.rot.x;
-                    var_r31->data.base.rot.y = var_r30->transform.rot.y;
-                    var_r31->data.base.rot.z = var_r30->transform.rot.z;
-                    var_r31->data.base.scale.x = var_r30->transform.scale.x;
-                    var_r31->data.base.scale.y = var_r30->transform.scale.y;
-                    var_r31->data.base.scale.z = var_r30->transform.scale.z;
+                    var_r31->mesh.base.pos.x = var_r30->transform.pos.x;
+                    var_r31->mesh.base.pos.y = var_r30->transform.pos.y;
+                    var_r31->mesh.base.pos.z = var_r30->transform.pos.z;
+                    var_r31->mesh.base.rot.x = var_r30->transform.rot.x;
+                    var_r31->mesh.base.rot.y = var_r30->transform.rot.y;
+                    var_r31->mesh.base.rot.z = var_r30->transform.rot.z;
+                    var_r31->mesh.base.scale.x = var_r30->transform.scale.x;
+                    var_r31->mesh.base.scale.y = var_r30->transform.scale.y;
+                    var_r31->mesh.base.scale.z = var_r30->transform.scale.z;
                 }
             }
-            var_r31->data.curr.pos.x = var_r31->data.base.pos.x;
-            var_r31->data.curr.pos.y = var_r31->data.base.pos.y;
-            var_r31->data.curr.pos.z = var_r31->data.base.pos.z;
-            var_r31->data.curr.rot.x = var_r31->data.base.rot.x;
-            var_r31->data.curr.rot.y = var_r31->data.base.rot.y;
-            var_r31->data.curr.rot.z = var_r31->data.base.rot.z;
-            var_r31->data.curr.scale.x = var_r31->data.base.scale.x;
-            var_r31->data.curr.scale.y = var_r31->data.base.scale.y;
-            var_r31->data.curr.scale.z = var_r31->data.base.scale.z;
+            var_r31->mesh.curr.pos.x = var_r31->mesh.base.pos.x;
+            var_r31->mesh.curr.pos.y = var_r31->mesh.base.pos.y;
+            var_r31->mesh.curr.pos.z = var_r31->mesh.base.pos.z;
+            var_r31->mesh.curr.rot.x = var_r31->mesh.base.rot.x;
+            var_r31->mesh.curr.rot.y = var_r31->mesh.base.rot.y;
+            var_r31->mesh.curr.rot.z = var_r31->mesh.base.rot.z;
+            var_r31->mesh.curr.scale.x = var_r31->mesh.base.scale.x;
+            var_r31->mesh.curr.scale.y = var_r31->mesh.base.scale.y;
+            var_r31->mesh.curr.scale.z = var_r31->mesh.base.scale.z;
         }
         CurHsf = arg0;
         objtop = arg0->object;
@@ -82,52 +82,52 @@ void InitEnvelope(HsfData *arg0) {
     }
 }
 
-static void SetEnvelopMtx(HsfObject *arg0, HsfObject *arg1, Mtx arg2) {
+static void SetEnvelopMtx(HSFOBJECT *arg0, HSFOBJECT *arg1, Mtx arg2) {
     Mtx sp6C;
     Mtx sp3C;
     Mtx spC;
     s32 var_r29;
     s32 i;
 
-    MTXTrans(spC, arg1->data.curr.pos.x, arg1->data.curr.pos.y, arg1->data.curr.pos.z);
+    MTXTrans(spC, arg1->mesh.curr.pos.x, arg1->mesh.curr.pos.y, arg1->mesh.curr.pos.z);
     MTXConcat(arg2, spC, sp3C);
-    if (arg1->data.curr.rot.z) {
-        MTXRotRad(sp6C, 'z', MTXDegToRad(arg1->data.curr.rot.z));
+    if (arg1->mesh.curr.rot.z) {
+        MTXRotRad(sp6C, 'z', MTXDegToRad(arg1->mesh.curr.rot.z));
         MTXConcat(sp3C, sp6C, sp3C);
     }
-    if (arg1->data.curr.rot.y) {
-        MTXRotRad(sp6C, 'y', MTXDegToRad(arg1->data.curr.rot.y));
+    if (arg1->mesh.curr.rot.y) {
+        MTXRotRad(sp6C, 'y', MTXDegToRad(arg1->mesh.curr.rot.y));
         MTXConcat(sp3C, sp6C, sp3C);
     }
-    if (arg1->data.curr.rot.x) {
-        MTXRotRad(sp6C, 'x', MTXDegToRad(arg1->data.curr.rot.x));
+    if (arg1->mesh.curr.rot.x) {
+        MTXRotRad(sp6C, 'x', MTXDegToRad(arg1->mesh.curr.rot.x));
         MTXConcat(sp3C, sp6C, sp3C);
     }
-    if (arg1->data.curr.scale.x != 1.0f) {
-        sp3C[0][0] *= arg1->data.curr.scale.x;
-        sp3C[1][0] *= arg1->data.curr.scale.x;
-        sp3C[2][0] *= arg1->data.curr.scale.x;
+    if (arg1->mesh.curr.scale.x != 1.0f) {
+        sp3C[0][0] *= arg1->mesh.curr.scale.x;
+        sp3C[1][0] *= arg1->mesh.curr.scale.x;
+        sp3C[2][0] *= arg1->mesh.curr.scale.x;
     }
-    if (arg1->data.curr.scale.y != 1.0f) {
-        sp3C[0][1] *= arg1->data.curr.scale.y;
-        sp3C[1][1] *= arg1->data.curr.scale.y;
-        sp3C[2][1] *= arg1->data.curr.scale.y;
+    if (arg1->mesh.curr.scale.y != 1.0f) {
+        sp3C[0][1] *= arg1->mesh.curr.scale.y;
+        sp3C[1][1] *= arg1->mesh.curr.scale.y;
+        sp3C[2][1] *= arg1->mesh.curr.scale.y;
     }
-    if (arg1->data.curr.scale.z != 1.0f) {
-        sp3C[0][2] *= arg1->data.curr.scale.z;
-        sp3C[1][2] *= arg1->data.curr.scale.z;
-        sp3C[2][2] *= arg1->data.curr.scale.z;
+    if (arg1->mesh.curr.scale.z != 1.0f) {
+        sp3C[0][2] *= arg1->mesh.curr.scale.z;
+        sp3C[1][2] *= arg1->mesh.curr.scale.z;
+        sp3C[2][2] *= arg1->mesh.curr.scale.z;
     }
     var_r29 = arg1 - arg0;
     MTXCopy(sp3C, MtxTop[nMesh + var_r29]);
-    for (i = 0; i < arg1->data.childrenCount; i++) {
-        SetEnvelopMtx(arg0, arg1->data.children[i], sp3C);
+    for (i = 0; i < arg1->mesh.childrenCount; i++) {
+        SetEnvelopMtx(arg0, arg1->mesh.children[i], sp3C);
     }
 }
 
-void EnvelopeProc(HsfData *arg0) {
-    HsfMatrix *temp_r31;
-    HsfObject *temp_r29;
+void EnvelopeProc(HSFDATA *arg0) {
+    HSFMATRIX *temp_r31;
+    HSFOBJECT *temp_r29;
     Mtx sp8;
 
     CurHsf = arg0;
@@ -141,49 +141,49 @@ void EnvelopeProc(HsfData *arg0) {
     SetEnvelopMain(arg0);
 }
 
-void InitVtxParm(HsfData *arg0) {
-    HsfObject *var_r31;
+void InitVtxParm(HSFDATA *arg0) {
+    HSFOBJECT *var_r31;
     s32 i;
 
     var_r31 = arg0->object;
-    for (i = 0; i < arg0->objectCnt; i++, var_r31++) {
+    for (i = 0; i < arg0->objectNum; i++, var_r31++) {
         if (var_r31->type == 2) {
-            var_r31->data.unk120[0] = 0;
+            var_r31->mesh.writeNum = 0;
         }
     }
 }
 
-static void SetEnvelopMain(HsfData *arg0) {
+static void SetEnvelopMain(HSFDATA *arg0) {
     void *sp10;
     void *spC;
     void *sp8;
-    HsfBuffer *temp_r28;
-    HsfBuffer *temp_r30;
-    HsfObject *var_r31;
+    HSFBUFFER *temp_r28;
+    HSFBUFFER *temp_r30;
+    HSFOBJECT *var_r31;
     s32 i;
     s32 j;
-    HsfCenv *var_r25;
+    HSFCENV *var_r25;
 
     var_r31 = arg0->object;
-    for (Meshno = i = 0; i < arg0->objectCnt; i++, var_r31++) {
+    for (Meshno = i = 0; i < arg0->objectNum; i++, var_r31++) {
         if (var_r31->type == 2) {
             MTXInverse(MtxTop[&var_r31[nMesh] - arg0->object], MtxTop[Meshno]);
-            temp_r30 = var_r31->data.vertex;
-            temp_r28 = var_r31->data.normal;
-            if (var_r31->data.unk120[0] != 0) {
+            temp_r30 = var_r31->mesh.vertex;
+            temp_r28 = var_r31->mesh.normal;
+            if (var_r31->mesh.writeNum != 0) {
                 Vertextop = temp_r30->data;
             } else {
-                Vertextop = (Vec*)var_r31->data.vtxtop;
+                Vertextop = (Vec*)var_r31->mesh.vtxtop;
             }
             vtxenv = temp_r30->data;
-            normtop = (Vec*)var_r31->data.normtop;
+            normtop = (Vec*)var_r31->mesh.normtop;
             normenv = temp_r28->data;
-            var_r25 = var_r31->data.cenv;
-            for (j = 0; j < var_r31->data.cenvCnt; j++, var_r25++) {
+            var_r25 = var_r31->mesh.cenv;
+            for (j = 0; j < var_r31->mesh.cenvNum; j++, var_r25++) {
                 SetEnvelop(var_r25);
             }
             sp10 = temp_r30->data;
-            spC = var_r31->data.vtxtop;
+            spC = var_r31->mesh.vtxtop;
             sp8 = temp_r30->data;
             DCStoreRangeNoSync(normenv, temp_r28->count * sizeof(Vec));
             DCStoreRangeNoSync(vtxenv, temp_r30->count * sizeof(Vec));
@@ -192,7 +192,7 @@ static void SetEnvelopMain(HsfData *arg0) {
     }
 }
 
-static void SetEnvelop(HsfCenv *arg0) {
+static void SetEnvelop(HSFCENV *arg0) {
     Vec sp44;
     Vec sp38;
     Vec sp2C;
@@ -201,11 +201,11 @@ static void SetEnvelop(HsfCenv *arg0) {
     s32 sp10;
     u32 spC;
     u32 sp8;
-    HsfCenvDual *var_r20;
-    HsfCenvDualWeight *var_r30;
+    HSFCENVDUAL *var_r20;
+    HSFCENVDUALWEIGHT *var_r30;
     HsfCenvMulti *var_r19;
-    HsfCenvMultiWeight *var_r25;
-    HsfCenvSingle *var_r27;
+    HSFCENVMULTIWEIGHT *var_r25;
+    HSFCENVSINGLE *var_r27;
     Vec *temp_r22;
     Vec *temp_r26;
     Vec *temp_r28;
@@ -243,17 +243,17 @@ static void SetEnvelop(HsfCenv *arg0) {
         } else {
             MTXInvXpose(sp1A0, sp170);
         }
-        if (var_r27->posCnt == 1) {
+        if (var_r27->posNum == 1) {
             MTXMultVec(sp1A0, temp_r31, temp_r28);
             MTXMultVec(sp170, temp_r26, temp_r22);
-        } else if (var_r27->posCnt <= 6) {
-            MTXMultVecArray(sp1A0, temp_r31, temp_r28, var_r27->posCnt);
-            MTXMultVecArray(sp170, temp_r26, temp_r22, var_r27->normalCnt);
+        } else if (var_r27->posNum <= 6) {
+            MTXMultVecArray(sp1A0, temp_r31, temp_r28, var_r27->posNum);
+            MTXMultVecArray(sp170, temp_r26, temp_r22, var_r27->normalNum);
         } else {
             MTXReorder(sp1A0, (ROMtxPtr) sp140);
             MTXReorder(sp170, (ROMtxPtr) sp110);
-            MTXROMultVecArray((ROMtxPtr) sp140, temp_r31, temp_r28, var_r27->posCnt);
-            MTXROMultVecArray((ROMtxPtr) sp110, temp_r26, temp_r22, var_r27->normalCnt);
+            MTXROMultVecArray((ROMtxPtr) sp140, temp_r31, temp_r28, var_r27->posNum);
+            MTXROMultVecArray((ROMtxPtr) sp110, temp_r26, temp_r22, var_r27->normalNum);
         }
     }
     var_r20 = arg0->dualData;
@@ -265,7 +265,7 @@ static void SetEnvelop(HsfCenv *arg0) {
         MTXConcat(MtxTop[nMesh + sp8], MtxTop[nMesh + nObj + nObj * Meshno + sp8], sp140);
         MTXConcat(MtxTop[Meshno], sp140, (float (*)[4]) &spB0[0]);
         var_r30 = var_r20->weight;
-        for (j = 0; j < var_r20->weightCnt; j++, var_r30++) {
+        for (j = 0; j < var_r20->weightNum; j++, var_r30++) {
             temp_r18 = var_r30->normal;
             temp_r21 = var_r30->pos;
             temp_r28 = &vtxenv[temp_r21];
@@ -326,22 +326,22 @@ static void SetEnvelop(HsfCenv *arg0) {
             } else {
                 MTXInvXpose(sp80, sp110);
             }
-            if (var_r30->posCnt == 1) {
+            if (var_r30->posNum == 1) {
                 MTXMultVec(sp80, temp_r31, temp_r28);
-            } else if (var_r30->posCnt <= 6) {
-                MTXMultVecArray(sp80, temp_r31, temp_r28, var_r30->posCnt);
+            } else if (var_r30->posNum <= 6) {
+                MTXMultVecArray(sp80, temp_r31, temp_r28, var_r30->posNum);
             } else {
                 MTXReorder(sp80, (ROMtxPtr) sp140);
-                MTXROMultVecArray((ROMtxPtr) sp140, temp_r31, temp_r28, var_r30->posCnt);
+                MTXROMultVecArray((ROMtxPtr) sp140, temp_r31, temp_r28, var_r30->posNum);
             }
-            if (var_r30->normalCnt != 0) {
-                if (var_r30->normalCnt == 1) {
+            if (var_r30->normalNum != 0) {
+                if (var_r30->normalNum == 1) {
                     MTXMultVec(sp110, temp_r26, temp_r22);
-                } else if (var_r30->normalCnt <= 6) {
-                    MTXMultVecArray(sp110, temp_r26, temp_r22, var_r30->normalCnt);
+                } else if (var_r30->normalNum <= 6) {
+                    MTXMultVecArray(sp110, temp_r26, temp_r22, var_r30->normalNum);
                 } else {
                     MTXReorder(sp110, (ROMtxPtr) sp140);
-                    MTXROMultVecArray((ROMtxPtr) sp140, temp_r26, temp_r22, var_r30->normalCnt);
+                    MTXROMultVecArray((ROMtxPtr) sp140, temp_r26, temp_r22, var_r30->normalNum);
                 }
             }
         }
@@ -358,7 +358,7 @@ static void SetEnvelop(HsfCenv *arg0) {
         sp38.x = sp38.y = sp38.z = 0.0f;
         sp20.x = sp20.y = sp20.z = 0.0f;
         sp10 = 0;
-        for (j = 0; j < var_r19->weightCnt; j++, var_r25++) {
+        for (j = 0; j < var_r19->weightNum; j++, var_r25++) {
             MTXConcat(MtxTop[nMesh + var_r25->target], MtxTop[nMesh + nObj + nObj * Meshno + var_r25->target], sp1A0);
             MTXConcat(MtxTop[Meshno], sp1A0, sp1A0);
             MTXInvXpose(sp1A0, sp170);
@@ -390,8 +390,8 @@ static void SetEnvelop(HsfCenv *arg0) {
     }
 }
 
-static void SetMtx(HsfObject *arg0, Mtx arg1) {
-    HsfSkeleton *temp_r3;
+static void SetMtx(HSFOBJECT *arg0, Mtx arg1) {
+    HSFSKELETON *temp_r3;
     Mtx spFC;
     Mtx spCC;
     Mtx sp9C;
@@ -400,35 +400,35 @@ static void SetMtx(HsfObject *arg0, Mtx arg1) {
 
     temp_r3 = SearchSklenton(arg0->name);
     if (temp_r3) {
-        arg0->data.base.pos.x = temp_r3->transform.pos.x;
-        arg0->data.base.pos.y = temp_r3->transform.pos.y;
-        arg0->data.base.pos.z = temp_r3->transform.pos.z;
-        arg0->data.base.rot.x = temp_r3->transform.rot.x;
-        arg0->data.base.rot.y = temp_r3->transform.rot.y;
-        arg0->data.base.rot.z = temp_r3->transform.rot.z;
-        arg0->data.base.scale.x = temp_r3->transform.scale.x;
-        arg0->data.base.scale.y = temp_r3->transform.scale.y;
-        arg0->data.base.scale.z = temp_r3->transform.scale.z;
+        arg0->mesh.base.pos.x = temp_r3->transform.pos.x;
+        arg0->mesh.base.pos.y = temp_r3->transform.pos.y;
+        arg0->mesh.base.pos.z = temp_r3->transform.pos.z;
+        arg0->mesh.base.rot.x = temp_r3->transform.rot.x;
+        arg0->mesh.base.rot.y = temp_r3->transform.rot.y;
+        arg0->mesh.base.rot.z = temp_r3->transform.rot.z;
+        arg0->mesh.base.scale.x = temp_r3->transform.scale.x;
+        arg0->mesh.base.scale.y = temp_r3->transform.scale.y;
+        arg0->mesh.base.scale.z = temp_r3->transform.scale.z;
     }
-    MTXTrans(spFC, arg0->data.base.pos.x, arg0->data.base.pos.y, arg0->data.base.pos.z);
-    MTXScale(spCC, arg0->data.base.scale.x, arg0->data.base.scale.y, arg0->data.base.scale.z);
+    MTXTrans(spFC, arg0->mesh.base.pos.x, arg0->mesh.base.pos.y, arg0->mesh.base.pos.z);
+    MTXScale(spCC, arg0->mesh.base.scale.x, arg0->mesh.base.scale.y, arg0->mesh.base.scale.z);
     MTXConcat(arg1, spFC, spFC);
-    MTXRotRad(sp9C, 'z', MTXDegToRad(arg0->data.base.rot.z));
+    MTXRotRad(sp9C, 'z', MTXDegToRad(arg0->mesh.base.rot.z));
     MTXConcat(spFC, sp9C, spFC);
-    MTXRotRad(sp9C, 'y', MTXDegToRad(arg0->data.base.rot.y));
+    MTXRotRad(sp9C, 'y', MTXDegToRad(arg0->mesh.base.rot.y));
     MTXConcat(spFC, sp9C, spFC);
-    MTXRotRad(sp9C, 'x', MTXDegToRad(arg0->data.base.rot.x));
+    MTXRotRad(sp9C, 'x', MTXDegToRad(arg0->mesh.base.rot.x));
     MTXConcat(spFC, sp9C, spFC);
     MTXConcat(spFC, spCC, spFC);
     temp_r25 = arg0 - objtop;
     MTXCopy(spFC, MtxTop[nMesh + temp_r25]);
-    for (i = 0; i < arg0->data.childrenCount; i++) {
-        SetMtx(arg0->data.children[i], spFC);
+    for (i = 0; i < arg0->mesh.childrenCount; i++) {
+        SetMtx(arg0->mesh.children[i], spFC);
     }
 }
 
 static void SetRevMtx(void) {
-    HsfObject *var_r29;
+    HSFOBJECT *var_r29;
     s32 var_r28;
     s32 i;
     s32 var_r30;
@@ -436,10 +436,10 @@ static void SetRevMtx(void) {
     Mtx sp8;
 
     var_r29 = CurHsf->object;
-    for (var_r28 = i = 0; i < CurHsf->objectCnt; i++, var_r29++) {
+    for (var_r28 = i = 0; i < CurHsf->objectNum; i++, var_r29++) {
         if (var_r29->type == 2) {
             MTXCopy(MtxTop[nMesh + i], sp8);
-            for (var_r30 = 0; var_r30 < CurHsf->objectCnt; var_r30++) {
+            for (var_r30 = 0; var_r30 < CurHsf->objectNum; var_r30++) {
                 MTXInverse(MtxTop[nMesh + var_r30], sp38);
                 MTXConcat(sp38, sp8, MtxTop[nMesh + nObj + nObj * var_r28 + var_r30]);
             }
@@ -449,12 +449,12 @@ static void SetRevMtx(void) {
     }
 }
 
-static HsfSkeleton *SearchSklenton(char *arg0) {
-    HsfSkeleton *var_r31;
+static HSFSKELETON *SearchSklenton(char *arg0) {
+    HSFSKELETON *var_r31;
     s32 i;
 
     var_r31 = CurHsf->skeleton;
-    for (i = 0; i < CurHsf->skeletonCnt; i++, var_r31++) {
+    for (i = 0; i < CurHsf->skeletonNum; i++, var_r31++) {
         if (strcmp(arg0, var_r31->name) == 0) {
             return var_r31;
         }

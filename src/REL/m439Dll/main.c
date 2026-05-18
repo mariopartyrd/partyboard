@@ -434,11 +434,11 @@ void fn_1_D0C(omObjData *object)
     work->unk2C = 0;
     work->unk30 = HU3D_MOTATTR_LOOP;
     for (i = 0; i < 7; i++) {
-        object->motion[i] = CharModelMotionCreate(work->unkC, lbl_1_data_7694[i]);
+        object->motion[i] = CharMotionCreate(work->unkC, lbl_1_data_7694[i]);
     }
     Hu3DMotionSet(object->model[0], object->motion[0]);
     Hu3DModelAttrSet(object->model[0], HU3D_MOTATTR_LOOP);
-    CharModelVoiceEnableSet(work->unkC, object->motion[4], 0);
+    CharMotionVoiceOnSet(work->unkC, object->motion[4], 0);
     CharModelDataClose(work->unkC);
     object->model[1] = Hu3DModelCreateFile(DATA_MAKE_NUM(DATADIR_M439, 0x12));
     Hu3DModelAttrSet(object->model[1], HU3D_ATTR_DISPOFF);
@@ -1001,9 +1001,9 @@ void fn_1_2C84(omObjData *object)
     if ((temp_r28 >= 0 && temp_r28 != temp_r31->unk2C) || temp_r26 != temp_r31->unk30) {
         temp_r31->unk2C = temp_r28;
         temp_r31->unk30 = temp_r26;
-        CharModelMotionShiftSet(temp_r31->unkC, object->motion[temp_r31->unk2C], 0, 8, temp_r26);
+        CharMotionShiftSet(temp_r31->unkC, object->motion[temp_r31->unk2C], 0, 8, temp_r26);
     }
-    CharModelMotionSpeedSet(temp_r31->unkC, temp_f25);
+    CharMotionSpeedSet(temp_r31->unkC, temp_f25);
     temp_r31->unk34 = temp_f25;
     if (temp_r31->unk2 == 0) {
         Hu3DShadowData.camTarget.x = object->trans.x;
@@ -1093,9 +1093,9 @@ void fn_1_3C1C(omObjData *object)
     if ((temp_r29 >= 0 && temp_r29 != temp_r31->unk2C) || temp_r28 != temp_r31->unk30) {
         temp_r31->unk2C = temp_r29;
         temp_r31->unk30 = temp_r28;
-        CharModelMotionShiftSet(temp_r31->unkC, object->motion[temp_r31->unk2C], 0, 8, temp_r28);
+        CharMotionShiftSet(temp_r31->unkC, object->motion[temp_r31->unk2C], 0, 8, temp_r28);
     }
-    CharModelMotionSpeedSet(temp_r31->unkC, temp_f29);
+    CharMotionSpeedSet(temp_r31->unkC, temp_f29);
     temp_r31->unk34 = temp_f29;
 }
 
@@ -1104,12 +1104,12 @@ void fn_1_4528(ModelData *model, ParticleData *particle, Mtx matrix)
     float temp_f31;
     float temp_f30;
     float temp_f29;
-    HsfanimStruct01 *temp_r31;
+    HU3DPARTICLEDATA *temp_r31;
     s32 temp_r29;
     s32 temp_r28;
     if (particle->unk_00 == 0) {
         particle->unk_00 = 1;
-        temp_r31 = particle->unk_48;
+        temp_r31 = particle->data;
         temp_f29 = atan2d(particle->unk_04.x, particle->unk_04.z);
         for (temp_r29 = 0; temp_r29 < particle->unk_30; temp_r31++, temp_r29++) {
             temp_r31->unk2C = ((20.0f * frand8()) + 50.0f) / 256.0f;
@@ -1126,7 +1126,7 @@ void fn_1_4528(ModelData *model, ParticleData *particle, Mtx matrix)
         }
     }
     temp_r28 = 0;
-    temp_r31 = particle->unk_48;
+    temp_r31 = particle->data;
     for (temp_r29 = 0; temp_r29 < particle->unk_30; temp_r29++, temp_r31++) {
         if (temp_r31->unk34.y < -2000.0f) {
             temp_r28++;
@@ -1141,7 +1141,7 @@ void fn_1_4528(ModelData *model, ParticleData *particle, Mtx matrix)
     if (temp_r28 == particle->unk_30) {
         model->attr |= 0x1;
     }
-    DCStoreRangeNoSync(particle->unk_48, particle->unk_30 * sizeof(HsfanimStruct01));
+    DCStoreRangeNoSync(particle->data, particle->unk_30 * sizeof(HU3DPARTICLEDATA));
 }
 
 void fn_1_4978(omObjData *object)
@@ -1790,7 +1790,11 @@ void fn_1_7578(s16 layer)
     }
     else {
         MTXCopy(lbl_1_bss_44[Hu3DCameraNo - 1], Hu3DShadowData.lookAtMtx);
+#ifdef TARGET_PC
+        Hu3DShadowData.buf = lbl_1_bss_11C[Hu3DCameraNo - 1];
+#else
         memcpy(Hu3DShadowData.buf, lbl_1_bss_11C[Hu3DCameraNo - 1], dataSize);
+#endif
         DCFlushRangeNoSync(Hu3DShadowData.buf, dataSize);
     }
 }
@@ -1859,7 +1863,7 @@ void fn_1_77E4(s32 shadowNo)
                     if (model->attr & 0x400) {
                         ClusterProc(model);
                     }
-                    if (model->hsfData->cenvCnt) {
+                    if (model->hsfData->cenvNum) {
                         EnvelopeProc(model->hsfData);
                     }
                     PPCSync();

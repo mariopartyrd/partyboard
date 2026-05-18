@@ -716,15 +716,15 @@ void fn_1_1BF0(omObjData *object)
     Hu3DModelAttrSet(var_r28, HU3D_MOTATTR_LOOP);
     Hu3DModelShadowSet(var_r28);
     for (var_r29 = 0; var_r29 < 8; var_r29++) {
-        object->motion[var_r29] = CharModelMotionCreate(var_r31->unk_01, lbl_1_data_C4[var_r29]);
+        object->motion[var_r29] = CharMotionCreate(var_r31->unk_01, lbl_1_data_C4[var_r29]);
     }
-    CharModelMotionDataClose(var_r31->unk_01);
-    CharModelMotionSet(var_r31->unk_01, object->motion[var_r31->unk_18]);
+    CharMotionDataClose(var_r31->unk_01);
+    CharMotionSet(var_r31->unk_01, object->motion[var_r31->unk_18]);
     omSetTra(object, var_r31->unk_2C.x, var_r31->unk_2C.y, var_r31->unk_2C.z);
     Hu3DModelPosSet(var_r28, var_r31->unk_2C.x, var_r31->unk_2C.y, var_r31->unk_2C.z);
     Hu3DModelRotSet(var_r28, 0.0f, 30.0f, 0.0f);
-    CharModelStepTypeSet(var_r31->unk_01, 1);
-    CharModelVoiceEnableSet(var_r31->unk_01, object->motion[3], 0);
+    CharModelStepFxSet(var_r31->unk_01, 1);
+    CharMotionVoiceOnSet(var_r31->unk_01, object->motion[3], 0);
     object->func = fn_1_1FA0;
 }
 
@@ -1039,7 +1039,7 @@ void fn_1_2E24(omObjData *object)
             break;
         case 3:
             var_r27 = 0;
-            if ((Hu3DData[var_r25].unk_0C == -1) && (CharModelMotionEndCheck(var_r31->unk_01) != 0)) {
+            if ((Hu3DData[var_r25].unk_0C == -1) && (CharMotionEndCheck(var_r31->unk_01) != 0)) {
                 var_r31->unk_48 += -146.0f / REFRESH_RATE_F;
             }
             else {
@@ -1062,13 +1062,13 @@ void fn_1_2E24(omObjData *object)
             break;
         case 4:
             var_r31->unk_48 += -146.0f / REFRESH_RATE_F;
-            if ((var_r31->unk_0C != 0) && (CharModelMotionEndCheck(var_r31->unk_01) != 0)) {
+            if ((var_r31->unk_0C != 0) && (CharMotionEndCheck(var_r31->unk_01) != 0)) {
                 var_r28 = 5;
                 var_r27 = 0;
             }
             break;
         case 5:
-            if (CharModelMotionEndCheck(var_r31->unk_01) != 0) {
+            if (CharMotionEndCheck(var_r31->unk_01) != 0) {
                 var_r28 = 0;
                 var_r27 = 1;
             }
@@ -1100,8 +1100,8 @@ void fn_1_2E24(omObjData *object)
     if (var_r28 != var_r31->unk_1A) {
         var_r31->unk_1A = var_r28;
         var_r31->unk_18 = var_r28;
-        CharModelMotionShiftSet(var_r31->unk_01, object->motion[var_r31->unk_18], 0.0f, 8.0f, var_r27);
-        var_r31->unk_28 = CharModelMotionMaxTimeGet(var_r31->unk_01);
+        CharMotionShiftSet(var_r31->unk_01, object->motion[var_r31->unk_18], 0.0f, 8.0f, var_r27);
+        var_r31->unk_28 = CharMotionMaxTimeGet(var_r31->unk_01);
     }
     omSetTra(object, var_r31->unk_2C.x, var_r31->unk_2C.y, var_r31->unk_2C.z);
     omSetRot(object, var_r31->unk_38.x, var_r31->unk_38.y, var_r31->unk_38.z);
@@ -1322,13 +1322,13 @@ void fn_1_3F38(ModelData *model, ParticleData *particle, Mtx matrix)
     float var_f30;
     float var_f29;
 
-    HsfanimStruct01 *var_r31;
+    HU3DPARTICLEDATA *var_r31;
     s32 var_r29;
 
     switch (particle->unk_00) {
         case 0:
             var_f29 = 360.0f / particle->unk_30;
-            for (var_r31 = particle->unk_48, var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
+            for (var_r31 = particle->data, var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
                 var_r31->unk08.x = sind((var_f29 * var_r29)) * (1.0f + (0.1f * (6.0f * ((fn_1_43B8() - 0x8000) / 32768.0f))));
                 var_r31->unk08.y = 0.0f;
                 var_r31->unk08.z = cosd((var_f29 * var_r29)) * (1.0f + (0.1f * (6.0f * ((fn_1_43B8() - 0x8000) / 32768.0f))));
@@ -1342,7 +1342,7 @@ void fn_1_3F38(ModelData *model, ParticleData *particle, Mtx matrix)
             particle->unk_02--;
             var_f31 = ((REFRESH_RATE_F / 2) - particle->unk_02) / (REFRESH_RATE_F / 2);
             var_f30 = particle->unk_02 / (REFRESH_RATE_F / 2);
-            for (var_r31 = particle->unk_48, var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
+            for (var_r31 = particle->data, var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
                 var_r31->unk34.x += 5.0f * var_f30 * var_r31->unk08.x;
                 var_r31->unk34.y = 20.0f;
                 var_r31->unk34.z += 5.0f * var_f30 * var_r31->unk08.z;
@@ -1358,7 +1358,7 @@ void fn_1_3F38(ModelData *model, ParticleData *particle, Mtx matrix)
             Hu3DModelKill(particle->unk_2E);
             return;
     }
-    DCFlushRange(particle->unk_48, particle->unk_30 * sizeof(HsfanimStruct01));
+    DCFlushRange(particle->data, particle->unk_30 * sizeof(HU3DPARTICLEDATA));
 }
 
 u32 lbl_1_data_154 = 0x41C64E6D;

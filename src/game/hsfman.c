@@ -34,7 +34,7 @@ AnimData *reflectAnim[5];
 SHARED_SYM AnimData *hiliteAnim[4];
 ThreeDProjectionStruct Hu3DProjection[4];
 SHARED_SYM ShadowData Hu3DShadowData;
-HsfScene FogData;
+HSFSCENE FogData;
 SHARED_SYM Mtx Hu3DCameraMtx;
 SHARED_SYM Mtx Hu3DCameraMtxXPose;
 SHARED_SYM LightData Hu3DGlobalLight[0x8];
@@ -224,7 +224,7 @@ void Hu3DExec(void) {
                 HuSprExec(0x7F);
             }
             if (FogData.fogType != GX_FOG_NONE) {
-                GXSetFog(FogData.fogType, FogData.start, FogData.end, camera->nnear, camera->ffar, FogData.color);
+                GXSetFog(FogData.fogType, FogData.fogStart, FogData.fogEnd, camera->nnear, camera->ffar, FogData.color);
             }
             for (j = 0; j < 8; j++) {
                 if (layerHook[j] != 0) {
@@ -280,7 +280,7 @@ void Hu3DExec(void) {
                                             if ((data->attr & 0x400) != 0) {
                                                 ClusterProc(data);
                                             }
-                                            if (data->hsfData->cenvCnt != 0) {
+                                            if (data->hsfData->cenvNum != 0) {
                                                 EnvelopeProc(data->hsfData);
                                             }
                                             PPCSync();
@@ -388,7 +388,7 @@ void Hu3DNoSyncSet(s32 arg0) {
 }
 
 s16 Hu3DModelCreate(void *arg0) {
-    HsfData* temp_r0;
+    HSFDATA* temp_r0;
     ModelData* var_r31;
     s16 i;
     s16 var_r30;
@@ -418,17 +418,17 @@ s16 Hu3DModelCreate(void *arg0) {
     var_r31->unk_0C = -1;
     var_r31->unk_0E = -1;
     var_r31->unk_64 = 0.0f;
-    if (var_r31->hsfData->motionCnt != 0) {
+    if (var_r31->hsfData->motionNum != 0) {
         var_r31->unk_08 = var_r31->unk_20 = Hu3DMotionModelCreate(var_r30);
-        if (var_r31->hsfData->cenvCnt != 0) {
+        if (var_r31->hsfData->cenvNum != 0) {
             Hu3DMotionExec(var_r30, var_r31->unk_08, 0.0f, 0);
             EnvelopeProc(var_r31->hsfData);
             PPCSync();
         }
-        if (var_r31->hsfData->clusterCnt != 0) {
+        if (var_r31->hsfData->clusterNum != 0) {
             Hu3DMotionClusterSet(var_r30, var_r31->unk_08);
         }
-        if (var_r31->hsfData->shapeCnt != 0) {
+        if (var_r31->hsfData->shapeNum != 0) {
             Hu3DMotionShapeSet(var_r30, var_r31->unk_08);
         }
         var_r31->unk_6C = 0.0f;
@@ -456,14 +456,14 @@ s16 Hu3DModelCreate(void *arg0) {
     MTXIdentity(var_r31->unk_F0);
     layerNum[0] += 1;
     HuMemDCFlush(HEAP_DATA);
-    if ((var_r31->hsfData->sceneCnt != 0) && ((var_r31->hsfData->scene->start) || (var_r31->hsfData->scene->end))) {
-        Hu3DFogSet(var_r31->hsfData->scene->start, var_r31->hsfData->scene->end, var_r31->hsfData->scene->color.r, var_r31->hsfData->scene->color.g, var_r31->hsfData->scene->color.b);
+    if ((var_r31->hsfData->sceneNum != 0) && ((var_r31->hsfData->scene->fogStart) || (var_r31->hsfData->scene->fogEnd))) {
+        Hu3DFogSet(var_r31->hsfData->scene->fogStart, var_r31->hsfData->scene->fogEnd, var_r31->hsfData->scene->color.r, var_r31->hsfData->scene->color.g, var_r31->hsfData->scene->color.b);
     }
     return var_r30;
 }
 
 s16 Hu3DModelLink(s16 arg0) {
-    HsfObject* temp_r3_2;
+    HSFOBJECT* temp_r3_2;
     ModelData* temp_r30;
     ModelData* var_r31;
     s16 var_r28;
@@ -480,11 +480,11 @@ s16 Hu3DModelLink(s16 arg0) {
         return -1;
     }
     var_r31->unk_C8 = temp_r30->hsfData;
-    var_r31->hsfData = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfData), var_r31->unk_4C);
+    var_r31->hsfData = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFDATA), var_r31->unk_4C);
     var_r31->unk_4C = (uintptr_t)var_r31->hsfData;
     *var_r31->hsfData = *temp_r30->hsfData;
     temp_r3_2 = Hu3DObjDuplicate(var_r31->hsfData, var_r31->unk_4C);
-    var_r31->hsfData->root = (HsfObject*)((uintptr_t)temp_r3_2 + ((uintptr_t)var_r31->hsfData->root - (uintptr_t)var_r31->hsfData->object));
+    var_r31->hsfData->root = (HSFOBJECT*)((uintptr_t)temp_r3_2 + ((uintptr_t)var_r31->hsfData->root - (uintptr_t)var_r31->hsfData->object));
     var_r31->hsfData->object = temp_r3_2;
     var_r31->unk_48 = temp_r30->unk_48;
     var_r31->attr = temp_r30->attr;
@@ -528,7 +528,7 @@ s16 Hu3DModelLink(s16 arg0) {
 }
 
 s16 Hu3DHookFuncCreate(ModelHookFunc hook) {
-    HsfData* sp8;
+    HSFDATA* sp8;
     ModelData* var_r31;
     s16 var_r29;
     s16 i;
@@ -576,7 +576,7 @@ s16 Hu3DHookFuncCreate(ModelHookFunc hook) {
 }
 
 void Hu3DModelKill(s16 arg0) {
-    HsfData* var_r28;
+    HSFDATA* var_r28;
     ModelData* temp_r31;
     ModelData* var_r30;
     ParticleData *copy;
@@ -803,35 +803,35 @@ void Hu3DModelLayerSet(s16 arg0, s16 arg1) {
     layerNum[arg1] += 1;
 }
 
-HsfObject* Hu3DModelObjPtrGet(s16 arg0, char *arg1) {
+HSFOBJECT* Hu3DModelObjPtrGet(s16 arg0, char *arg1) {
     char name[0x100];
     s32 spC;
     s16 sp8;
-    HsfData* temp_r31;
+    HSFDATA* temp_r31;
     s16 var_r30;
-    HsfObject* var_r29;
-    HsfObject* var_r28;
+    HSFOBJECT* var_r29;
+    HSFOBJECT* var_r28;
     u32 var_r4;
 
     temp_r31 = Hu3DData[arg0].hsfData;
     var_r29 = temp_r31->object;
     strcpy(name, MakeObjectName(arg1));
     
-    for (var_r30 = 0; var_r30 < temp_r31->objectCnt; var_r29++, var_r30++) {
+    for (var_r30 = 0; var_r30 < temp_r31->objectNum; var_r29++, var_r30++) {
         var_r28 = var_r29;
         if (strcmp(name, var_r28->name) == 0) {
             return var_r29;
         }
     }
-    if (var_r30 == temp_r31->objectCnt) {
+    if (var_r30 == temp_r31->objectNum) {
         OSReport("Error: OBJPtr Error!\n");
     }
     return NULL;
 }
 
-static inline void inlineFunc(HsfObject* var_r26, u32 a) {
+static inline void inlineFunc(HSFOBJECT* var_r26, u32 a) {
     HsfConstData* temp_r25;
-    HsfObject* copy = var_r26;
+    HSFOBJECT* copy = var_r26;
     if (copy->type == HSF_OBJ_MESH) {
         temp_r25 = copy->constData;
         temp_r25->flags |= a;
@@ -839,18 +839,18 @@ static inline void inlineFunc(HsfObject* var_r26, u32 a) {
 }
 
 void Hu3DModelTPLvlSet(s16 arg0, f32 arg8) {
-    HsfMaterial* var_r31;
-    HsfData* temp_r30;
+    HSFMATERIAL* var_r31;
+    HSFDATA* temp_r30;
     s16 i;
     ModelData* temp_r28;
-    HsfObject* var_r27;
-    HsfObject* var_r26;
+    HSFOBJECT* var_r27;
+    HSFOBJECT* var_r26;
     HsfConstData* temp_r25;
 
     temp_r28 = &Hu3DData[arg0];
     temp_r30 = temp_r28->hsfData;
     var_r31 = temp_r30->material;
-    for (i = 0; i < temp_r30->materialCnt; i++, var_r31++) {
+    for (i = 0; i < temp_r30->materialNum; i++, var_r31++) {
         var_r31->invAlpha = 1.0f - arg8;
         if (1.0f != arg8) {
             var_r31->pass = (var_r31->pass & 0xF0) | 1;
@@ -859,7 +859,7 @@ void Hu3DModelTPLvlSet(s16 arg0, f32 arg8) {
         }
     }
     var_r26 = temp_r30->object;
-    for (i = 0; i < temp_r30->objectCnt; var_r26++, i++) {
+    for (i = 0; i < temp_r30->objectNum; var_r26++, i++) {
         var_r27 = var_r26;
         if (var_r27->type == HSF_OBJ_MESH) {
             temp_r25 = var_r27->constData;
@@ -870,17 +870,17 @@ void Hu3DModelTPLvlSet(s16 arg0, f32 arg8) {
 }
 
 void Hu3DModelHiliteMapSet(s16 arg0, AnimData *arg1) {
-    HsfObject* copy;
+    HSFOBJECT* copy;
     ModelData* temp_r30;
-    HsfData* temp_r29;
+    HSFDATA* temp_r29;
     s16 i;
-    HsfObject* var_r27;
+    HSFOBJECT* var_r27;
     HsfConstData* temp_r25;
 
     temp_r30 = &Hu3DData[arg0];
     temp_r29 = temp_r30->hsfData;
     var_r27 = temp_r29->object;
-    for (i = 0; i < temp_r29->objectCnt; var_r27++, i++) {
+    for (i = 0; i < temp_r29->objectNum; var_r27++, i++) {
         copy = var_r27;
         if (copy->type == HSF_OBJ_MESH) {
             copy->flags |= 0x100;
@@ -891,18 +891,18 @@ void Hu3DModelHiliteMapSet(s16 arg0, AnimData *arg1) {
     }
 }
 
-static inline void constDataFlagSet(HsfObject* var_r26, u32 a) {
+static inline void constDataFlagSet(HSFOBJECT* var_r26, u32 a) {
     HsfConstData* temp_r25;
-    HsfObject* copy = var_r26;
+    HSFOBJECT* copy = var_r26;
     if (copy->constData != 0) {
         temp_r25 = copy->constData;
         temp_r25->flags |= a;
     } 
 }
 
-static inline void constDataFlagReset(HsfObject* var_r26, u32 a) {
+static inline void constDataFlagReset(HSFOBJECT* var_r26, u32 a) {
     HsfConstData* temp_r25;
-    HsfObject* copy = var_r26;
+    HSFOBJECT* copy = var_r26;
     if (copy->constData != 0) {
         temp_r25 = copy->constData;
         temp_r25->flags &= ~a;
@@ -911,11 +911,11 @@ static inline void constDataFlagReset(HsfObject* var_r26, u32 a) {
 
 void Hu3DModelShadowSet(s16 arg0) {
     HsfConstData* temp_r26;
-    HsfData* temp_r30;
+    HSFDATA* temp_r30;
     HsfConstData* temp_r25;
-    HsfObject* copy;
+    HSFOBJECT* copy;
     s16 var_r28;
-    HsfObject* var_r27;
+    HSFOBJECT* var_r27;
     ModelData* temp_r31;
 
     temp_r31 = &Hu3DData[arg0];
@@ -926,25 +926,25 @@ void Hu3DModelShadowSet(s16 arg0) {
     temp_r31->attr |= HU3D_ATTR_SHADOW;
     var_r27 = temp_r30->object;
     
-    for (var_r28 = 0; var_r28 < temp_r30->objectCnt; var_r28++, var_r27++) {
+    for (var_r28 = 0; var_r28 < temp_r30->objectNum; var_r28++, var_r27++) {
         constDataFlagSet(var_r27, 0x400);
     }
 }
 
 void Hu3DModelShadowReset(s16 arg0) {
     s16 var_r28;
-    HsfObject* var_r27;
+    HSFOBJECT* var_r27;
     HsfConstData* temp_r26;
     ModelData* temp_r31;
-    HsfData* temp_r30;
-    HsfObject* copy;
+    HSFDATA* temp_r30;
+    HSFOBJECT* copy;
 
     temp_r31 = &Hu3DData[(s16) arg0];
     temp_r30 = temp_r31->hsfData;
     temp_r31->attr &= ~HU3D_ATTR_SHADOW;
     Hu3DShadowCamBit -= 1;
     var_r27 = temp_r30->object;
-    for (var_r28 = 0; var_r28 < temp_r30->objectCnt; var_r28++, var_r27++) {
+    for (var_r28 = 0; var_r28 < temp_r30->objectNum; var_r28++, var_r27++) {
         constDataFlagReset(var_r27, 0x400);
     }
 }
@@ -965,31 +965,31 @@ void Hu3DModelShadowDispOff(s16 arg0) {
 
 void Hu3DModelShadowMapSet(s16 arg0) {
     HsfConstData* temp_r27;
-    HsfData* temp_r31;
+    HSFDATA* temp_r31;
     s16 i;
-    HsfObject* var_r28;
-    HsfObject* copy;
+    HSFOBJECT* var_r28;
+    HSFOBJECT* copy;
 
     temp_r31 = Hu3DData[arg0].hsfData;
     var_r28 = temp_r31->object;
-    for (i = 0; i < temp_r31->objectCnt; i++, var_r28++) {
+    for (i = 0; i < temp_r31->objectNum; i++, var_r28++) {
         constDataFlagSet(var_r28, 8);
     }
 }
 
 void Hu3DModelShadowMapObjSet(s16 arg0, char *arg1) {
     char name[0x100];
-    HsfData* temp_r30;
+    HSFDATA* temp_r30;
     s16 i;
-    HsfObject* var_r28;
-    HsfObject* copy;
+    HSFOBJECT* var_r28;
+    HSFOBJECT* copy;
     HsfConstData* temp_r27;
 
     temp_r30 = Hu3DData[arg0].hsfData;
     var_r28 = temp_r30->object;
     strcpy(name, MakeObjectName(arg1));
     
-    for (i = 0; i < temp_r30->objectCnt; i++, var_r28++) {
+    for (i = 0; i < temp_r30->objectNum; i++, var_r28++) {
         copy = var_r28;
         if (copy->constData != 0x0 && strcmp(name, copy->name) == 0) {
             temp_r27 = copy->constData;
@@ -1011,17 +1011,17 @@ void Hu3DModelAmbSet(s16 arg0, f32 arg8, f32 arg9, f32 argA) {
 void Hu3DModelHookSet(s16 arg0, char *arg1, s16 arg2) {
     char name[0x100];
     ModelData* data;
-    HsfData* temp_r30;
+    HSFDATA* temp_r30;
     s16 i;
     HsfConstData *constData;
-    HsfObject* copy;
-    HsfObject* var_r27;
+    HSFOBJECT* copy;
+    HSFOBJECT* var_r27;
 
     temp_r30 = Hu3DData[arg0].hsfData;
     var_r27 = temp_r30->object;
     strcpy(name, MakeObjectName(arg1));
     
-    for (i = 0; i < temp_r30->objectCnt; i++, var_r27++) {
+    for (i = 0; i < temp_r30->objectNum; i++, var_r27++) {
         copy = var_r27;
         if (copy->constData != 0) {
             if (strcmp(name, copy->name) == 0) {
@@ -1039,16 +1039,16 @@ void Hu3DModelHookSet(s16 arg0, char *arg1, s16 arg2) {
 
 void Hu3DModelHookReset(s16 arg0) {
     HsfConstData* temp_r31;
-    HsfData* temp_r30;
-    HsfObject* copy;
+    HSFDATA* temp_r30;
+    HSFOBJECT* copy;
     ModelData* temp_r28;
     s16 var_r27;
-    HsfObject* var_r26;
+    HSFOBJECT* var_r26;
     s16 temp_r0;
 
     temp_r30 = Hu3DData[arg0].hsfData;
     var_r26 = temp_r30->object;
-    for (var_r27 = 0; var_r27 < temp_r30->objectCnt; var_r27++, var_r26++) {
+    for (var_r27 = 0; var_r27 < temp_r30->objectNum; var_r27++, var_r26++) {
         copy = var_r26;
         if (copy->constData != 0) {
             temp_r31 = copy->constData;
@@ -1066,18 +1066,18 @@ void Hu3DModelHookReset(s16 arg0) {
 void Hu3DModelHookObjReset(s16 arg0, char *arg1) {
     char name[0x100];
     ModelData* temp_r28;
-    HsfData* temp_r30;
-    HsfObject* copy;
+    HSFDATA* temp_r30;
+    HSFOBJECT* copy;
     HsfConstData* temp_r29;
     s16 i;
-    HsfObject* var_r26;
+    HSFOBJECT* var_r26;
     s16 temp_r0;
 
     temp_r30 = Hu3DData[arg0].hsfData;
     var_r26 = temp_r30->object;
     strcpy(name, MakeObjectName(arg1));
     
-    for (i = 0; i < temp_r30->objectCnt; i++, var_r26++) {
+    for (i = 0; i < temp_r30->objectNum; i++, var_r26++) {
         copy = var_r26;
         if (copy->constData != 0) {
             if (strcmp(name, copy->name) == 0) {
@@ -1110,8 +1110,8 @@ void Hu3DModelProjectionReset(s16 arg0, s16 arg1) {
 }
 
 void Hu3DModelHiliteTypeSet(s16 arg0, s16 arg1) {
-    HsfData* temp_r30;
-    HsfMaterial* var_r31;
+    HSFDATA* temp_r30;
+    HSFMATERIAL* var_r31;
     ModelData* temp_r29;
     ModelData* temp_r5;
     s16 i;
@@ -1123,7 +1123,7 @@ void Hu3DModelHiliteTypeSet(s16 arg0, s16 arg1) {
 
     arg1 = ((s16) arg1) * 0x10;
     arg1 &= 0xF0;
-    for (i = 0; i < temp_r30->materialCnt; i++, var_r31++) {
+    for (i = 0; i < temp_r30->materialNum; i++, var_r31++) {
         var_r31->pass = var_r31->pass & 0xF | arg1;
         var_r31->flags |= 0x100;
     }
@@ -1312,11 +1312,11 @@ BOOL Hu3DModelCameraInfoSet(s16 arg0, u16 arg1) {
     CameraData* cam;
     CameraData* temp_r30;
     CameraData* temp_r29;
-    HsfObject* obj_copy;
+    HSFOBJECT* obj_copy;
     ModelData* temp_r24;
     ModelData* temp_r28;
-    HsfObject* var_r23;
-    HsfData* temp_r27;
+    HSFOBJECT* var_r23;
+    HSFDATA* temp_r27;
     Point3d sp14;
     Point3d sp8;
     f32 temp_f31;
@@ -1331,22 +1331,22 @@ BOOL Hu3DModelCameraInfoSet(s16 arg0, u16 arg1) {
     cam = &Hu3DCamera[arg1];
     var_r23 = temp_r27->object;
     
-    for (i = 0; i < temp_r27->objectCnt; i++, var_r23++) {
+    for (i = 0; i < temp_r27->objectNum; i++, var_r23++) {
         obj_copy = var_r23;
         if (obj_copy->type == HSF_OBJ_CAMERA) {
-            temp_f31 = obj_copy->camera.aspect_dupe;
+            temp_f31 = obj_copy->camera.upRot;
             cam->aspect_dupe = temp_f31;
             
-            VECSubtract((Point3d* ) &obj_copy->camera.target, (Point3d* ) &obj_copy->camera.pos, &sp8);
+            VECSubtract((Point3d* ) &obj_copy->camera.pos, (Point3d* ) &obj_copy->camera.target, &sp8);
             
             sp14.x = ((sp8.x * sp8.y * (1.0 - cosd(temp_f31))) - (sp8.z * sind(temp_f31)));
             sp14.y = ((sp8.y * sp8.y) + (1.0f - (sp8.y * sp8.y)) * cosd(temp_f31));
             sp14.z = (((sp8.y * sp8.z) * (1.0 - cosd(temp_f31))) + (sp8.x * sind(temp_f31)));
             VECNormalize(&sp14, &sp8);
 
-            Hu3DCameraPosSet(arg1, obj_copy->camera.target.x, obj_copy->camera.target.y, obj_copy->camera.target.z,
+            Hu3DCameraPosSet(arg1, obj_copy->camera.pos.x, obj_copy->camera.pos.y, obj_copy->camera.pos.z,
                              sp8.x, sp8.y, sp8.z, 
-                             obj_copy->camera.pos.x, obj_copy->camera.pos.y, obj_copy->camera.pos.z);
+                             obj_copy->camera.target.x, obj_copy->camera.target.y, obj_copy->camera.target.z);
             
             Hu3DCameraPerspectiveSet(arg1, obj_copy->camera.fov, obj_copy->camera.nnear, obj_copy->camera.ffar, HU_DISP_ASPECT);
             
@@ -1780,9 +1780,9 @@ s32 Hu3DModelLightInfoSet(s16 modelId, s16 staticF) {
     u8 spE;
     u8 spD;
     u8 spC;
-    HsfData* hsf;
-    HsfObject* obj;
-    HsfObject* objPtr;
+    HSFDATA* hsf;
+    HSFOBJECT* obj;
+    HSFOBJECT* objPtr;
     ModelData* modelP;
     s16 i;
     s16 lightNum;
@@ -1794,7 +1794,7 @@ s32 Hu3DModelLightInfoSet(s16 modelId, s16 staticF) {
     }
     objPtr = hsf->object;
 
-    for (i = lightNum = 0; i < hsf->objectCnt; i++, objPtr++) {
+    for (i = lightNum = 0; i < hsf->objectNum; i++, objPtr++) {
         obj = objPtr;
         if (obj->type != HSF_OBJ_LIGHT) {
             continue;
@@ -1927,8 +1927,8 @@ void Hu3DReflectNoSet(s16 arg0) {
 
 void Hu3DFogSet(f32 arg0, f32 arg1, u8 arg2, u8 arg3, u8 arg4) {
     FogData.fogType = 4;
-    FogData.start = arg0;
-    FogData.end = arg1;
+    FogData.fogStart = arg0;
+    FogData.fogEnd = arg1;
     FogData.color.r = arg2;
     FogData.color.g = arg3;
     FogData.color.b = arg4;
@@ -2043,7 +2043,7 @@ void Hu3DShadowExec(void) {
                     if ((var_r31->attr & HU3D_ATTR_CLUSTER_ON) != 0) {
                         ClusterProc(var_r31);
                     }
-                    if (var_r31->hsfData->cenvCnt != 0) {
+                    if (var_r31->hsfData->cenvNum != 0) {
                         EnvelopeProc(var_r31->hsfData);
                     }
                     PPCSync();
@@ -2147,11 +2147,11 @@ void Hu3DProjectionTPLvlSet(s16 arg0, f32 arg8) {
 }
 
 void Hu3DMipMapSet(char* arg0, s16 arg1, char* arg2, f32 arg8) {
-    HsfBitmap* temp_r31;
+    HSFBITMAP* temp_r31;
     AnimBmpData* var_r30;
     s16 i;
-    HsfData* temp_r27;
-    HsfAttribute* var_r26;
+    HSFDATA* temp_r27;
+    HSFATTRIBUTE* var_r26;
     ModelData* temp_r25;
     s32 var_r24;
     void *var_r23;
@@ -2161,12 +2161,12 @@ void Hu3DMipMapSet(char* arg0, s16 arg1, char* arg2, f32 arg8) {
     temp_r25 = &Hu3DData[arg1];
     temp_r27 = temp_r25->hsfData;
     var_r26 = temp_r27->attribute;
-    for (i = 0; i < temp_r27->attributeCnt; i++, var_r26++) {
+    for (i = 0; i < temp_r27->attributeNum; i++, var_r26++) {
         if (strcmp(arg2, var_r26->bitmap->name) == 0) {
             break;
         }
     }
-    if (i == temp_r27->attributeCnt) {
+    if (i == temp_r27->attributeNum) {
         OSReport("Error: Not Found %s for MipMapSet\n", arg2);
         return;
     }

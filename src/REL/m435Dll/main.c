@@ -2077,13 +2077,13 @@ void fn_1_9824(s32 arg0, s32 arg1) {
 
 void fn_1_984C(omObjData* arg0) {
     StructBssE88* temp_r30;
-    HsfMaterial* var_r31;
-    HsfData* temp_r28;
+    HSFMATERIAL* var_r31;
+    HSFDATA* temp_r28;
     char** temp_r27;
     s32 var_r23;
     s32 i, j;
     ModelData* temp_r25;
-    HsfAttribute* temp_r24;
+    HSFATTRIBUTE* temp_r24;
 
     temp_r30 = &lbl_1_bss_E88[arg0->work[0]];
     if (temp_r30->unk08 != 1) {
@@ -2094,7 +2094,7 @@ void fn_1_984C(omObjData* arg0) {
     temp_r28 = temp_r25->hsfData;
     var_r31 = temp_r28->material;
     if (temp_r30->unk34 == 3) {
-        for (i = 0; i < temp_r25->hsfData->materialCnt; i++, var_r31++) {
+        for (i = 0; i < temp_r25->hsfData->materialNum; i++, var_r31++) {
             if (i == 1 || i == 2) {
                 continue;
             }
@@ -2112,11 +2112,11 @@ void fn_1_984C(omObjData* arg0) {
             }
         }
     } else {
-        temp_r27 = CharModelTexNameGet(temp_r30->unk34, 2);
-        for (i = 0; i < temp_r28->materialCnt; i++, var_r31++) {
+        temp_r27 = CharModelEyeBmpGet(temp_r30->unk34, 2);
+        for (i = 0; i < temp_r28->materialNum; i++, var_r31++) {
             var_r23 = 1;
-            for (j = 0; j < var_r31->numAttrs; j++) {
-                temp_r24 = &temp_r28->attribute[var_r31->attrs[j]];
+            for (j = 0; j < var_r31->attrNum; j++) {
+                temp_r24 = &temp_r28->attribute[var_r31->attr[j]];
                 if (strcmp(temp_r27[0], temp_r24->bitmap->name) == 0 || strcmp(temp_r27[1], temp_r24->bitmap->name) == 0) {
                     var_r23 = 0;
                 }
@@ -2216,10 +2216,10 @@ void fn_1_A148(omObjData* arg0) {
     };
 
     arg0->model[0] = CharModelCreate(temp_r31->unk34, 2);
-    arg0->motion[0] = CharModelMotionCreate(temp_r31->unk34, DATA_MAKE_NUM(DATADIR_MARIOMOT, 0));
-    arg0->motion[1] = CharModelMotionCreate(temp_r31->unk34, DATA_MAKE_NUM(DATADIR_MARIOMOT, 2));
-    arg0->motion[2] = CharModelMotionCreate(temp_r31->unk34, DATA_MAKE_NUM(DATADIR_MARIOMOT, 3));
-    arg0->motion[6] = CharModelMotionCreate(temp_r31->unk34, DATA_MAKE_NUM(DATADIR_MARIOMOT, 28));
+    arg0->motion[0] = CharMotionCreate(temp_r31->unk34, DATA_MAKE_NUM(DATADIR_MARIOMOT, 0));
+    arg0->motion[1] = CharMotionCreate(temp_r31->unk34, DATA_MAKE_NUM(DATADIR_MARIOMOT, 2));
+    arg0->motion[2] = CharMotionCreate(temp_r31->unk34, DATA_MAKE_NUM(DATADIR_MARIOMOT, 3));
+    arg0->motion[6] = CharMotionCreate(temp_r31->unk34, DATA_MAKE_NUM(DATADIR_MARIOMOT, 28));
     arg0->motion[3] = Hu3DJointMotionFile(arg0->model[0], DATA_MAKE_NUM(DATADIR_M435, temp_r31->unk34));
     arg0->motion[4] = Hu3DJointMotionFile(arg0->model[0], DATA_MAKE_NUM(DATADIR_M435, 8 + temp_r31->unk34));
     arg0->motion[5] = Hu3DJointMotionFile(arg0->model[0], DATA_MAKE_NUM(DATADIR_M435, 16 + temp_r31->unk34));
@@ -2238,7 +2238,7 @@ void fn_1_A148(omObjData* arg0) {
     temp_r31->unk40 = temp_r31->unk44 = temp_r31->unk48 = 0.0f;
     temp_r31->unk4C = temp_r31->unk50 = temp_r31->unk54 = 0.0f;
     temp_r31->unk3C = 1.0f;
-    CharModelMotionDataClose(temp_r31->unk34);
+    CharMotionDataClose(temp_r31->unk34);
     arg0->func = fn_1_9D88;
 }
 

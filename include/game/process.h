@@ -35,7 +35,7 @@ typedef struct process {
 #endif
     void (*dtor)(void);
     union {
-        void *user_data;
+        void *user_data; // TODO rename to property
         volatile uintptr_t user_data_u32;
     };
 } Process;

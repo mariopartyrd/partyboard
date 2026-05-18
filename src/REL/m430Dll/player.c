@@ -362,8 +362,8 @@ void fn_1_C1E4(omObjData *object)
     s32 var_r29;
     M430PlayerBss174Struct *var_r28;
     u32 var_r27;
-    HsfData *var_r26;
-    HsfMaterial *var_r25;
+    HSFDATA *var_r26;
+    HSFMATERIAL *var_r25;
     ModelData *var_r24;
     s32 var_r23;
 
@@ -412,21 +412,21 @@ void fn_1_C1E4(omObjData *object)
     object->model[0] = CharModelCreate(work->unk_38, 4);
     Hu3DModelCameraSet(object->model[0], 3);
     Hu3DModelLayerSet(object->model[0], 6);
-    CharModelStepTypeSet(work->unk_38, 3);
+    CharModelStepFxSet(work->unk_38, 3);
     if (work->unk_0C == 0) {
         for (var_r29 = 0; var_r29 < 7; var_r29++) {
             if ((lbl_1_data_170[var_r29].unk_04) == 0xFFFFFFFF) {
-                object->motion[var_r29] = CharModelMotionCreate(work->unk_38, lbl_1_data_170[var_r29].unk_00);
+                object->motion[var_r29] = CharMotionCreate(work->unk_38, lbl_1_data_170[var_r29].unk_00);
             }
             else {
                 object->motion[var_r29] = Hu3DJointMotionFile(object->model[0], work->unk_38 + lbl_1_data_1C8[lbl_1_data_170[var_r29].unk_04]);
             }
             if (var_r29 == 5) {
-                CharModelVoiceEnableSet(work->unk_38, object->motion[var_r29], 0);
+                CharMotionVoiceOnSet(work->unk_38, object->motion[var_r29], 0);
             }
         }
         work->unk_58 = 0;
-        CharModelMotionSet(work->unk_38, object->motion[work->unk_58]);
+        CharMotionSet(work->unk_38, object->motion[work->unk_58]);
         object->model[1] = Hu3DModelCreateFile(lbl_1_data_278[work->unk_04]);
         Hu3DModelLayerSet(object->model[1], 2);
         Hu3DModelCameraSet(object->model[1], 3);
@@ -452,17 +452,17 @@ void fn_1_C1E4(omObjData *object)
     else {
         for (var_r29 = 0; var_r29 < 4; var_r29++) {
             if (lbl_1_data_1A8[var_r29].unk_04 == 0xFFFFFFFF) {
-                object->motion[var_r29] = CharModelMotionCreate(work->unk_38, lbl_1_data_1A8[var_r29].unk_00);
+                object->motion[var_r29] = CharMotionCreate(work->unk_38, lbl_1_data_1A8[var_r29].unk_00);
             }
             else {
                 object->motion[var_r29] = Hu3DJointMotionFile(object->model[0], work->unk_38 + lbl_1_data_1C8[lbl_1_data_1A8[var_r29].unk_04]);
             }
             if (var_r29 == 2) {
-                CharModelVoiceEnableSet(work->unk_38, object->motion[var_r29], 0);
+                CharMotionVoiceOnSet(work->unk_38, object->motion[var_r29], 0);
             }
         }
         work->unk_58 = 0;
-        CharModelMotionSet(work->unk_38, object->motion[work->unk_58]);
+        CharMotionSet(work->unk_38, object->motion[work->unk_58]);
         Hu3DModelAttrSet(object->model[0], HU3D_MOTATTR_LOOP);
         object->model[1] = Hu3DModelCreateFile(lbl_1_data_280[work->unk_04]);
         Hu3DModelLayerSet(object->model[1], 7);
@@ -473,7 +473,7 @@ void fn_1_C1E4(omObjData *object)
         Hu3DModelLayerSet(object->model[2], 6);
         Hu3DModelCameraSet(object->model[2], 3);
     }
-    CharModelMotionDataClose(work->unk_38);
+    CharMotionDataClose(work->unk_38);
     object->trans.x = work->unk_18;
     if (work->unk_0C == 0) {
         object->trans.y = 0.0f;
@@ -513,7 +513,7 @@ void fn_1_C1E4(omObjData *object)
     if (work->unk_0C != 0) {
         var_r24 = &Hu3DData[object->model[1]];
         var_r26 = var_r24->hsfData;
-        for (var_r25 = var_r26->material, var_r29 = 0; var_r29 < var_r26->materialCnt; var_r29++, var_r25++) {
+        for (var_r25 = var_r26->material, var_r29 = 0; var_r29 < var_r26->materialNum; var_r29++, var_r25++) {
             var_r25->flags |= 2;
         }
     }
@@ -531,8 +531,8 @@ void fn_1_CA3C(omObjData *object)
     M430PlayerWork *work;
     s32 var_r29;
     M430PlayerBss174Struct *var_r28;
-    HsfData *var_r27;
-    HsfMaterial *var_r26;
+    HSFDATA *var_r27;
+    HSFMATERIAL *var_r26;
     ModelData *var_r25;
 
     work = object->data;
@@ -627,7 +627,7 @@ void fn_1_CA3C(omObjData *object)
         else {
             var_r25 = &Hu3DData[object->model[1]];
             var_r27 = var_r25->hsfData;
-            for (var_r26 = var_r27->material, var_r29 = 0; var_r29 < var_r27->materialCnt; var_r29++, var_r26++) {
+            for (var_r26 = var_r27->material, var_r29 = 0; var_r29 < var_r27->materialNum; var_r29++, var_r26++) {
                 var_r26->flags &= 0xFFFFFFFD;
             }
             if (work->unk_6C != -1) {
@@ -747,7 +747,7 @@ void fn_1_D2D0(omObjData *object)
         else {
             work->unk_58 = 1;
         }
-        CharModelMotionSet(work->unk_38, object->motion[work->unk_58]);
+        CharMotionSet(work->unk_38, object->motion[work->unk_58]);
         Hu3DModelCameraSet(object->model[0], 1);
         Hu3DModelAttrReset(object->model[0], HU3D_ATTR_DISPOFF);
         if ((object->model[1] != -1) && (work->unk_0C != 0)) {
@@ -832,7 +832,7 @@ void fn_1_D828(omObjData *var_r30)
             }
             if (var_r28 < 8) {
                 var_r31->unk_58 = 3;
-                CharModelMotionShiftSet(var_r31->unk_38, var_r30->motion[var_r31->unk_58], 0.0f, 10.0f, 0);
+                CharMotionShiftSet(var_r31->unk_38, var_r30->motion[var_r31->unk_58], 0.0f, 10.0f, 0);
                 var_r31->unk_0E = 1;
                 var_r31->unk_10 = 0;
                 if (var_r31->unk_04 == 0) {
@@ -915,9 +915,9 @@ void fn_1_D828(omObjData *var_r30)
         else {
             var_r27 = 0;
         }
-        if ((var_r27 != -1) && (var_r31->unk_58 != var_r27) && (CharModelMotionShiftIDGet(var_r31->unk_38) < 0)) {
+        if ((var_r27 != -1) && (var_r31->unk_58 != var_r27) && (CharMotionShiftIDGet(var_r31->unk_38) < 0)) {
             var_r31->unk_58 = var_r27;
-            CharModelMotionShiftSet(var_r31->unk_38, var_r30->motion[var_r31->unk_58], 0.0f, 10.0f, 0);
+            CharMotionShiftSet(var_r31->unk_38, var_r30->motion[var_r31->unk_58], 0.0f, 10.0f, 0);
         }
     }
     if ((var_r31->unk_44 & 0x100) != 0) {
@@ -1171,7 +1171,7 @@ void fn_1_F0D8(omObjData *object)
             else {
                 work->unk_58 = 1;
             }
-            CharModelMotionSet(work->unk_38, object->motion[work->unk_58]);
+            CharMotionSet(work->unk_38, object->motion[work->unk_58]);
             Hu3DModelShadowSet(object->model[0]);
             if (work->unk_0C == 0) {
                 Hu3DModelCameraSet(object->model[1], 3);
@@ -1224,7 +1224,7 @@ void fn_1_F0D8(omObjData *object)
                 else {
                     work->unk_58 = 3;
                 }
-                CharModelMotionShiftSet(work->unk_38, object->motion[work->unk_58], 0.0f, 8.0f, 0);
+                CharMotionShiftSet(work->unk_38, object->motion[work->unk_58], 0.0f, 8.0f, 0);
                 if (work->unk_0E == 3) {
                     CharFXPlay(work->unk_38, 0x122);
                 }
@@ -1251,7 +1251,7 @@ s32 fn_1_F62C(omObjData *object)
 {
     M430PlayerWork *work = object->data;
     s32 var_r30 = 0;
-    if ((CharModelMotionEndCheck(work->unk_38) != 0) && (CharModelMotionShiftIDGet(work->unk_38) < 0)) {
+    if ((CharMotionEndCheck(work->unk_38) != 0) && (CharMotionShiftIDGet(work->unk_38) < 0)) {
         var_r30 = 1;
     }
     return var_r30;
@@ -2022,7 +2022,7 @@ void fn_1_11C1C(void)
 void fn_1_11D70(void)
 {
     M430PlayerBss164Struct *var_r31;
-    HsfanimStruct01 *var_r30;
+    HU3DPARTICLEDATA *var_r30;
     ParticleData *var_r29;
     s32 var_r28;
     s32 var_r27;
@@ -2035,8 +2035,8 @@ void fn_1_11D70(void)
             if (var_r31->unk_10 > 1) {
                 var_r25 = &Hu3DData[var_r31->unk_04];
                 var_r29 = var_r25->unk_120;
-                for (var_r30 = var_r29->unk_48, var_r27 = 0; var_r27 < var_r29->unk_30; var_r27++, var_r30++) {
-                    if (++var_r30->unk00 > var_r30->unk02) {
+                for (var_r30 = var_r29->data, var_r27 = 0; var_r27 < var_r29->unk_30; var_r27++, var_r30++) {
+                    if (++var_r30->time > var_r30->unk02) {
                         var_r24 = var_r30->unk40.a - 9;
                         if (var_r24 < 0) {
                             var_r30->unk2C = 0.0f;
@@ -2081,7 +2081,7 @@ s32 fn_1_11F90(s32 arg0, float arg8, float arg9, float argA)
     float var_f27;
     float var_f26;
     M430PlayerBss164Struct *var_r31;
-    HsfanimStruct01 *var_r30;
+    HU3DPARTICLEDATA *var_r30;
     s32 var_r29;
     ParticleData *var_r28;
     ModelData *var_r27;
@@ -2107,7 +2107,7 @@ s32 fn_1_11F90(s32 arg0, float arg8, float arg9, float argA)
     var_r27 = &Hu3DData[var_r31->unk_04];
     var_r28 = var_r27->unk_120;
     var_r28->unk_2C = 1;
-    for (var_r30 = var_r28->unk_48, var_r29 = 0; var_r29 < var_r28->unk_30; var_r29++, var_r30++) {
+    for (var_r30 = var_r28->data, var_r29 = 0; var_r29 < var_r28->unk_30; var_r29++, var_r30++) {
         var_f30 = (frand() % 30) + 0x4B;
         var_f29 = frand() % 360;
         var_f27 = sind(var_f30);
@@ -2117,7 +2117,7 @@ s32 fn_1_11F90(s32 arg0, float arg8, float arg9, float argA)
         var_r30->unk08.x = var_f31 * (0.6499999761581421 * (50.0 * (var_f28 * sind(var_f29))));
         var_r30->unk08.y = var_f31 * (50.0f * var_f27 * var_f26);
         var_r30->unk08.z = var_f31 * (0.6499999761581421 * (50.0 * (var_f28 * cosd(var_f29))));
-        var_r30->unk00 = 0;
+        var_r30->time = 0;
         var_r30->unk02 = (frand() % 7) + 0xA;
         var_r30->unk2C = 45.0f;
         var_r30->unk34.x = 0.25f * ((frand() & 0x7F) - 0x40);

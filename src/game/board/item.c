@@ -441,11 +441,11 @@ static Process *ItemShowProc(UnkItemShowProcStruct *arg0, Vec *arg1)
     }
     BoardCameraRotGet(&sp14);
     if (arg0 == NULL || arg0->unk1C != 0) {
-        CharModelLayerSetAll(3);
+        CharEffectLayerSet(3);
         sp20.y += 35.0f;
         sp20.z += 50.0 * cosd(sp14.y);
         sp20.x += 50.0 * sind(sp14.y);
-        CharModelEffectCreate(1, &sp20);
+        CharEffectSmokeCreate(1, &sp20);
         HuPrcSleep(10);
     }
     if (suitMdl >= 0) {
@@ -915,7 +915,7 @@ static void ExecItemPipe(void)
         }
         BoardPlayerMotionShiftSet(sp2C[1], 6, 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
         BoardModelVoiceEnableSet(BoardPlayerModelGet(sp2C[1]), 6, 0);
-        CharModelLayerSetAll(2);
+        CharEffectLayerSet(2);
         BoardPlayerIdleSet(sp2C[0]);
         for (var_r31 = 0; var_r31 < 45; var_r31++) {
             sp9C.y -= 0.044444446f;
@@ -1888,9 +1888,9 @@ static void ExecItemBooBall(void)
     ExecItemBooBallInlineFunc01(60);
     HuPrcKill(temp_r17);
     BoardAudSeqPause(0, 0, 1000);
-    CharModelLayerSetAll(3);
+    CharEffectLayerSet(3);
     BoardModelPosGet(suitMdl, &sp74);
-    CharModelEffectCreate(1, &sp74);
+    CharEffectSmokeCreate(1, &sp74);
     HuAudFXPlay(0x351);
     HuPrcSleep(10);
     BoardModelKill(suitMdl);
@@ -1911,7 +1911,7 @@ static void ForceConsts(void)
 
 static void LampParticleUpdate(ModelData *model, ParticleData *particle, Mtx matrix)
 {
-    HsfanimStruct01 *var_r31;
+    HU3DPARTICLEDATA *var_r31;
     Vec spC;
     float sp8;
     float temp_f31;
@@ -1920,7 +1920,7 @@ static void LampParticleUpdate(ModelData *model, ParticleData *particle, Mtx mat
     s32 j;
 
     if (particle->unk_34 == 0) {
-        var_r31 = particle->unk_48;
+        var_r31 = particle->data;
         for (i = 0; i < particle->unk_30; i++, var_r31++) {
             var_r31->unk2C = 0.0f;
             var_r31->unk40.a = 0;
@@ -1932,7 +1932,7 @@ static void LampParticleUpdate(ModelData *model, ParticleData *particle, Mtx mat
         particle->unk_00 = 2;
         BoardModelRotGet(suitMdl, &spC);
         for (i = 0; i < 2; i++) {
-            var_r31 = particle->unk_48;
+            var_r31 = particle->data;
             for (j = 0; j < particle->unk_30; j++, var_r31++) {
                 if (var_r31->unk2C == 0.0f) {
                     break;
@@ -1950,17 +1950,17 @@ static void LampParticleUpdate(ModelData *model, ParticleData *particle, Mtx mat
                 var_r31->unk2C = 25.0f;
                 temp_f30 = 175.0f + frand8() * 0x50 * 0.003921569f;
                 var_r31->unk40.r = var_r31->unk40.g = var_r31->unk40.b = temp_f30;
-                var_r31->unk00 = 0;
+                var_r31->time = 0;
             }
         }
     }
     else {
         particle->unk_00--;
     }
-    var_r31 = particle->unk_48;
+    var_r31 = particle->data;
     for (i = 0; i < particle->unk_30; i++, var_r31++) {
         if (var_r31->unk2C != 0.0f) {
-            if (var_r31->unk00 == 0) {
+            if (var_r31->time == 0) {
                 VECAdd(&var_r31->unk34, &var_r31->unk08, &var_r31->unk34);
                 VECScale(&var_r31->unk08, &var_r31->unk08, 0.95f);
                 var_r31->unk2C += 8.0f;
@@ -1971,7 +1971,7 @@ static void LampParticleUpdate(ModelData *model, ParticleData *particle, Mtx mat
                     var_r31->unk08.x = 6.0 * cosd(temp_f31);
                     var_r31->unk08.y = -4.0f;
                     var_r31->unk08.z = 6.0 * sind(temp_f31);
-                    var_r31->unk00 = 1;
+                    var_r31->time = 1;
                 }
                 var_r31->unk40.a = var_r31->unk14.y;
             }
@@ -1991,14 +1991,14 @@ static void LampParticleUpdate(ModelData *model, ParticleData *particle, Mtx mat
 
 static void GenieParticleUpdate(ModelData *model, ParticleData *particle, Mtx matrix)
 {
-    HsfanimStruct01 *var_r31;
+    HU3DPARTICLEDATA *var_r31;
     float temp_f31;
     float temp_f30;
     s32 var_r28;
     s32 i;
 
     if (particle->unk_34 == 0) {
-        var_r31 = particle->unk_48;
+        var_r31 = particle->data;
         for (i = 0; i < particle->unk_30; i++, var_r31++) {
             var_r31->unk34.x = -50.0f + frand8() * 100.0f * 0.003921569f;
             var_r31->unk34.y = -50.0f + frand8() * 100.0f * 0.003921569f;
@@ -2010,11 +2010,11 @@ static void GenieParticleUpdate(ModelData *model, ParticleData *particle, Mtx ma
             var_r31->unk14.y = 255.0f;
             temp_f30 = 125.0f + frand8() * 100 * 0.003921569f;
             var_r31->unk40.r = var_r31->unk40.g = var_r31->unk40.b = temp_f30;
-            var_r31->unk00 = 0;
+            var_r31->time = 0;
             var_r31->unk2C = 80.0f + frand8() * 60.0f * 0.003921569f;
         }
     }
-    var_r31 = particle->unk_48;
+    var_r31 = particle->data;
     var_r28 = 0;
     for (i = 0; i < particle->unk_30; i++, var_r31++) {
         if (var_r31->unk2C != 0.0f) {
@@ -2443,7 +2443,7 @@ static void ExecItemGenie(void)
         HuPrcVSleep();
     }
     HuAudFXPlay(0x35E);
-    CharModelEffectEnableSet(GWPlayer[currItemRestore].character, 0);
+    CharModelFxFlagSet(GWPlayer[currItemRestore].character, 0);
     BoardPlayerMotionStart(currItemRestore, 6, 0x40000001);
     var_f29 = 0.0f;
     var_f31 = 1.0f;
@@ -2475,7 +2475,7 @@ static void ExecItemGenie(void)
         HuPrcVSleep();
     }
     BoardPlayerIdleSet(currItemRestore);
-    CharModelEffectEnableSet(GWPlayer[currItemRestore].character, 1);
+    CharModelFxFlagSet(GWPlayer[currItemRestore].character, 1);
     HuSprAnimKill(genieParticleAnim);
     BoardPlayerMotionKill(currItemRestore, geniePlayerMot[0]);
     BoardPlayerMotionKill(currItemRestore, geniePlayerMot[1]);
@@ -2529,8 +2529,8 @@ static void ExecItemBagJump(void)
         }
         HuPrcVSleep();
     }
-    CharModelLayerSetAll(3);
-    CharModelEffectCreate(1, &sp14);
+    CharEffectLayerSet(3);
+    CharEffectSmokeCreate(1, &sp14);
     BoardModelVisibilitySet(temp_r31, 0);
     HuAudFXPlay(0x30D);
     HuPrcKill(NULL);
@@ -2669,8 +2669,8 @@ static void ExecItemBag(void)
     }
     HuWinKill(temp_r28);
     BoardModelPosGet(suitMdl, &sp30);
-    CharModelLayerSetAll(3);
-    CharModelEffectCreate(1, &sp30);
+    CharEffectLayerSet(3);
+    CharEffectSmokeCreate(1, &sp30);
     HuAudFXPlay(0x351);
     HuPrcSleep(10);
     HuPrcKill(temp_r24);

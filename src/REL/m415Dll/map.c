@@ -253,7 +253,7 @@ void fn_1_88B8(unkSubStruct2 *arg0)
             for (var_r27 = 0; var_r27 < var_r31->unk33; var_r27++) {
                 GXSetVtxDesc(var_r27 + GX_VA_TEX0, GX_INDEX16);
                 GXSetVtxAttrFmt(GX_VTXFMT0, var_r27 + GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
-                GXSETARRAY(var_r27 + GX_VA_TEX0, var_r31->unk54[var_r27].unk4, 4 * sizeof(HsfVector2f), 8, TRUE);
+                GXSETARRAY(var_r27 + GX_VA_TEX0, var_r31->unk54[var_r27].unk4, 4 * sizeof(HuVec2f), 8, TRUE);
             }
             GXSetVtxDesc(GX_VA_NRM, GX_INDEX16);
             GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_NRM, GX_NRM_XYZ, GX_F32, 0);
@@ -381,13 +381,13 @@ void fn_1_9A1C(Vec **arg0, s16 arg1, Vec *arg2)
     }
 }
 
-void fn_1_9AA8(HsfVector2f **arg0, s16 arg1, HsfVector2f *arg2)
+void fn_1_9AA8(HuVec2f **arg0, s16 arg1, HuVec2f *arg2)
 {
     s32 var_r28;
     s32 var_r29;
-    HsfVector2f *var_r31;
+    HuVec2f *var_r31;
 
-    var_r31 = *arg0 = HuMemDirectMallocNum(HEAP_SYSTEM, arg1 * sizeof(HsfVector2f[4]), MEMORY_DEFAULT_NUM);
+    var_r31 = *arg0 = HuMemDirectMallocNum(HEAP_SYSTEM, arg1 * sizeof(HuVec2f[4]), MEMORY_DEFAULT_NUM);
 
     for (var_r28 = 0; var_r28 < arg1; var_r28++) {
         for (var_r29 = 0; var_r29 < 4; var_r31++, arg2++, var_r29++) {

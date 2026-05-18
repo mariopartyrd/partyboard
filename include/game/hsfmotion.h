@@ -13,12 +13,12 @@
 typedef struct motion_data {
     s16 attr;
     s16 modelId;
-    HsfData *hsfData;
+    HSFDATA *hsfData;
 } MotionData;
 
 typedef struct {
     /* 0x00 */ float unk00;
-    /* 0x04 */ HsfBitmap *unk04;
+    /* 0x04 */ HSFBITMAP *unk04;
 } UnknownHsfMotionStruct01; // Size 8
 
 void Hu3DMotionInit(void);
@@ -63,16 +63,16 @@ void Hu3DMotionNext(s16 arg0);
 void Hu3DMotionExec(s16 arg0, s16 arg1, float arg2, s32 arg3);
 void Hu3DCameraMotionExec(s16 arg0);
 void Hu3DSubMotionExec(s16 arg0);
-float *GetObjTRXPtr(HsfObject *arg0, u16 arg1);
-void SetObjMatMotion(s16 arg0, HsfTrack *arg1, float arg2);
-void SetObjAttrMotion(s16 arg0, HsfTrack *arg1, float arg2);
-void SetObjCameraMotion(s16 modelId, HsfTrack *trackP, float value);
-void SetObjLightMotion(s16 modelId, HsfTrack *trackP, float value);
-float GetCurve(HsfTrack *arg0, float arg1);
+float *GetObjTRXPtr(HSFOBJECT *arg0, u16 arg1);
+void SetObjMatMotion(s16 arg0, HSFTRACK *arg1, float arg2);
+void SetObjAttrMotion(s16 arg0, HSFTRACK *arg1, float arg2);
+void SetObjCameraMotion(s16 modelId, HSFTRACK *trackP, float value);
+void SetObjLightMotion(s16 modelId, HSFTRACK *trackP, float value);
+float GetCurve(HSFTRACK *arg0, float arg1);
 float GetConstant(s32 arg0, float *arg1, float arg2);
 float GetLinear(s32 arg0, float arg1[][2], float arg2);
-float GetBezier(s32 arg0, HsfTrack *arg1, float arg2);
-HsfBitmap *GetBitMap(s32 arg0, UnknownHsfMotionStruct01 *arg1, float arg2);
+float GetBezier(s32 arg0, HSFTRACK *arg1, float arg2);
+HSFBITMAP *GetBitMap(s32 arg0, UnknownHsfMotionStruct01 *arg1, float arg2);
 s16 Hu3DJointMotion(s16 arg0, void *arg1);
 void JointModel_Motion(s16 arg0, s16 arg1);
 void Hu3DMotionCalc(s16 arg0);

@@ -1,6 +1,7 @@
 #include "game/hsfload.h"
 #include "game/EnvelopeExec.h"
 #include "ctype.h"
+#include "game/hsfformat.h"
 #include "string.h"
 
 #ifdef TARGET_PC
@@ -16,30 +17,30 @@
 #define AS_U16(field) (*((u16 *)&(field)))
 
 GXColor rgba[100];
-HsfHeader head;
-HsfData Model;
+HSFHEADER head;
+HSFDATA Model;
 
 static BOOL MotionOnly;
-static HsfData *MotionModel;
+static HSFDATA *MotionModel;
 static void *VertexDataTop;
 static void *NormalDataTop;
 void *fileptr;
 char *StringTable;
 char *DicStringTable;
 void **NSymIndex;
-HsfObject *objtop;
-HsfBuffer *vtxtop;
+HSFOBJECT *objtop;
+HSFBUFFER *vtxtop;
 HsfCluster *ClusterTop;
-HsfAttribute *AttributeTop;
-HsfMaterial *MaterialTop;
+HSFATTRIBUTE *AttributeTop;
+HSFMATERIAL *MaterialTop;
 #ifdef BYTESWAPPING
-HsfBuffer *NormalTop;
-HsfBuffer *StTop;
-HsfBuffer *ColorTop;
-HsfBuffer *FaceTop;
-HsfCenv *CenvTop;
+HSFBUFFER *NormalTop;
+HSFBUFFER *StTop;
+HSFBUFFER *ColorTop;
+HSFBUFFER *FaceTop;
+HSFCENV *CenvTop;
 HsfPart *PartTop;
-HsfBitmap *BitmapTop;
+HSFBITMAP *BitmapTop;
 #endif
 
 #ifdef TARGET_PC
@@ -47,7 +48,7 @@ static BOOL DoDump = FALSE;
 #endif
 
 static void FileLoad(void *data);
-static HsfData *SetHsfModel(void);
+static HSFDATA *SetHsfModel(void);
 static void MaterialLoad(void);
 static void AttributeLoad(void);
 static void SceneLoad(void);
@@ -68,52 +69,52 @@ static void BitmapLoad(void);
 static void MotionLoad(void);
 static void MatrixLoad(void);
 
-static s32 SearchObjectSetName(HsfData *data, char *name);
-static HsfBuffer *SearchVertexPtr(s32 id);
-static HsfBuffer *SearchNormalPtr(s32 id);
-static HsfBuffer *SearchStPtr(s32 id);
-static HsfBuffer *SearchColorPtr(s32 id);
-static HsfBuffer *SearchFacePtr(s32 id);
-static HsfCenv *SearchCenvPtr(s32 id);
+static s32 SearchObjectSetName(HSFDATA *data, char *name);
+static HSFBUFFER *SearchVertexPtr(s32 id);
+static HSFBUFFER *SearchNormalPtr(s32 id);
+static HSFBUFFER *SearchStPtr(s32 id);
+static HSFBUFFER *SearchColorPtr(s32 id);
+static HSFBUFFER *SearchFacePtr(s32 id);
+static HSFCENV *SearchCenvPtr(s32 id);
 static HsfPart *SearchPartPtr(s32 id);
-static HsfPalette *SearchPalettePtr(s32 id);
+static HSFPALETTE *SearchPalettePtr(s32 id);
 
-static HsfBitmap *SearchBitmapPtr(s32 id);
+static HSFBITMAP *SearchBitmapPtr(s32 id);
 static char *GetString(u32 *str_ofs);
 static char *GetMotionString(u16 *str_ofs);
 
 #ifdef BYTESWAPPING
 
-static void LoadEnvelopeSourceData(HsfObject *object, HsfObjectData *data)
+static void LoadEnvelopeSourceData(HSFOBJECT *object, HSFMESH *data)
 {
-    if (object->data.cenvCnt == 0) {
-        object->data.vtxtop = NULL;
-        object->data.normtop = NULL;
+    if (object->mesh.cenvNum == 0) {
+        object->mesh.vtxtop = NULL;
+        object->mesh.normtop = NULL;
         return;
     }
-    if (data->vtxtop != NULL && object->data.vertex != NULL) {
-        HsfVector3f *vtx = (HsfVector3f *)((uintptr_t)fileptr + (uintptr_t)data->vtxtop);
-        for (int i = 0; i < object->data.vertex->count; i++) {
+    if (data->vtxtop != NULL && object->mesh.vertex != NULL) {
+        HuVecF *vtx = (HuVecF *)((uintptr_t)fileptr + (uintptr_t)data->vtxtop);
+        for (int i = 0; i < object->mesh.vertex->count; i++) {
             byteswap_hsfvec3f(&vtx[i]);
         }
-        object->data.vtxtop = vtx;
+        object->mesh.vtxtop = vtx;
         // object->data.vtxtop = CopyByteSwappedVec3Data(
-        //     (HsfVector3f *)((uintptr_t)fileptr + (uintptr_t)data->vtxtop),
+        //     (HuVecF *)((uintptr_t)fileptr + (uintptr_t)data->vtxtop),
         //     object->data.vertex->count);
     } else {
-        object->data.vtxtop = NULL;
+        object->mesh.vtxtop = NULL;
     }
-    if (data->normtop != NULL && object->data.normal != NULL) {
-        HsfVector3f *norm = (HsfVector3f *)((uintptr_t)fileptr + (uintptr_t)data->normtop);
-        for (int i = 0; i < object->data.normal->count; i++) {
+    if (data->normtop != NULL && object->mesh.normal != NULL) {
+        HuVecF *norm = (HuVecF *)((uintptr_t)fileptr + (uintptr_t)data->normtop);
+        for (int i = 0; i < object->mesh.normal->count; i++) {
             byteswap_hsfvec3f(&norm[i]);
         }
-        object->data.normtop = norm;
+        object->mesh.normtop = norm;
         // object->data.normtop = CopyByteSwappedVec3Data(
-        //     (HsfVector3f *)((uintptr_t)fileptr + (uintptr_t)data->normtop),
+        //     (HuVecF *)((uintptr_t)fileptr + (uintptr_t)data->normtop),
         //     object->data.normal->count);
     } else {
-        object->data.normtop = NULL;
+        object->mesh.normtop = NULL;
     }
 }
 #endif
@@ -121,46 +122,46 @@ static void LoadEnvelopeSourceData(HsfObject *object, HsfObjectData *data)
 #ifdef TARGET_PC
 static FILE *g_dump_file = NULL;
 
-static void DumpVec3f(const char *label, HsfVector3f *v) {
+static void DumpVec3f(const char *label, HuVecF *v) {
     fprintf(g_dump_file, "    %s: (%.4f, %.4f, %.4f)\n", label, v->x, v->y, v->z);
 }
 
-static void DumpVec2f(const char *label, HsfVector2f *v) {
+static void DumpVec2f(const char *label, HuVec2f *v) {
     fprintf(g_dump_file, "    %s: (%.4f, %.4f)\n", label, v->x, v->y);
 }
 
-static void DumpTransform(const char *label, HsfTransform *t) {
+static void DumpTransform(const char *label, HSFTRANSFORM *t) {
     fprintf(g_dump_file, "  %s:\n", label);
-    DumpVec3f("pos",   (HsfVector3f*)&t->pos);
-    DumpVec3f("rot",   (HsfVector3f*)&t->rot);
-    DumpVec3f("scale", (HsfVector3f*)&t->scale);
+    DumpVec3f("pos",   (HuVecF*)&t->pos);
+    DumpVec3f("rot",   (HuVecF*)&t->rot);
+    DumpVec3f("scale", (HuVecF*)&t->scale);
 }
 
-static void DumpScene(HsfData *hsf) {
+static void DumpScene(HSFDATA *hsf) {
     s32 i;
-    fprintf(g_dump_file, "=== SCENES (%d) ===\n", hsf->sceneCnt);
-    for (i = 0; i < hsf->sceneCnt; i++) {
-        HsfScene *s = &hsf->scene[i];
+    fprintf(g_dump_file, "=== SCENES (%d) ===\n", hsf->sceneNum);
+    for (i = 0; i < hsf->sceneNum; i++) {
+        HSFSCENE *s = &hsf->scene[i];
         fprintf(g_dump_file, "[%d] fogType=%d start=%.4f end=%.4f color=(%u,%u,%u,%u)\n",
-            i, s->fogType, s->start, s->end,
+            i, s->fogType, s->fogStart, s->fogEnd,
             s->color.r, s->color.g, s->color.b, s->color.a);
     }
 }
 
-static void DumpPalettes(HsfData *hsf) {
+static void DumpPalettes(HSFDATA *hsf) {
     s32 i;
-    fprintf(g_dump_file, "=== PALETTES (%d) ===\n", hsf->paletteCnt);
-    for (i = 0; i < hsf->paletteCnt; i++) {
-        HsfPalette *p = &hsf->palette[i];
+    fprintf(g_dump_file, "=== PALETTES (%d) ===\n", hsf->paletteNum);
+    for (i = 0; i < hsf->paletteNum; i++) {
+        HSFPALETTE *p = &hsf->palette[i];
         fprintf(g_dump_file, "[%d] name=%s palSize=%u\n", i, p->name ? p->name : "(null)", p->palSize);
     }
 }
 
-static void DumpBitmaps(HsfData *hsf) {
+static void DumpBitmaps(HSFDATA *hsf) {
     s32 i;
-    fprintf(g_dump_file, "=== BITMAPS (%d) ===\n", hsf->bitmapCnt);
-    for (i = 0; i < hsf->bitmapCnt; i++) {
-        HsfBitmap *b = &hsf->bitmap[i];
+    fprintf(g_dump_file, "=== BITMAPS (%d) ===\n", hsf->bitmapNum);
+    for (i = 0; i < hsf->bitmapNum; i++) {
+        HSFBITMAP *b = &hsf->bitmap[i];
         fprintf(g_dump_file, "[%d] name=%s dataFmt=%u pixSize=%u sizeX=%d sizeY=%d palSize=%d maxLod=%u\n",
             i, b->name ? b->name : "(null)",
             b->dataFmt, b->pixSize, b->sizeX, b->sizeY, b->palSize, b->maxLod);
@@ -169,51 +170,51 @@ static void DumpBitmaps(HsfData *hsf) {
     }
 }
 
-static void DumpMaterials(HsfData *hsf) {
+static void DumpMaterials(HSFDATA *hsf) {
     s32 i, j;
-    fprintf(g_dump_file, "=== MATERIALS (%d) ===\n", hsf->materialCnt);
-    for (i = 0; i < hsf->materialCnt; i++) {
-        HsfMaterial *m = &hsf->material[i];
+    fprintf(g_dump_file, "=== MATERIALS (%d) ===\n", hsf->materialNum);
+    for (i = 0; i < hsf->materialNum; i++) {
+        HSFMATERIAL *m = &hsf->material[i];
         fprintf(g_dump_file, "[%d] name=%s pass=%u vtxMode=%u\n",
             i, m->name ? m->name : "(null)", m->pass, m->vtxMode);
         fprintf(g_dump_file, "     litColor=(%u,%u,%u) color=(%u,%u,%u) shadowColor=(%u,%u,%u)\n",
             m->litColor[0], m->litColor[1], m->litColor[2],
             m->color[0],    m->color[1],    m->color[2],
             m->shadowColor[0], m->shadowColor[1], m->shadowColor[2]);
-        fprintf(g_dump_file, "     hilite_scale=%.4f unk18=%.4f invAlpha=%.4f refAlpha=%.4f unk2C=%.4f\n",
-            m->hilite_scale, m->unk18, m->invAlpha, m->refAlpha, m->unk2C);
+        fprintf(g_dump_file, "     hiliteScale=%.4f unk18=%.4f invAlpha=%.4f refAlpha=%.4f unk2C=%.4f\n",
+            m->hiliteScale, m->unk18, m->invAlpha, m->refAlpha, m->unk2C);
         fprintf(g_dump_file, "     unk20=(%.4f,%.4f) flags=%u numAttrs=%u\n",
-            m->unk20[0], m->unk20[1], m->flags, m->numAttrs);
+            m->unk20[0], m->unk20[1], m->flags, m->attrNum);
         // for (j = 0; j < (s32)m->numAttrs; j++) {
             // fprintf(g_dump_file, "     attr[%d]=%d\n", j, m->attrs[j]);
         // }
     }
 }
 
-static void DumpAttributes(HsfData *hsf) {
+static void DumpAttributes(HSFDATA *hsf) {
     s32 i;
-    fprintf(g_dump_file, "=== ATTRIBUTES (%d) ===\n", hsf->attributeCnt);
-    for (i = 0; i < hsf->attributeCnt; i++) {
-        HsfAttribute *a = &hsf->attribute[i];
+    fprintf(g_dump_file, "=== ATTRIBUTES (%d) ===\n", hsf->attributeNum);
+    for (i = 0; i < hsf->attributeNum; i++) {
+        HSFATTRIBUTE *a = &hsf->attribute[i];
         fprintf(g_dump_file, "[%d] name=%s\n", i, a->name ? a->name : "(null)");
-        fprintf(g_dump_file, "     unk0C=%.4f unk14=%.4f unk20=%.4f\n", a->unk0C, a->unk14, a->unk20);
+        fprintf(g_dump_file, "     unk0C=%.4f unk14=%.4f unk20=%.4f\n", a->kColor, a->nbtTpLvl, a->unk20);
         fprintf(g_dump_file, "     scale=(%.4f,%.4f) trans=(%.4f,%.4f)\n",
             a->scale.x, a->scale.y, a->trans.x, a->trans.y);
         fprintf(g_dump_file, "     wrap_s=%u wrap_t=%u unk78=%u flag=%u\n",
-            a->wrap_s, a->wrap_t, a->unk78, a->flag);
+            a->wrapS, a->wrapT, a->maxLod, a->flag);
         fprintf(g_dump_file, "     bitmap=%s\n",
             (a->bitmap && a->bitmap->name) ? a->bitmap->name : "(null)");
     }
 }
 
-static void DumpVertexBuffers(HsfData *hsf) {
+static void DumpVertexBuffers(HSFDATA *hsf) {
     s32 i, j;
-    fprintf(g_dump_file, "=== VERTEX BUFFERS (%d) ===\n", hsf->vertexCnt);
-    for (i = 0; i < hsf->vertexCnt; i++) {
-        HsfBuffer *buf = &hsf->vertex[i];
+    fprintf(g_dump_file, "=== VERTEX BUFFERS (%d) ===\n", hsf->vertexNum);
+    for (i = 0; i < hsf->vertexNum; i++) {
+        HSFBUFFER *buf = &hsf->vertex[i];
         fprintf(g_dump_file, "[%d] name=%s count=%d\n",
             i, buf->name ? buf->name : "(null)", buf->count);
-        HsfVector3f *verts = (HsfVector3f *)buf->data;
+        HuVecF *verts = (HuVecF *)buf->data;
         for (j = 0; j < buf->count; j++) {
             fprintf(g_dump_file, "  [%d] (%.6f, %.6f, %.6f)\n",
                 j, verts[j].x, verts[j].y, verts[j].z);
@@ -221,14 +222,14 @@ static void DumpVertexBuffers(HsfData *hsf) {
     }
 }
 
-static void DumpNormalBuffers(HsfData *hsf) {
+static void DumpNormalBuffers(HSFDATA *hsf) {
     s32 i, j;
-    fprintf(g_dump_file, "=== NORMAL BUFFERS (%d) ===\n", hsf->normalCnt);
-    for (i = 0; i < hsf->normalCnt; i++) {
-        HsfBuffer *buf = &hsf->normal[i];
+    fprintf(g_dump_file, "=== NORMAL BUFFERS (%d) ===\n", hsf->normalNum);
+    for (i = 0; i < hsf->normalNum; i++) {
+        HSFBUFFER *buf = &hsf->normal[i];
         fprintf(g_dump_file, "[%d] name=%s count=%d\n",
             i, buf->name ? buf->name : "(null)", buf->count);
-        HsfVector3f *normals = (HsfVector3f *)buf->data;
+        HuVecF *normals = (HuVecF *)buf->data;
         for (j = 0; j < buf->count; j++) {
             fprintf(g_dump_file, "  [%d] (%.6f, %.6f, %.6f)\n",
                 j, normals[j].x, normals[j].y, normals[j].z);
@@ -236,14 +237,14 @@ static void DumpNormalBuffers(HsfData *hsf) {
     }
 }
 
-static void DumpStBuffers(HsfData *hsf) {
+static void DumpStBuffers(HSFDATA *hsf) {
     s32 i, j;
-    fprintf(g_dump_file, "=== ST BUFFERS (%d) ===\n", hsf->stCnt);
-    for (i = 0; i < hsf->stCnt; i++) {
-        HsfBuffer *buf = &hsf->st[i];
+    fprintf(g_dump_file, "=== ST BUFFERS (%d) ===\n", hsf->stNum);
+    for (i = 0; i < hsf->stNum; i++) {
+        HSFBUFFER *buf = &hsf->st[i];
         fprintf(g_dump_file, "[%d] name=%s count=%d\n",
             i, buf->name ? buf->name : "(null)", buf->count);
-        HsfVector2f *st = (HsfVector2f *)buf->data;
+        HuVec2f *st = (HuVec2f *)buf->data;
         for (j = 0; j < buf->count; j++) {
             fprintf(g_dump_file, "  [%d] (%.6f, %.6f)\n",
                 j, st[j].x, st[j].y);
@@ -251,11 +252,11 @@ static void DumpStBuffers(HsfData *hsf) {
     }
 }
 
-static void DumpColorBuffers(HsfData *hsf) {
+static void DumpColorBuffers(HSFDATA *hsf) {
     s32 i, j;
-    fprintf(g_dump_file, "=== COLOR BUFFERS (%d) ===\n", hsf->colorCnt);
-    for (i = 0; i < hsf->colorCnt; i++) {
-        HsfBuffer *buf = &hsf->color[i];
+    fprintf(g_dump_file, "=== COLOR BUFFERS (%d) ===\n", hsf->colorNum);
+    for (i = 0; i < hsf->colorNum; i++) {
+        HSFBUFFER *buf = &hsf->color[i];
         fprintf(g_dump_file, "[%d] name=%s count=%d\n",
             i, buf->name ? buf->name : "(null)", buf->count);
         GXColor *colors = (GXColor *)buf->data;
@@ -266,16 +267,16 @@ static void DumpColorBuffers(HsfData *hsf) {
     }
 }
 
-static void DumpFaces(HsfData *hsf) {
+static void DumpFaces(HSFDATA *hsf) {
     s32 i, j;
-    fprintf(g_dump_file, "=== FACES (%d) ===\n", hsf->faceCnt);
-    for (i = 0; i < hsf->faceCnt; i++) {
-        HsfBuffer *fb = &hsf->face[i];
-        HsfFace *faces = (HsfFace *)fb->data;
+    fprintf(g_dump_file, "=== FACES (%d) ===\n", hsf->faceNum);
+    for (i = 0; i < hsf->faceNum; i++) {
+        HSFBUFFER *fb = &hsf->face[i];
+        HSFFACE *faces = (HSFFACE *)fb->data;
         fprintf(g_dump_file, "[%d] name=%s count=%d\n",
             i, fb->name ? fb->name : "(null)", fb->count);
         for (j = 0; j < fb->count; j++) {
-            HsfFace *f = &faces[j];
+            HSFFACE *f = &faces[j];
             u16 ftype = *((u16 *)&f->type);
             fprintf(g_dump_file, "  face[%d] type=%u mat=%d nbt=(%.4f,%.4f,%.4f)\n",
                 j, ftype, f->mat, f->nbt.x, f->nbt.y, f->nbt.z);
@@ -293,7 +294,7 @@ static void DumpFaces(HsfData *hsf) {
     }
 }
 
-static void DumpObjectData(HsfObject *obj, s32 depth) {
+static void DumpObjectData(HSFOBJECT *obj, s32 depth) {
     s32 i;
     char indent[64];
     for (i = 0; i < depth * 2 && i < 62; i++) indent[i] = ' ';
@@ -310,12 +311,12 @@ static void DumpObjectData(HsfObject *obj, s32 depth) {
         case HSF_OBJ_JOINT:
         case HSF_OBJ_MAP:
         {
-            HsfObjectData *d = &obj->data;
+            HSFMESH *d = &obj->mesh;
             DumpTransform("base", &d->base);
             DumpTransform("curr", &d->curr);
-            fprintf(g_dump_file, "%s  childrenCount=%u clusterCnt=%u cenvCnt=%u vertexShapeCnt=%u\n",
-                indent, d->childrenCount, d->clusterCnt, d->cenvCnt, d->vertexShapeCnt);
-            fprintf(g_dump_file, "%s  shapeType=%u unk123=%u\n", indent, d->shapeType, d->unk123);
+            fprintf(g_dump_file, "%s  childrenCount=%u clusterNum=%u cenvNum=%u vertexShapeCnt=%u\n",
+                indent, d->childrenCount, d->clusterNum, d->cenvNum, d->shapeNum);
+            fprintf(g_dump_file, "%s  shapeType=%u unk123=%u\n", indent, d->shapeType, d->matPass);
             if (obj->type == HSF_OBJ_MESH) {
                 fprintf(g_dump_file, "%s  mesh.min=(%.4f,%.4f,%.4f) mesh.max=(%.4f,%.4f,%.4f)\n",
                     indent,
@@ -341,20 +342,20 @@ static void DumpObjectData(HsfObject *obj, s32 depth) {
         }
         case HSF_OBJ_REPLICA:
             fprintf(g_dump_file, "%s  replica=%s\n", indent,
-                (obj->data.replica && obj->data.replica->name) ? obj->data.replica->name : "(null)");
+                (obj->mesh.replica && obj->mesh.replica->name) ? obj->mesh.replica->name : "(null)");
             break;
         case HSF_OBJ_CAMERA:
         {
-            HsfCamera *c = &obj->camera;
+            HSFCAMERA *c = &obj->camera;
             fprintf(g_dump_file, "%s  pos=(%.4f,%.4f,%.4f) target=(%.4f,%.4f,%.4f)\n",
                 indent, c->pos.x, c->pos.y, c->pos.z, c->target.x, c->target.y, c->target.z);
             fprintf(g_dump_file, "%s  fov=%.4f near=%.4f far=%.4f aspect=%.4f\n",
-                indent, c->fov, c->nnear, c->ffar, c->aspect_dupe);
+                indent, c->fov, c->nnear, c->ffar, c->upRot);
             break;
         }
         case HSF_OBJ_LIGHT:
         {
-            HsfLight *l = &obj->light;
+            HSFLIGHT *l = &obj->light;
             fprintf(g_dump_file, "%s  pos=(%.4f,%.4f,%.4f) target=(%.4f,%.4f,%.4f)\n",
                 indent, l->pos.x, l->pos.y, l->pos.z, l->target.x, l->target.y, l->target.z);
             fprintf(g_dump_file, "%s  type=%u color=(%u,%u,%u)\n",
@@ -366,109 +367,109 @@ static void DumpObjectData(HsfObject *obj, s32 depth) {
     }
 }
 
-static void DumpSkeletons(HsfData *hsf) {
+static void DumpSkeletons(HSFDATA *hsf) {
     s32 i;
-    fprintf(g_dump_file, "=== SKELETONS (%d) ===\n", hsf->skeletonCnt);
-    for (i = 0; i < hsf->skeletonCnt; i++) {
-        HsfSkeleton *s = &hsf->skeleton[i];
+    fprintf(g_dump_file, "=== SKELETONS (%d) ===\n", hsf->skeletonNum);
+    for (i = 0; i < hsf->skeletonNum; i++) {
+        HSFSKELETON *s = &hsf->skeleton[i];
         fprintf(g_dump_file, "[%d] name=%s\n", i, s->name ? s->name : "(null)");
         DumpTransform("transform", &s->transform);
     }
 }
 
-static void DumpParts(HsfData *hsf) {
+static void DumpParts(HSFDATA *hsf) {
     s32 i, j;
-    fprintf(g_dump_file, "=== PARTS (%d) ===\n", hsf->partCnt);
-    for (i = 0; i < hsf->partCnt; i++) {
+    fprintf(g_dump_file, "=== PARTS (%d) ===\n", hsf->partNum);
+    for (i = 0; i < hsf->partNum; i++) {
         HsfPart *p = &hsf->part[i];
         fprintf(g_dump_file, "[%d] name=%s count=%u\n",
-            i, p->name ? p->name : "(null)", p->count);
-        for (j = 0; j < (s32)p->count; j++) {
+            i, p->name ? p->name : "(null)", p->num);
+        for (j = 0; j < (s32)p->num; j++) {
             fprintf(g_dump_file, "  vertex[%d]=%u\n", j, p->vertex[j]);
         }
     }
 }
 
-static void DumpClusters(HsfData *hsf) {
+static void DumpClusters(HSFDATA *hsf) {
     s32 i, j;
-    fprintf(g_dump_file, "=== CLUSTERS (%d) ===\n", hsf->clusterCnt);
-    for (i = 0; i < hsf->clusterCnt; i++) {
+    fprintf(g_dump_file, "=== CLUSTERS (%d) ===\n", hsf->clusterNum);
+    for (i = 0; i < hsf->clusterNum; i++) {
         HsfCluster *c = &hsf->cluster[i];
         fprintf(g_dump_file, "[%d] name[0]=%s name[1]=%s target=%d type=%u\n",
             i,
             c->name[0] ? c->name[0] : "(null)",
             c->name[1] ? c->name[1] : "(null)",
             c->target, c->type);
-        fprintf(g_dump_file, "     index=%.4f adjusted=%u unk95=%u vertexCnt=%u\n",
-            c->index, c->adjusted, c->unk95, c->vertexCnt);
-        for (j = 0; j < (s32)c->vertexCnt; j++) {
+        fprintf(g_dump_file, "     index=%.4f adjusted=%u unk95=%u vertexNum=%u\n",
+            c->index, c->adjusted, c->unk95, c->vertexNum);
+        for (j = 0; j < (s32)c->vertexNum; j++) {
             fprintf(g_dump_file, "  vertex[%d]=%s\n", j,
                 (c->vertex[j] && c->vertex[j]->name) ? c->vertex[j]->name : "(null)");
         }
     }
 }
 
-static void DumpCenvs(HsfData *hsf) {
+static void DumpCenvs(HSFDATA *hsf) {
     s32 i, j;
-    fprintf(g_dump_file, "=== CENVS (%d) ===\n", hsf->cenvCnt);
-    for (i = 0; i < hsf->cenvCnt; i++) {
-        HsfCenv *c = &hsf->cenv[i];
+    fprintf(g_dump_file, "=== CENVS (%d) ===\n", hsf->cenvNum);
+    for (i = 0; i < hsf->cenvNum; i++) {
+        HSFCENV *c = &hsf->cenv[i];
         fprintf(g_dump_file, "[%d] singleCount=%u dualCount=%u multiCount=%u vtxCount=%u copyCount=%u\n",
             i, c->singleCount, c->dualCount, c->multiCount, c->vtxCount, c->copyCount);
         for (j = 0; j < (s32)c->singleCount; j++) {
-            HsfCenvSingle *s = &c->singleData[j];
-            fprintf(g_dump_file, "  single[%d] target=%u pos=%u posCnt=%u normal=%u normalCnt=%u\n",
-                j, s->target, s->pos, s->posCnt, s->normal, s->normalCnt);
+            HSFCENVSINGLE *s = &c->singleData[j];
+            fprintf(g_dump_file, "  single[%d] target=%u pos=%u posCnt=%u normal=%u normalNum=%u\n",
+                j, s->target, s->pos, s->posNum, s->normal, s->normalNum);
         }
         for (j = 0; j < (s32)c->dualCount; j++) {
-            HsfCenvDual *d = &c->dualData[j];
+            HSFCENVDUAL *d = &c->dualData[j];
             s32 k;
             fprintf(g_dump_file, "  dual[%d] target1=%u target2=%u weightCnt=%u\n",
-                j, d->target1, d->target2, d->weightCnt);
-            for (k = 0; k < (s32)d->weightCnt; k++) {
-                HsfCenvDualWeight *w = &d->weight[k];
-                fprintf(g_dump_file, "    weight[%d] weight=%.4f pos=%u posCnt=%u normal=%u normalCnt=%u\n",
-                    k, w->weight, w->pos, w->posCnt, w->normal, w->normalCnt);
+                j, d->target1, d->target2, d->weightNum);
+            for (k = 0; k < (s32)d->weightNum; k++) {
+                HSFCENVDUALWEIGHT *w = &d->weight[k];
+                fprintf(g_dump_file, "    weight[%d] weight=%.4f pos=%u posCnt=%u normal=%u normalNum=%u\n",
+                    k, w->weight, w->pos, w->posNum, w->normal, w->normalNum);
             }
         }
         for (j = 0; j < (s32)c->multiCount; j++) {
             HsfCenvMulti *m = &c->multiData[j];
             s32 k;
-            fprintf(g_dump_file, "  multi[%d] weightCnt=%u pos=%u posCnt=%u normal=%u normalCnt=%u\n",
-                j, m->weightCnt, m->pos, m->posCnt, m->normal, m->normalCnt);
-            for (k = 0; k < (s32)m->weightCnt; k++) {
-                HsfCenvMultiWeight *w = &m->weight[k];
+            fprintf(g_dump_file, "  multi[%d] weightCnt=%u pos=%u posCnt=%u normal=%u normalNum=%u\n",
+                j, m->weightNum, m->pos, m->posNum, m->normal, m->normalNum);
+            for (k = 0; k < (s32)m->weightNum; k++) {
+                HSFCENVMULTIWEIGHT *w = &m->weight[k];
                 fprintf(g_dump_file, "    weight[%d] target=%u value=%.4f\n", k, w->target, w->value);
             }
         }
     }
 }
 
-static void DumpShapes(HsfData *hsf) {
+static void DumpShapes(HSFDATA *hsf) {
     s32 i, j;
-    fprintf(g_dump_file, "=== SHAPES (%d) ===\n", hsf->shapeCnt);
-    for (i = 0; i < hsf->shapeCnt; i++) {
+    fprintf(g_dump_file, "=== SHAPES (%d) ===\n", hsf->shapeNum);
+    for (i = 0; i < hsf->shapeNum; i++) {
         HsfShape *s = &hsf->shape[i];
         fprintf(g_dump_file, "[%d] name=%s count16[0]=%u count16[1]=%u\n",
-            i, s->name ? s->name : "(null)", s->count16[0], s->count16[1]);
-        for (j = 0; j < s->count16[1]; j++) {
+            i, s->name ? s->name : "(null)", s->num16[0], s->num16[1]);
+        for (j = 0; j < s->num16[1]; j++) {
             fprintf(g_dump_file, "  vertex[%d]=%s\n", j,
                 (s->vertex[j] && s->vertex[j]->name) ? s->vertex[j]->name : "(null)");
         }
     }
 }
 
-static void DumpMapAttrs(HsfData *hsf) {
+static void DumpMapAttrs(HSFDATA *hsf) {
     s32 i;
-    fprintf(g_dump_file, "=== MAP ATTRS (%d) ===\n", hsf->mapAttrCnt);
-    for (i = 0; i < hsf->mapAttrCnt; i++) {
-        HsfMapAttr *m = &hsf->mapAttr[i];
+    fprintf(g_dump_file, "=== MAP ATTRS (%d) ===\n", hsf->mapAttrNum);
+    for (i = 0; i < hsf->mapAttrNum; i++) {
+        HSFMAPATTR *m = &hsf->mapAttr[i];
         fprintf(g_dump_file, "[%d] minX=%.4f minZ=%.4f maxX=%.4f maxZ=%.4f dataLen=%u data=%p\n",
             i, m->minX, m->minZ, m->maxX, m->maxZ, m->dataLen, m->data);
     }
 }
 
-static void DumpTrackData(HsfTrack *t) {
+static void DumpTrackData(HSFTRACK *t) {
     s32 j;
     float *data = (float *)t->data;
     if (!data) {
@@ -494,7 +495,7 @@ static void DumpTrackData(HsfTrack *t) {
 
         case HSF_CURVE_BITMAP:
         {
-            HsfBitmapKey *keys = (HsfBitmapKey *)t->data;
+            HSFBITMAPKEY *keys = (HSFBITMAPKEY *)t->data;
             for (j = 0; j < t->numKeyframes; j++) {
                 fprintf(g_dump_file, "    [%d] time=%.4f bitmap=%s\n",
                     j, keys[j].time,
@@ -575,14 +576,14 @@ static const char *ChannelName(u16 channel) {
     }
 }
 
-static void DumpMotions(HsfData *hsf) {
+static void DumpMotions(HSFDATA *hsf) {
     s32 i;
-    HsfMotion *m = hsf->motion;
+    HSFMOTION *m = hsf->motion;
     fprintf(g_dump_file, "=== MOTIONS (%d) ===\n", 1);
         fprintf(g_dump_file, "numTracks=%d len=%.4f\n",
-            m->numTracks, m->len);
+            m->numTracks, m->maxTime);
     for (i = 0; i < m->numTracks; i++) {
-        HsfTrack *t = &m->track[i];
+        HSFTRACK *t = &m->track[i];
         fprintf(g_dump_file, "  track[%d] type=%s target=%u start=%u\n",
             i, TrackTypeName(t->type), t->target, t->start);
         fprintf(g_dump_file, "    curve=%s channel=%s numKeyframes=%u\n",
@@ -591,11 +592,11 @@ static void DumpMotions(HsfData *hsf) {
     }
 }
 
-static void DumpMatrices(HsfData *hsf) {
+static void DumpMatrices(HSFDATA *hsf) {
     s32 i, j, k;
-    fprintf(g_dump_file, "=== MATRICES (%d) ===\n", hsf->matrixCnt);
-    for (i = 0; i < hsf->matrixCnt; i++) {
-        HsfMatrix *m = &hsf->matrix[i];
+    fprintf(g_dump_file, "=== MATRICES (%d) ===\n", hsf->matrixNum);
+    for (i = 0; i < hsf->matrixNum; i++) {
+        HSFMATRIX *m = &hsf->matrix[i];
         u32 totalMatrices = m->base_idx + m->count + m->base_idx * m->count;
         fprintf(g_dump_file, "[%d] base_idx=%u count=%u totalMatrices=%u\n",
             i, m->base_idx, m->count, totalMatrices);
@@ -616,7 +617,7 @@ static void DumpMatrices(HsfData *hsf) {
 #define DUMP_NAME "hsf_dump_preswaped.txt"
 #endif
 
-static void DumpHSF(HsfData *hsf) {
+static void DumpHSF(HSFDATA *hsf) {
     g_dump_file = fopen(DUMP_NAME, "w");
     if (!g_dump_file) return;
 
@@ -653,12 +654,12 @@ static void DumpHSF(HsfData *hsf) {
 }
 #endif
 
-HsfData *LoadHSF(void *data)
+HSFDATA *LoadHSF(void *data)
 {
 #ifdef BYTESWAPPING
     byteswap_clear_visited_ptrs();
 #endif
-    HsfData *hsf;
+    HSFDATA *hsf;
     Model.root = NULL;
     objtop = NULL;
     FileLoad(data);
@@ -692,7 +693,7 @@ HsfData *LoadHSF(void *data)
     objtop = NULL;
 #ifdef TARGET_PC
     // this dumps noko
-    if (DoDump && hsf->skeletonCnt > 0 && hsf->skeletonCnt != 9 && hsf->skeletonCnt != 10) {
+    if (DoDump && hsf->skeletonNum > 0 && hsf->skeletonNum != 9 && hsf->skeletonNum != 10) {
         DumpHSF(hsf);
     }
 #endif
@@ -700,14 +701,14 @@ HsfData *LoadHSF(void *data)
 
 }
 
-void ClusterAdjustObject(HsfData *model, HsfData *src_model)
+void ClusterAdjustObject(HSFDATA *model, HSFDATA *src_model)
 {
     HsfCluster *cluster;
     s32 i;
     if(!src_model) {
         return;
     }
-    if(src_model->clusterCnt == 0) {
+    if(src_model->clusterNum == 0) {
         return;
     }
     cluster = src_model->cluster;
@@ -715,7 +716,7 @@ void ClusterAdjustObject(HsfData *model, HsfData *src_model)
         return;
     }
     cluster->adjusted = 1;
-    for(i=0; i<src_model->clusterCnt; i++, cluster++) {
+    for(i=0; i<src_model->clusterNum; i++, cluster++) {
         char *name = cluster->targetName;
         cluster->target = SearchObjectSetName(model, name);
     }
@@ -727,8 +728,8 @@ static void FileLoad(void *data)
     s32 i;
 #endif
     fileptr = data;
-    memcpy(&head, fileptr, sizeof(HsfHeader));
-    memset(&Model, 0, sizeof(HsfData));
+    memcpy(&head, fileptr, sizeof(HSFHEADER));
+    memset(&Model, 0, sizeof(HSFDATA));
 #ifdef BYTESWAPPING
     byteswap_hsfheader(&head);
     NSymIndex = HuMemDirectMallocNum(HEAP_DATA, sizeof(void*) * head.symbol.count, MEMORY_DEFAULT_NUM);
@@ -743,12 +744,12 @@ static void FileLoad(void *data)
         HsfCluster32b *file_cluster_real = (HsfCluster32b *)((uintptr_t)fileptr + head.cluster.ofs);
         byteswap_hsfcluster(&file_cluster_real[i], &ClusterTop[i]);
     }
-    AttributeTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfAttribute) * head.attribute.count, MEMORY_DEFAULT_NUM);
+    AttributeTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFATTRIBUTE) * head.attribute.count, MEMORY_DEFAULT_NUM);
     for (i = 0; i < head.attribute.count; i++) {
         HsfAttribute32b *file_attribute_real = (HsfAttribute32b *)((uintptr_t)fileptr + head.attribute.ofs);
         byteswap_hsfattribute(&file_attribute_real[i], &AttributeTop[i]);
     }
-    MaterialTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfMaterial) * head.material.count, MEMORY_DEFAULT_NUM);
+    MaterialTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFMATERIAL) * head.material.count, MEMORY_DEFAULT_NUM);
     for (i = 0; i < head.material.count; i++) {
         HsfMaterial32b *file_material_real = (HsfMaterial32b *)((uintptr_t)fileptr + head.material.ofs);
         byteswap_hsfmaterial(&file_material_real[i], &MaterialTop[i]);
@@ -757,62 +758,62 @@ static void FileLoad(void *data)
     NSymIndex = (void **)((uintptr_t)fileptr+head.symbol.ofs);
     StringTable = (char *)((uintptr_t)fileptr+head.string.ofs);
     ClusterTop = (HsfCluster *)((uintptr_t)fileptr+head.cluster.ofs);
-    AttributeTop = (HsfAttribute *)((uintptr_t)fileptr + head.attribute.ofs);
-    MaterialTop = (HsfMaterial *)((uintptr_t)fileptr + head.material.ofs);
+    AttributeTop = (HSFATTRIBUTE *)((uintptr_t)fileptr + head.attribute.ofs);
+    MaterialTop = (HSFMATERIAL *)((uintptr_t)fileptr + head.material.ofs);
 #endif
 }
 
-static HsfData *SetHsfModel(void)
+static HSFDATA *SetHsfModel(void)
 {
 #ifdef BYTESWAPPING
     // TODO free
-    HsfData *data = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfData), MEMORY_DEFAULT_NUM);
+    HSFDATA *data = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFDATA), MEMORY_DEFAULT_NUM);
 #else
-    HsfData *data = fileptr;
+    HSFDATA *data = fileptr;
 #endif
     data->scene = Model.scene;
-    data->sceneCnt = Model.sceneCnt;
+    data->sceneNum = Model.sceneNum;
     data->attribute = Model.attribute;
-    data->attributeCnt = Model.attributeCnt;
+    data->attributeNum = Model.attributeNum;
     data->bitmap = Model.bitmap;
-    data->bitmapCnt = Model.bitmapCnt;
+    data->bitmapNum = Model.bitmapNum;
     data->cenv = Model.cenv;
-    data->cenvCnt = Model.cenvCnt;
+    data->cenvNum = Model.cenvNum;
     data->skeleton = Model.skeleton;
-    data->skeletonCnt = Model.skeletonCnt;
+    data->skeletonNum = Model.skeletonNum;
     data->face = Model.face;
-    data->faceCnt = Model.faceCnt;
+    data->faceNum = Model.faceNum;
     data->material = Model.material;
-    data->materialCnt = Model.materialCnt;
+    data->materialNum = Model.materialNum;
     data->motion = Model.motion;
-    data->motionCnt = Model.motionCnt;
+    data->motionNum = Model.motionNum;
     data->normal = Model.normal;
-    data->normalCnt = Model.normalCnt;
+    data->normalNum = Model.normalNum;
     data->root = Model.root;
-    data->objectCnt = Model.objectCnt;
+    data->objectNum = Model.objectNum;
     data->object = objtop;
     data->matrix = Model.matrix;
-    data->matrixCnt = Model.matrixCnt;
+    data->matrixNum = Model.matrixNum;
     data->palette = Model.palette;
-    data->paletteCnt = Model.paletteCnt;
+    data->paletteNum = Model.paletteNum;
     data->st = Model.st;
-    data->stCnt = Model.stCnt;
+    data->stNum = Model.stNum;
     data->vertex = Model.vertex;
-    data->vertexCnt = Model.vertexCnt;
+    data->vertexNum = Model.vertexNum;
     data->cenv = Model.cenv;
-    data->cenvCnt = Model.cenvCnt;
+    data->cenvNum = Model.cenvNum;
     data->cluster = Model.cluster;
-    data->clusterCnt = Model.clusterCnt;
+    data->clusterNum = Model.clusterNum;
     data->part = Model.part;
-    data->partCnt = Model.partCnt;
+    data->partNum = Model.partNum;
     data->shape = Model.shape;
-    data->shapeCnt = Model.shapeCnt;
+    data->shapeNum = Model.shapeNum;
     data->mapAttr = Model.mapAttr;
-    data->mapAttrCnt = Model.mapAttrCnt;
+    data->mapAttrNum = Model.mapAttrNum;
 #ifdef TARGET_PC
     // for debugging, why doesn't the original set it?...
     data->color = Model.color;
-    data->colorCnt = Model.colorCnt;
+    data->colorNum = Model.colorNum;
 #endif
 #ifdef BYTESWAPPING
     // TODO PC was this created solely for the sake of being able to free it later?
@@ -839,22 +840,22 @@ static void MaterialLoad(void)
     s32 j;
     if(head.material.count) {
 #ifdef BYTESWAPPING
-        HsfMaterial *file_mat = MaterialTop;
+        HSFMATERIAL *file_mat = MaterialTop;
 #else
-        HsfMaterial *file_mat = (HsfMaterial *)((uintptr_t)fileptr+head.material.ofs);
+        HSFMATERIAL *file_mat = (HSFMATERIAL *)((uintptr_t)fileptr+head.material.ofs);
 #endif
-        HsfMaterial *curr_mat;
-        HsfMaterial *new_mat;
+        HSFMATERIAL *curr_mat;
+        HSFMATERIAL *new_mat;
         for(i=0; i<head.material.count; i++) {
             curr_mat = &file_mat[i];
         }
         new_mat = file_mat;
         Model.material = new_mat;
-        Model.materialCnt = head.material.count;
+        Model.materialNum = head.material.count;
 #ifdef BYTESWAPPING
         file_mat = MaterialTop;
 #else
-        file_mat = (HsfMaterial *)((u32)fileptr+head.material.ofs);
+        file_mat = (HSFMATERIAL *)((u32)fileptr+head.material.ofs);
 #endif
         for(i=0; i<head.material.count; i++, new_mat++) {
             curr_mat = &file_mat[i];
@@ -870,22 +871,22 @@ static void MaterialLoad(void)
             new_mat->shadowColor[0] = curr_mat->shadowColor[0];
             new_mat->shadowColor[1] = curr_mat->shadowColor[1];
             new_mat->shadowColor[2] = curr_mat->shadowColor[2];
-            new_mat->hilite_scale = curr_mat->hilite_scale;
+            new_mat->hiliteScale = curr_mat->hiliteScale;
             new_mat->unk18 = curr_mat->unk18;
             new_mat->invAlpha = curr_mat->invAlpha;
             new_mat->unk20[0] = curr_mat->unk20[0];
             new_mat->unk20[1] = curr_mat->unk20[1];
             new_mat->refAlpha = curr_mat->refAlpha;
             new_mat->unk2C = curr_mat->unk2C;
-            new_mat->numAttrs = curr_mat->numAttrs;
+            new_mat->attrNum = curr_mat->attrNum;
             // the pointers are being treated as values
-            new_mat->attrs = (intptr_t *)(NSymIndex+((uintptr_t)curr_mat->attrs));
+            new_mat->attr = (intptr_t *)(NSymIndex+((uintptr_t)curr_mat->attr));
             rgba[i].r = new_mat->litColor[0];
             rgba[i].g = new_mat->litColor[1];
             rgba[i].b = new_mat->litColor[2];
             rgba[i].a = 255;
-            for(j=0; j<new_mat->numAttrs; j++) {
-                new_mat->attrs[j] = new_mat->attrs[j];
+            for(j=0; j<new_mat->attrNum; j++) {
+                new_mat->attr[j] = new_mat->attr[j];
             }
         }
     }
@@ -893,19 +894,19 @@ static void MaterialLoad(void)
 
 static void AttributeLoad(void)
 {
-    HsfAttribute *file_attr;
-    HsfAttribute *new_attr;
-    HsfAttribute *temp_attr;
+    HSFATTRIBUTE *file_attr;
+    HSFATTRIBUTE *new_attr;
+    HSFATTRIBUTE *temp_attr;
     s32 i;
     if(head.attribute.count) {
 #ifdef BYTESWAPPING
         temp_attr = file_attr = AttributeTop;
 #else
-        temp_attr = file_attr = (HsfAttribute *)((u32)fileptr+head.attribute.ofs);
+        temp_attr = file_attr = (HSFATTRIBUTE *)((u32)fileptr+head.attribute.ofs);
 #endif
         new_attr = temp_attr;
         Model.attribute = new_attr;
-        Model.attributeCnt = head.attribute.count;
+        Model.attributeNum = head.attribute.count;
         for(i=0; i<head.attribute.count; i++, new_attr++) {
             if((u32)(uintptr_t)file_attr[i].name != -1) {
                 new_attr->name = SetName((u32 *)&file_attr[i].name);
@@ -932,51 +933,51 @@ static void SceneLoad(void)
 #ifdef BYTESWAPPING
     s32 i;
 #endif
-    HsfScene *file_scene;
-    HsfScene *new_scene;
+    HSFSCENE *file_scene;
+    HSFSCENE *new_scene;
     if(head.scene.count) {
-        file_scene = (HsfScene *)((uintptr_t)fileptr+head.scene.ofs);
+        file_scene = (HSFSCENE *)((uintptr_t)fileptr+head.scene.ofs);
 #ifdef BYTESWAPPING
         for (i = 0; i < head.scene.count; i++) {
             byteswap_hsfscene(&file_scene[i]);
         }
 #endif
         new_scene = file_scene;
-        new_scene->end = file_scene->end;
-        new_scene->start = file_scene->start;
+        new_scene->fogEnd = file_scene->fogEnd;
+        new_scene->fogStart = file_scene->fogStart;
         Model.scene = new_scene;
-        Model.sceneCnt = head.scene.count;
+        Model.sceneNum = head.scene.count;
     }
 }
 
 static void ColorLoad(void)
 {
     s32 i;
-    HsfBuffer *file_color;
-    HsfBuffer *new_color;
+    HSFBUFFER *file_color;
+    HSFBUFFER *new_color;
     void *data;
     void *color_data;
-    HsfBuffer *temp_color;
+    HSFBUFFER *temp_color;
 
     if(head.color.count) {
 #ifdef BYTESWAPPING
         HsfBuffer32b * file_color_real = (HsfBuffer32b *)((uintptr_t)fileptr + head.color.ofs);
-        temp_color = file_color = ColorTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfBuffer) * head.color.count, MEMORY_DEFAULT_NUM);
+        temp_color = file_color = ColorTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFBUFFER) * head.color.count, MEMORY_DEFAULT_NUM);
         for (i = 0; i < head.color.count; i++) {
             byteswap_hsfbuffer(&file_color_real[i], &file_color[i]);
         }
 #else
-        temp_color = file_color = (HsfBuffer *)((u32)fileptr+head.color.ofs);
+        temp_color = file_color = (HSFBUFFER *)((u32)fileptr+head.color.ofs);
         data = &file_color[head.color.count];
         for(i=0; i<head.color.count; i++, file_color++);
 #endif
         new_color = temp_color;
         Model.color = new_color;
-        Model.colorCnt = head.color.count;
+        Model.colorNum = head.color.count;
 #ifdef BYTESWAPPING
         data = (u16 *)&file_color_real[head.color.count];
 #else
-        file_color = (HsfBuffer *)((u32)fileptr+head.color.ofs);
+        file_color = (HSFBUFFER *)((u32)fileptr+head.color.ofs);
         data = &file_color[head.color.count];
 #endif
         for(i=0; i<head.color.count; i++, new_color++, file_color++) {
@@ -990,35 +991,35 @@ static void ColorLoad(void)
 static void VertexLoad(void)
 {
     s32 i, j;
-    HsfBuffer *file_vertex;
-    HsfBuffer *new_vertex;
+    HSFBUFFER *file_vertex;
+    HSFBUFFER *new_vertex;
     void *data;
-    HsfVector3f *data_elem;
+    HuVecF *data_elem;
     void *temp_data;
 
     if(head.vertex.count) {
 #ifdef BYTESWAPPING
         HsfBuffer32b *file_vertex_real = (HsfBuffer32b *)((uintptr_t)fileptr + head.vertex.ofs);
-        vtxtop = file_vertex = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfBuffer) * head.vertex.count, MEMORY_DEFAULT_NUM);
+        vtxtop = file_vertex = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFBUFFER) * head.vertex.count, MEMORY_DEFAULT_NUM);
         for (i = 0; i < head.vertex.count; i++) {
             byteswap_hsfbuffer(&file_vertex_real[i], &file_vertex[i]);
         }
 #else
-        vtxtop = file_vertex = (HsfBuffer *)((u32)fileptr+head.vertex.ofs);
+        vtxtop = file_vertex = (HSFBUFFER *)((u32)fileptr+head.vertex.ofs);
         data = (void *)&file_vertex[head.vertex.count];
         for(i=0; i<head.vertex.count; i++, file_vertex++) {
             for(j=0; j<(u32)file_vertex->count; j++) {
-                data_elem = (HsfVector3f *)(((uintptr_t)data)+((uintptr_t)file_vertex->data)+(j*sizeof(HsfVector3f)));
+                data_elem = (HuVecF *)(((uintptr_t)data)+((uintptr_t)file_vertex->data)+(j*sizeof(HuVecF)));
             }
         }
 #endif
         new_vertex = vtxtop;
         Model.vertex = new_vertex;
-        Model.vertexCnt = head.vertex.count;
+        Model.vertexNum = head.vertex.count;
 #ifdef BYTESWAPPING
         VertexDataTop = data = (void *)&file_vertex_real[head.vertex.count];
 #else
-        file_vertex = (HsfBuffer *)((u32)fileptr+head.vertex.ofs);
+        file_vertex = (HSFBUFFER *)((u32)fileptr+head.vertex.ofs);
         VertexDataTop = data = (void *)&file_vertex[head.vertex.count];
 #endif
         for(i=0; i<head.vertex.count; i++, new_vertex++, file_vertex++) {
@@ -1027,14 +1028,14 @@ static void VertexLoad(void)
             new_vertex->name = SetName((u32 *)&file_vertex->name);
             new_vertex->data = (void *)((uintptr_t)data + (uintptr_t)temp_data);
             for(j=0; j<new_vertex->count; j++) {
-                data_elem = (HsfVector3f *)((uintptr_t)data + (uintptr_t)temp_data + (j * sizeof(HsfVector3f)));
+                data_elem = (HuVecF *)((uintptr_t)data + (uintptr_t)temp_data + (j * sizeof(HuVecF)));
 #ifdef BYTESWAPPING
                 // TODO we should do extra allocations for these elements and don't swap the dvd data directly to avoid double byteswaps
                 byteswap_hsfvec3f(data_elem);
 #endif
-                ((HsfVector3f *)new_vertex->data)[j].x = data_elem->x;
-                ((HsfVector3f *)new_vertex->data)[j].y = data_elem->y;
-                ((HsfVector3f *)new_vertex->data)[j].z = data_elem->z;
+                ((HuVecF *)new_vertex->data)[j].x = data_elem->x;
+                ((HuVecF *)new_vertex->data)[j].y = data_elem->y;
+                ((HuVecF *)new_vertex->data)[j].z = data_elem->z;
             }
         }
     }
@@ -1044,9 +1045,9 @@ static void NormalLoad(void)
 {
     s32 i, j;
     void *temp_data;
-    HsfBuffer *file_normal;
-    HsfBuffer *new_normal;
-    HsfBuffer *temp_normal;
+    HSFBUFFER *file_normal;
+    HSFBUFFER *new_normal;
+    HSFBUFFER *temp_normal;
     void *data;
 
 
@@ -1054,21 +1055,21 @@ static void NormalLoad(void)
         s32 cenv_count = head.cenv.count;
 #ifdef BYTESWAPPING
         HsfBuffer32b *file_normal_real = (HsfBuffer32b *)((uintptr_t)fileptr + head.normal.ofs);
-        temp_normal = file_normal = NormalTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfBuffer) * head.normal.count, MEMORY_DEFAULT_NUM);
+        temp_normal = file_normal = NormalTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFBUFFER) * head.normal.count, MEMORY_DEFAULT_NUM);
         for (i = 0; i < head.normal.count; i++) {
             byteswap_hsfbuffer(&file_normal_real[i], &file_normal[i]);
         }
 #else
-        temp_normal = file_normal = (HsfBuffer *)((u32)fileptr+head.normal.ofs);
+        temp_normal = file_normal = (HSFBUFFER *)((u32)fileptr+head.normal.ofs);
         data = (void *)&file_normal[head.normal.count];
 #endif
         new_normal = temp_normal;
         Model.normal = new_normal;
-        Model.normalCnt = head.normal.count;
+        Model.normalNum = head.normal.count;
 #ifdef BYTESWAPPING
         NormalDataTop = data = (void *)&file_normal_real[head.normal.count];
 #else
-        file_normal = (HsfBuffer *)((u32)fileptr+head.normal.ofs);
+        file_normal = (HSFBUFFER *)((u32)fileptr+head.normal.ofs);
         NormalDataTop = data = (void *)&file_normal[head.normal.count];
 #endif
         for(i=0; i<head.normal.count; i++, new_normal++, file_normal++) {
@@ -1079,7 +1080,7 @@ static void NormalLoad(void)
 #ifdef BYTESWAPPING
             if (cenv_count != 0) {
                 for (j = 0; j < new_normal->count; j++) {
-                    HsfVector3f *normalData = &((HsfVector3f *)new_normal->data)[j];
+                    HuVecF *normalData = &((HuVecF *)new_normal->data)[j];
                     byteswap_hsfvec3f(normalData);
                 }
             }
@@ -1091,36 +1092,36 @@ static void NormalLoad(void)
 static void STLoad(void)
 {
     s32 i, j;
-    HsfBuffer *file_st;
-    HsfBuffer *temp_st;
-    HsfBuffer *new_st;
+    HSFBUFFER *file_st;
+    HSFBUFFER *temp_st;
+    HSFBUFFER *new_st;
     void *data;
-    HsfVector2f *data_elem;
+    HuVec2f *data_elem;
     void *temp_data;
 
     if(head.st.count) {
 #ifdef BYTESWAPPING
         HsfBuffer32b *file_st_real = (HsfBuffer32b *)((uintptr_t)fileptr + head.st.ofs);
-        temp_st = file_st = StTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfBuffer) * head.st.count, MEMORY_DEFAULT_NUM);
+        temp_st = file_st = StTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFBUFFER) * head.st.count, MEMORY_DEFAULT_NUM);
         for (i = 0; i < head.st.count; i++) {
             byteswap_hsfbuffer(&file_st_real[i], &file_st[i]);
         }
 #else
-        temp_st = file_st = (HsfBuffer *)((u32)fileptr+head.st.ofs);
+        temp_st = file_st = (HSFBUFFER *)((u32)fileptr+head.st.ofs);
         data = (void *)&file_st[head.st.count];
         for(i=0; i<head.st.count; i++, file_st++) {
             for(j=0; j<(u32)file_st->count; j++) {
-                data_elem = (HsfVector2f *)(((u32)data)+((u32)file_st->data)+(j*sizeof(HsfVector2f)));
+                data_elem = (HuVec2f *)(((u32)data)+((u32)file_st->data)+(j*sizeof(HuVec2f)));
             }
         }
 #endif
         new_st = temp_st;
         Model.st = new_st;
-        Model.stCnt = head.st.count;
+        Model.stNum = head.st.count;
 #ifdef BYTESWAPPING
         data = (void *)&file_st_real[head.st.count];
 #else
-        file_st = (HsfBuffer *)((u32)fileptr+head.st.ofs);
+        file_st = (HSFBUFFER *)((u32)fileptr+head.st.ofs);
         data = (void *)&file_st[head.st.count];
 #endif
         for(i=0; i<head.st.count; i++, new_st++, file_st++) {
@@ -1129,12 +1130,12 @@ static void STLoad(void)
             new_st->name = SetName((u32 *)&file_st->name);
             new_st->data = (void *)((uintptr_t)data + (uintptr_t)temp_data);
             for(j=0; j<new_st->count; j++) {
-                data_elem = (HsfVector2f *)((uintptr_t)data + (uintptr_t)temp_data + (j*sizeof(HsfVector2f)));
+                data_elem = (HuVec2f *)((uintptr_t)data + (uintptr_t)temp_data + (j*sizeof(HuVec2f)));
 #ifdef BYTESWAPPING
                 byteswap_hsfvec2f(data_elem);
 #endif
-                ((HsfVector2f *)new_st->data)[j].x = data_elem->x;
-                ((HsfVector2f *)new_st->data)[j].y = data_elem->y;
+                ((HuVec2f *)new_st->data)[j].x = data_elem->x;
+                ((HuVec2f *)new_st->data)[j].y = data_elem->y;
             }
         }
     }
@@ -1142,13 +1143,13 @@ static void STLoad(void)
 
 static void FaceLoad(void)
 {
-    HsfBuffer *file_face;
-    HsfBuffer *new_face;
-    HsfBuffer *temp_face;
-    HsfFace *temp_data;
-    HsfFace *data;
-    HsfFace *file_face_strip;
-    HsfFace *new_face_strip;
+    HSFBUFFER *file_face;
+    HSFBUFFER *new_face;
+    HSFBUFFER *temp_face;
+    HSFFACE *temp_data;
+    HSFFACE *data;
+    HSFFACE *file_face_strip;
+    HSFFACE *new_face_strip;
     u8 *strip;
     s32 i;
     s32 j;
@@ -1157,20 +1158,20 @@ static void FaceLoad(void)
 #ifdef BYTESWAPPING
         HsfBuffer32b *file_face_real = (HsfBuffer32b *)((uintptr_t)fileptr + head.face.ofs);
         HsfFace32b *file_facedata_real = (HsfFace32b *)&file_face_real[head.face.count];
-        temp_face = file_face = FaceTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfBuffer) * head.face.count, MEMORY_DEFAULT_NUM);
+        temp_face = file_face = FaceTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFBUFFER) * head.face.count, MEMORY_DEFAULT_NUM);
         for (i = 0; i < head.face.count; i++) {
             byteswap_hsfbuffer(&file_face_real[i], &file_face[i]);
         }
 #else
-        temp_face = file_face = (HsfBuffer *)((u32)fileptr+head.face.ofs);
-        data = (HsfFace *)&file_face[head.face.count];
+        temp_face = file_face = (HSFBUFFER *)((u32)fileptr+head.face.ofs);
+        data = (HSFFACE *)&file_face[head.face.count];
 #endif
         new_face = temp_face;
         Model.face = new_face;
-        Model.faceCnt = head.face.count;
+        Model.faceNum = head.face.count;
 #ifndef BYTESWAPPING
-        file_face = (HsfBuffer *)((u32)fileptr+head.face.ofs);
-        data = (HsfFace *)&file_face[head.face.count];
+        file_face = (HSFBUFFER *)((u32)fileptr+head.face.ofs);
+        data = (HSFFACE *)&file_face[head.face.count];
 #endif
         for(i=0; i<head.face.count; i++, new_face++, file_face++) {
             temp_data = file_face->data;
@@ -1179,7 +1180,7 @@ static void FaceLoad(void)
 #ifdef BYTESWAPPING
             {
                 HsfFace32b *facedata_start = (HsfFace32b *)((uintptr_t)file_facedata_real + (uintptr_t)temp_data);
-                data = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfFace) * new_face->count, MEMORY_DEFAULT_NUM);
+                data = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFFACE) * new_face->count, MEMORY_DEFAULT_NUM);
                 for (j = 0; j < new_face->count; j++) {
                     byteswap_hsfface(&facedata_start[j], &data[j]);
                 }
@@ -1188,7 +1189,7 @@ static void FaceLoad(void)
             }
 #else
             new_face->data = (void *)((uintptr_t)data+(uintptr_t)temp_data);
-            strip = (u8 *)(&((HsfFace *)new_face->data)[new_face->count]);
+            strip = (u8 *)(&((HSFFACE *)new_face->data)[new_face->count]);
 #endif
         }
         new_face = temp_face;
@@ -1211,14 +1212,14 @@ static void FaceLoad(void)
     }
 }
 
-static void DispObject(HsfObject *parent, HsfObject *object)
+static void DispObject(HSFOBJECT *parent, HSFOBJECT *object)
 {
     u32 i;
-    HsfObject *child_obj;
-    HsfObject *temp_object;
+    HSFOBJECT *child_obj;
+    HSFOBJECT *temp_object;
     struct {
-        HsfObject *parent;
-        HsfBuffer *shape;
+        HSFOBJECT *parent;
+        HSFBUFFER *shape;
         HsfCluster *cluster;
     } temp;
 
@@ -1227,200 +1228,200 @@ static void DispObject(HsfObject *parent, HsfObject *object)
     switch(object->type) {
         case HSF_OBJ_MESH:
         {
-            HsfObjectData *data;
-            HsfObject *new_object;
+            HSFMESH *data;
+            HSFOBJECT *new_object;
 
-            data = &object->data;
+            data = &object->mesh;
             new_object = temp_object = object;
-            new_object->data.childrenCount = data->childrenCount;
-            new_object->data.children = (HsfObject **)&NSymIndex[(uintptr_t)data->children];
-            for(i=0; i<new_object->data.childrenCount; i++) {
-                child_obj = &objtop[(uintptr_t)new_object->data.children[i]];
-                new_object->data.children[i] = child_obj;
+            new_object->mesh.childrenCount = data->childrenCount;
+            new_object->mesh.children = (HSFOBJECT **)&NSymIndex[(uintptr_t)data->children];
+            for(i=0; i<new_object->mesh.childrenCount; i++) {
+                child_obj = &objtop[(uintptr_t)new_object->mesh.children[i]];
+                new_object->mesh.children[i] = child_obj;
             }
-            new_object->data.parent = parent;
+            new_object->mesh.parent = parent;
             if(Model.root == NULL) {
                 Model.root = temp_object;
             }
             new_object->type = HSF_OBJ_MESH;
-            new_object->data.vertex = SearchVertexPtr((s32)(intptr_t)data->vertex);
-            new_object->data.normal = SearchNormalPtr((s32)(intptr_t)data->normal);
-            new_object->data.st = SearchStPtr((s32)(intptr_t)data->st);
-            new_object->data.color = SearchColorPtr((s32)(intptr_t)data->color);
-            new_object->data.face = SearchFacePtr((s32)(intptr_t)data->face);
-            new_object->data.vertexShape = (HsfBuffer **)&NSymIndex[(uintptr_t)data->vertexShape];
-            for(i=0; i<new_object->data.vertexShapeCnt; i++) {
-                temp.shape = &vtxtop[(uintptr_t)new_object->data.vertexShape[i]];
-                new_object->data.vertexShape[i] = temp.shape;
+            new_object->mesh.vertex = SearchVertexPtr((s32)(intptr_t)data->vertex);
+            new_object->mesh.normal = SearchNormalPtr((s32)(intptr_t)data->normal);
+            new_object->mesh.st = SearchStPtr((s32)(intptr_t)data->st);
+            new_object->mesh.color = SearchColorPtr((s32)(intptr_t)data->color);
+            new_object->mesh.face = SearchFacePtr((s32)(intptr_t)data->face);
+            new_object->mesh.shape = (HSFBUFFER **)&NSymIndex[(uintptr_t)data->shape];
+            for(i=0; i<new_object->mesh.shapeNum; i++) {
+                temp.shape = &vtxtop[(uintptr_t)new_object->mesh.shape[i]];
+                new_object->mesh.shape[i] = temp.shape;
             }
-            new_object->data.cluster = (HsfCluster **)&NSymIndex[(uintptr_t)data->cluster];
-            for(i=0; i<new_object->data.clusterCnt; i++) {
-                temp.cluster = &ClusterTop[(uintptr_t)new_object->data.cluster[i]];
-                new_object->data.cluster[i] = temp.cluster;
+            new_object->mesh.cluster = (HsfCluster **)&NSymIndex[(uintptr_t)data->cluster];
+            for(i=0; i<new_object->mesh.clusterNum; i++) {
+                temp.cluster = &ClusterTop[(uintptr_t)new_object->mesh.cluster[i]];
+                new_object->mesh.cluster[i] = temp.cluster;
             }
-            new_object->data.cenv = SearchCenvPtr((s32)(intptr_t)data->cenv);
-            new_object->data.material = Model.material;
+            new_object->mesh.cenv = SearchCenvPtr((s32)(intptr_t)data->cenv);
+            new_object->mesh.material = Model.material;
             if((intptr_t)data->attribute >= 0) {
-                new_object->data.attribute = Model.attribute;
+                new_object->mesh.attribute = Model.attribute;
             } else {
-                new_object->data.attribute = NULL;
+                new_object->mesh.attribute = NULL;
             }
 #ifdef BYTESWAPPING
             LoadEnvelopeSourceData(new_object, data);
 #else
-            new_object->data.vtxtop = (void *)((uintptr_t)fileptr + (uintptr_t)data->vtxtop);
-            new_object->data.normtop = (void *)((uintptr_t)fileptr + (uintptr_t)data->normtop);
+            new_object->mesh.vtxtop = (void *)((uintptr_t)fileptr + (uintptr_t)data->vtxtop);
+            new_object->mesh.normtop = (void *)((uintptr_t)fileptr + (uintptr_t)data->normtop);
 #endif
-            new_object->data.base.pos.x = data->base.pos.x;
-            new_object->data.base.pos.y = data->base.pos.y;
-            new_object->data.base.pos.z = data->base.pos.z;
-            new_object->data.base.rot.x = data->base.rot.x;
-            new_object->data.base.rot.y = data->base.rot.y;
-            new_object->data.base.rot.z = data->base.rot.z;
-            new_object->data.base.scale.x = data->base.scale.x;
-            new_object->data.base.scale.y = data->base.scale.y;
-            new_object->data.base.scale.z = data->base.scale.z;
-            new_object->data.mesh.min.x = data->mesh.min.x;
-            new_object->data.mesh.min.y = data->mesh.min.y;
-            new_object->data.mesh.min.z = data->mesh.min.z;
-            new_object->data.mesh.max.x = data->mesh.max.x;
-            new_object->data.mesh.max.y = data->mesh.max.y;
-            new_object->data.mesh.max.z = data->mesh.max.z;
+            new_object->mesh.base.pos.x = data->base.pos.x;
+            new_object->mesh.base.pos.y = data->base.pos.y;
+            new_object->mesh.base.pos.z = data->base.pos.z;
+            new_object->mesh.base.rot.x = data->base.rot.x;
+            new_object->mesh.base.rot.y = data->base.rot.y;
+            new_object->mesh.base.rot.z = data->base.rot.z;
+            new_object->mesh.base.scale.x = data->base.scale.x;
+            new_object->mesh.base.scale.y = data->base.scale.y;
+            new_object->mesh.base.scale.z = data->base.scale.z;
+            new_object->mesh.mesh.min.x = data->mesh.min.x;
+            new_object->mesh.mesh.min.y = data->mesh.min.y;
+            new_object->mesh.mesh.min.z = data->mesh.min.z;
+            new_object->mesh.mesh.max.x = data->mesh.max.x;
+            new_object->mesh.mesh.max.y = data->mesh.max.y;
+            new_object->mesh.mesh.max.z = data->mesh.max.z;
             for(i=0; i<data->childrenCount; i++) {
-                DispObject(new_object, new_object->data.children[i]);
+                DispObject(new_object, new_object->mesh.children[i]);
             }
         }
         break;
 
         case HSF_OBJ_NULL1:
         {
-            HsfObjectData *data;
-            HsfObject *new_object;
-            data = &object->data;
+            HSFMESH *data;
+            HSFOBJECT *new_object;
+            data = &object->mesh;
             new_object = temp_object = object;
-            new_object->data.parent = parent;
-            new_object->data.childrenCount = data->childrenCount;
-            new_object->data.children = (HsfObject **)&NSymIndex[(uintptr_t)data->children];
-            for(i=0; i<new_object->data.childrenCount; i++) {
-                child_obj = &objtop[(uintptr_t)new_object->data.children[i]];
-                new_object->data.children[i] = child_obj;
+            new_object->mesh.parent = parent;
+            new_object->mesh.childrenCount = data->childrenCount;
+            new_object->mesh.children = (HSFOBJECT **)&NSymIndex[(uintptr_t)data->children];
+            for(i=0; i<new_object->mesh.childrenCount; i++) {
+                child_obj = &objtop[(uintptr_t)new_object->mesh.children[i]];
+                new_object->mesh.children[i] = child_obj;
             }
             if(Model.root == NULL) {
                 Model.root = temp_object;
             }
             for(i=0; i<data->childrenCount; i++) {
-                DispObject(new_object, new_object->data.children[i]);
+                DispObject(new_object, new_object->mesh.children[i]);
             }
         }
         break;
 
         case HSF_OBJ_REPLICA:
         {
-            HsfObjectData *data;
-            HsfObject *new_object;
-            data = &object->data;
+            HSFMESH *data;
+            HSFOBJECT *new_object;
+            data = &object->mesh;
             new_object = temp_object = object;
-            new_object->data.parent = parent;
-            new_object->data.childrenCount = data->childrenCount;
-            new_object->data.children = (HsfObject **)&NSymIndex[(uintptr_t)data->children];
-            for(i=0; i<new_object->data.childrenCount; i++) {
-                child_obj = &objtop[(uintptr_t)new_object->data.children[i]];
-                new_object->data.children[i] = child_obj;
+            new_object->mesh.parent = parent;
+            new_object->mesh.childrenCount = data->childrenCount;
+            new_object->mesh.children = (HSFOBJECT **)&NSymIndex[(uintptr_t)data->children];
+            for(i=0; i<new_object->mesh.childrenCount; i++) {
+                child_obj = &objtop[(uintptr_t)new_object->mesh.children[i]];
+                new_object->mesh.children[i] = child_obj;
             }
             if(Model.root == NULL) {
                 Model.root = temp_object;
             }
-            new_object->data.replica = &objtop[(uintptr_t)new_object->data.replica];
+            new_object->mesh.replica = &objtop[(uintptr_t)new_object->mesh.replica];
             for(i=0; i<data->childrenCount; i++) {
-                DispObject(new_object, new_object->data.children[i]);
+                DispObject(new_object, new_object->mesh.children[i]);
             }
         }
         break;
 
         case HSF_OBJ_ROOT:
         {
-            HsfObjectData *data;
-            HsfObject *new_object;
-            data = &object->data;
+            HSFMESH *data;
+            HSFOBJECT *new_object;
+            data = &object->mesh;
             new_object = temp_object = object;
-            new_object->data.parent = parent;
-            new_object->data.childrenCount = data->childrenCount;
-            new_object->data.children = (HsfObject **)&NSymIndex[(uintptr_t)data->children];
-            for(i=0; i<new_object->data.childrenCount; i++) {
-                child_obj = &objtop[(uintptr_t)new_object->data.children[i]];
-                new_object->data.children[i] = child_obj;
+            new_object->mesh.parent = parent;
+            new_object->mesh.childrenCount = data->childrenCount;
+            new_object->mesh.children = (HSFOBJECT **)&NSymIndex[(uintptr_t)data->children];
+            for(i=0; i<new_object->mesh.childrenCount; i++) {
+                child_obj = &objtop[(uintptr_t)new_object->mesh.children[i]];
+                new_object->mesh.children[i] = child_obj;
             }
             if(Model.root == NULL) {
                 Model.root = temp_object;
             }
             for(i=0; i<data->childrenCount; i++) {
-                DispObject(new_object, new_object->data.children[i]);
+                DispObject(new_object, new_object->mesh.children[i]);
             }
         }
         break;
 
         case HSF_OBJ_JOINT:
         {
-            HsfObjectData *data;
-            HsfObject *new_object;
-            data = &object->data;
+            HSFMESH *data;
+            HSFOBJECT *new_object;
+            data = &object->mesh;
             new_object = temp_object = object;
-            new_object->data.parent = parent;
-            new_object->data.childrenCount = data->childrenCount;
-            new_object->data.children = (HsfObject **)&NSymIndex[(uintptr_t)data->children];
-            for(i=0; i<new_object->data.childrenCount; i++) {
-                child_obj = &objtop[(uintptr_t)new_object->data.children[i]];
-                new_object->data.children[i] = child_obj;
+            new_object->mesh.parent = parent;
+            new_object->mesh.childrenCount = data->childrenCount;
+            new_object->mesh.children = (HSFOBJECT **)&NSymIndex[(uintptr_t)data->children];
+            for(i=0; i<new_object->mesh.childrenCount; i++) {
+                child_obj = &objtop[(uintptr_t)new_object->mesh.children[i]];
+                new_object->mesh.children[i] = child_obj;
             }
             if(Model.root == NULL) {
                 Model.root = temp_object;
             }
             for(i=0; i<data->childrenCount; i++) {
-                DispObject(new_object, new_object->data.children[i]);
+                DispObject(new_object, new_object->mesh.children[i]);
             }
         }
         break;
 
         case HSF_OBJ_NULL2:
         {
-            HsfObjectData *data;
-            HsfObject *new_object;
-            data = &object->data;
+            HSFMESH *data;
+            HSFOBJECT *new_object;
+            data = &object->mesh;
             new_object = temp_object = object;
-            new_object->data.parent = parent;
-            new_object->data.childrenCount = data->childrenCount;
-            new_object->data.children = (HsfObject **)&NSymIndex[(uintptr_t)data->children];
-            for(i=0; i<new_object->data.childrenCount; i++) {
-                child_obj = &objtop[(uintptr_t)new_object->data.children[i]];
-                new_object->data.children[i] = child_obj;
+            new_object->mesh.parent = parent;
+            new_object->mesh.childrenCount = data->childrenCount;
+            new_object->mesh.children = (HSFOBJECT **)&NSymIndex[(uintptr_t)data->children];
+            for(i=0; i<new_object->mesh.childrenCount; i++) {
+                child_obj = &objtop[(uintptr_t)new_object->mesh.children[i]];
+                new_object->mesh.children[i] = child_obj;
             }
             if(Model.root == NULL) {
                 Model.root = temp_object;
             }
             for(i=0; i<data->childrenCount; i++) {
-                DispObject(new_object, new_object->data.children[i]);
+                DispObject(new_object, new_object->mesh.children[i]);
             }
         }
         break;
 
         case HSF_OBJ_MAP:
         {
-            HsfObjectData *data;
-            HsfObject *new_object;
-            data = &object->data;
+            HSFMESH *data;
+            HSFOBJECT *new_object;
+            data = &object->mesh;
             new_object = temp_object = object;
-            new_object->data.parent = parent;
-            new_object->data.childrenCount = data->childrenCount;
-            new_object->data.children = (HsfObject **)&NSymIndex[(uintptr_t)data->children];
-            for(i=0; i<new_object->data.childrenCount; i++) {
-                child_obj = &objtop[(uintptr_t)new_object->data.children[i]];
-                new_object->data.children[i] = child_obj;
+            new_object->mesh.parent = parent;
+            new_object->mesh.childrenCount = data->childrenCount;
+            new_object->mesh.children = (HSFOBJECT **)&NSymIndex[(uintptr_t)data->children];
+            for(i=0; i<new_object->mesh.childrenCount; i++) {
+                child_obj = &objtop[(uintptr_t)new_object->mesh.children[i]];
+                new_object->mesh.children[i] = child_obj;
             }
             if(Model.root == NULL) {
                 Model.root = temp_object;
             }
             for(i=0; i<data->childrenCount; i++) {
-                DispObject(new_object, new_object->data.children[i]);
+                DispObject(new_object, new_object->mesh.children[i]);
             }
         }
         break;
@@ -1430,23 +1431,23 @@ static void DispObject(HsfObject *parent, HsfObject *object)
     }
 }
 
-static inline void FixupObject(HsfObject *object)
+static inline void FixupObject(HSFOBJECT *object)
 {
-    HsfObjectData *objdata_8;
-    HsfObjectData *objdata_7;
+    HSFMESH *objdata_8;
+    HSFMESH *objdata_7;
 
     s32 obj_type = object->type;
     switch(obj_type) {
         case 8:
         {
-            objdata_8 = &object->data;
+            objdata_8 = &object->mesh;
             object->type = HSF_OBJ_LIGHT;
         }
         break;
 
         case 7:
         {
-            objdata_7 = &object->data;
+            objdata_7 = &object->mesh;
             object->type = HSF_OBJ_CAMERA;
         }
         break;
@@ -1460,19 +1461,19 @@ static inline void FixupObject(HsfObject *object)
 static void ObjectLoad(void)
 {
     s32 i;
-    HsfObject *object;
-    HsfObject *new_object;
+    HSFOBJECT *object;
+    HSFOBJECT *new_object;
     s32 obj_type;
 
     if(head.object.count) {
 #ifdef BYTESWAPPING
         HsfObject32b *file_object_real = (HsfObject32b *)((uintptr_t)fileptr + head.object.ofs);
-        objtop = object = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfObject) * head.object.count, MEMORY_DEFAULT_NUM);
+        objtop = object = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFOBJECT) * head.object.count, MEMORY_DEFAULT_NUM);
         for (i = 0; i < head.object.count; i++) {
             byteswap_hsfobject(&file_object_real[i], &objtop[i]);
         }
 #else
-        objtop = object = (HsfObject *)((u32)fileptr+head.object.ofs);
+        objtop = object = (HSFOBJECT *)((u32)fileptr+head.object.ofs);
 #endif
         for(i=0; i<head.object.count; i++, object++) {
             new_object = object;
@@ -1480,12 +1481,12 @@ static void ObjectLoad(void)
         }
         object = objtop;
         for(i=0; i<head.object.count; i++, object++) {
-            if((s32)(intptr_t)object->data.parent == -1) {
+            if((s32)(intptr_t)object->mesh.parent == -1) {
                 break;
             }
         }
         DispObject(NULL, object);
-        Model.objectCnt = head.object.count;
+        Model.objectNum = head.object.count;
         object = objtop;
         for(i=0; i<head.object.count; i++, object++) {
             FixupObject(object);
@@ -1497,13 +1498,13 @@ static void CenvLoad(void)
 {
     HsfCenvMulti *multi_file;
     HsfCenvMulti *multi_new;
-    HsfCenvSingle *single_new;
-    HsfCenvSingle *single_file;
-    HsfCenvDual *dual_file;
-    HsfCenvDual *dual_new;
+    HSFCENVSINGLE *single_new;
+    HSFCENVSINGLE *single_file;
+    HSFCENVDUAL *dual_file;
+    HSFCENVDUAL *dual_new;
 
-    HsfCenv *cenv_new;
-    HsfCenv *cenv_file;
+    HSFCENV *cenv_new;
+    HSFCENV *cenv_file;
     void *data_base;
     void *weight_base;
 
@@ -1513,23 +1514,23 @@ static void CenvLoad(void)
     if(head.cenv.count) {
 #ifdef BYTESWAPPING
         HsfCenv32b *file_cenv_real = (HsfCenv32b *)((uintptr_t)fileptr + head.cenv.ofs);
-        cenv_file = CenvTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfCenv) * head.cenv.count, MEMORY_DEFAULT_NUM);
+        cenv_file = CenvTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFCENV) * head.cenv.count, MEMORY_DEFAULT_NUM);
         for (i = 0; i < head.cenv.count; i++) {
             byteswap_hsfcenv(&file_cenv_real[i], &cenv_file[i]);
         }
         data_base = &file_cenv_real[head.cenv.count];
 #else
-        cenv_file = (HsfCenv *)((u32)fileptr+head.cenv.ofs);
+        cenv_file = (HSFCENV *)((u32)fileptr+head.cenv.ofs);
         data_base = &cenv_file[head.cenv.count];
 #endif
         weight_base = data_base;
         cenv_new = cenv_file;
-        Model.cenvCnt = head.cenv.count;
+        Model.cenvNum = head.cenv.count;
         Model.cenv = cenv_file;
         for(i=0; i<head.cenv.count; i++) {
-            cenv_new[i].singleData = (HsfCenvSingle *)((uintptr_t)cenv_file[i].singleData + (uintptr_t)data_base);
+            cenv_new[i].singleData = (HSFCENVSINGLE *)((uintptr_t)cenv_file[i].singleData + (uintptr_t)data_base);
 #ifndef BYTESWAPPING
-            cenv_new[i].dualData = (HsfCenvDual *)((uintptr_t)cenv_file[i].dualData + (uintptr_t)data_base);
+            cenv_new[i].dualData = (HSFCENVDUAL *)((uintptr_t)cenv_file[i].dualData + (uintptr_t)data_base);
             cenv_new[i].multiData = (HsfCenvMulti *)((uintptr_t)cenv_file[i].multiData + (uintptr_t)data_base);
 #endif
             cenv_new[i].singleCount = cenv_file[i].singleCount;
@@ -1538,12 +1539,12 @@ static void CenvLoad(void)
             cenv_new[i].copyCount = cenv_file[i].copyCount;
             cenv_new[i].vtxCount = cenv_file[i].vtxCount;
 #if BYTESWAPPING
-            weight_base = (void *)((uintptr_t)weight_base + (cenv_new[i].singleCount * sizeof(HsfCenvSingle)));
+            weight_base = (void *)((uintptr_t)weight_base + (cenv_new[i].singleCount * sizeof(HSFCENVSINGLE)));
             weight_base = (void *)((uintptr_t)weight_base + (cenv_new[i].dualCount * sizeof(HsfCenvDual32b)));
             weight_base = (void *)((uintptr_t)weight_base + (cenv_new[i].multiCount * sizeof(HsfCenvMulti32b)));
 #else
-            weight_base = (void *)((uintptr_t)weight_base + (cenv_new[i].singleCount * sizeof(HsfCenvSingle)));
-            weight_base = (void *)((uintptr_t)weight_base + (cenv_new[i].dualCount * sizeof(HsfCenvDual)));
+            weight_base = (void *)((uintptr_t)weight_base + (cenv_new[i].singleCount * sizeof(HSFCENVSINGLE)));
+            weight_base = (void *)((uintptr_t)weight_base + (cenv_new[i].dualCount * sizeof(HSFCENVDUAL)));
             weight_base = (void *)((uintptr_t)weight_base + (cenv_new[i].multiCount * sizeof(HsfCenvMulti)));
 #endif
         }
@@ -1551,7 +1552,7 @@ static void CenvLoad(void)
 #ifdef BYTESWAPPING
             HsfCenvDual32b *dual_data_real = (HsfCenvDual32b *)((uintptr_t)cenv_file[i].dualData + (uintptr_t)data_base);
             HsfCenvMulti32b *multi_data_real = (HsfCenvMulti32b *)((uintptr_t)cenv_file[i].multiData + (uintptr_t)data_base);
-            cenv_new[i].dualData = HuMemDirectMallocNum(HEAP_DATA, cenv_file[i].dualCount * sizeof(HsfCenvDual), MEMORY_DEFAULT_NUM);
+            cenv_new[i].dualData = HuMemDirectMallocNum(HEAP_DATA, cenv_file[i].dualCount * sizeof(HSFCENVDUAL), MEMORY_DEFAULT_NUM);
             cenv_new[i].multiData = HuMemDirectMallocNum(HEAP_DATA, cenv_file[i].multiCount * sizeof(HsfCenvMulti), MEMORY_DEFAULT_NUM);
 #endif
             single_new = single_file = cenv_new[i].singleData;
@@ -1560,9 +1561,9 @@ static void CenvLoad(void)
                 byteswap_hsfcenv_single(&single_new[j]);
 #endif
                 single_new[j].target = single_file[j].target;
-                single_new[j].posCnt = single_file[j].posCnt;
+                single_new[j].posNum = single_file[j].posNum;
                 single_new[j].pos = single_file[j].pos;
-                single_new[j].normalCnt = single_file[j].normalCnt;
+                single_new[j].normalNum = single_file[j].normalNum;
                 single_new[j].normal = single_file[j].normal;
             }
             dual_new = dual_file = cenv_new[i].dualData;
@@ -1573,10 +1574,10 @@ static void CenvLoad(void)
 #endif
                 dual_new[j].target1 = dual_file[j].target1;
                 dual_new[j].target2 = dual_file[j].target2;
-                dual_new[j].weightCnt = dual_file[j].weightCnt;
-                dual_new[j].weight = (HsfCenvDualWeight *)((uintptr_t)weight_base + (uintptr_t)dual_file[j].weight);
+                dual_new[j].weightNum = dual_file[j].weightNum;
+                dual_new[j].weight = (HSFCENVDUALWEIGHT *)((uintptr_t)weight_base + (uintptr_t)dual_file[j].weight);
 #ifdef BYTESWAPPING
-                for (k = 0; k < dual_new[j].weightCnt; k++) {
+                for (k = 0; k < dual_new[j].weightNum; k++) {
                     byteswap_hsfcenv_dual_weight(&dual_new[j].weight[k]);
                 }
 #endif
@@ -1587,27 +1588,27 @@ static void CenvLoad(void)
                 s32 k;
                 byteswap_hsfcenv_multi(&multi_data_real[j], &multi_new[j]);
 #endif
-                multi_new[j].weightCnt = multi_file[j].weightCnt;
+                multi_new[j].weightNum = multi_file[j].weightNum;
                 multi_new[j].pos = multi_file[j].pos;
-                multi_new[j].posCnt = multi_file[j].posCnt;
+                multi_new[j].posNum = multi_file[j].posNum;
                 multi_new[j].normal = multi_file[j].normal;
-                multi_new[j].normalCnt = multi_file[j].normalCnt;
-                multi_new[j].weight = (HsfCenvMultiWeight *)((uintptr_t)weight_base + (uintptr_t)multi_file[j].weight);
+                multi_new[j].normalNum = multi_file[j].normalNum;
+                multi_new[j].weight = (HSFCENVMULTIWEIGHT *)((uintptr_t)weight_base + (uintptr_t)multi_file[j].weight);
 #ifdef BYTESWAPPING
-                for (k = 0; k < multi_new[j].weightCnt; k++) {
+                for (k = 0; k < multi_new[j].weightNum; k++) {
                     byteswap_hsfcenv_multi_weight(&multi_new[j].weight[k]);
                 }
 #endif
             }
             dual_new = dual_file = cenv_new[i].dualData;
             for(j=0; j<cenv_new[i].dualCount; j++) {
-                HsfCenvDualWeight *discard = dual_new[j].weight;
+                HSFCENVDUALWEIGHT *discard = dual_new[j].weight;
             }
             multi_new = multi_file = cenv_new[i].multiData;
             for(j=0; j<cenv_new[i].multiCount; j++) {
-                HsfCenvMultiWeight *weight = multi_new[j].weight;
+                HSFCENVMULTIWEIGHT *weight = multi_new[j].weight;
                 s32 k;
-                for(k=0; k<multi_new[j].weightCnt; k++, weight++);
+                for(k=0; k<multi_new[j].weightNum; k++, weight++);
             }
         }
     }
@@ -1615,21 +1616,21 @@ static void CenvLoad(void)
 
 static void SkeletonLoad(void)
 {
-    HsfSkeleton *skeleton_file;
-    HsfSkeleton *skeleton_new;
+    HSFSKELETON *skeleton_file;
+    HSFSKELETON *skeleton_new;
     s32 i;
 
     if(head.skeleton.count) {
 #ifdef BYTESWAPPING
         HsfSkeleton32b *file_skeleton_real = (HsfSkeleton32b *)((uintptr_t)fileptr + head.skeleton.ofs);
-        skeleton_new = skeleton_file = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfSkeleton) * head.skeleton.count, MEMORY_DEFAULT_NUM);
+        skeleton_new = skeleton_file = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFSKELETON) * head.skeleton.count, MEMORY_DEFAULT_NUM);
         for (i = 0; i < head.skeleton.count; i++) {
             byteswap_hsfskeleton(&file_skeleton_real[i], &skeleton_file[i]);
         }
 #else
-        skeleton_new = skeleton_file = (HsfSkeleton *)((u32)fileptr+head.skeleton.ofs);
+        skeleton_new = skeleton_file = (HSFSKELETON *)((u32)fileptr+head.skeleton.ofs);
 #endif
-        Model.skeletonCnt = head.skeleton.count;
+        Model.skeletonNum = head.skeleton.count;
         Model.skeleton = skeleton_file;
         for(i=0; i<head.skeleton.count; i++) {
             skeleton_new[i].name = SetName((u32 *)&skeleton_file[i].name);
@@ -1664,7 +1665,7 @@ static void PartLoad(void)
 #else
         part_new = part_file = (HsfPart *)((u32)fileptr+head.part.ofs);
 #endif
-        Model.partCnt = head.part.count;
+        Model.partNum = head.part.count;
         Model.part = part_file;
 #ifdef BYTESWAPPING
         data = (u16 *)&file_part_real[head.part.count];
@@ -1673,9 +1674,9 @@ static void PartLoad(void)
 #endif
         for(i=0; i<head.part.count; i++, part_new++) {
             part_new->name = SetName((u32 *)&part_file[i].name);
-            part_new->count = part_file[i].count;
+            part_new->num = part_file[i].num;
             part_new->vertex = &data[(uintptr_t)part_file[i].vertex];
-            for(j=0; j<part_new->count; j++) {
+            for(j=0; j<part_new->num; j++) {
                 part_new->vertex[j] = part_new->vertex[j];
 #ifdef BYTESWAPPING
                 byteswap_u16(&part_new->vertex[j]);
@@ -1698,10 +1699,10 @@ static void ClusterLoad(void)
 #else
         cluster_new = cluster_file = (HsfCluster *)((u32)fileptr+head.cluster.ofs);
 #endif
-        Model.clusterCnt = head.cluster.count;
+        Model.clusterNum = head.cluster.count;
         Model.cluster = cluster_file;
         for(i=0; i<head.cluster.count; i++) {
-            HsfBuffer *vertex;
+            HSFBUFFER *vertex;
             u32 vertexSym;
             cluster_new[i].name[0] = SetName((u32 *)&cluster_file[i].name[0]);
             cluster_new[i].name[1] = SetName((u32 *)&cluster_file[i].name[1]);
@@ -1709,10 +1710,10 @@ static void ClusterLoad(void)
             cluster_new[i].part = SearchPartPtr((s32)(intptr_t)cluster_file[i].part);
             cluster_new[i].unk95 = cluster_file[i].unk95;
             cluster_new[i].type = cluster_file[i].type;
-            cluster_new[i].vertexCnt = cluster_file[i].vertexCnt;
+            cluster_new[i].vertexNum = cluster_file[i].vertexNum;
             vertexSym = (uintptr_t)cluster_file[i].vertex;
-            cluster_new[i].vertex = (HsfBuffer **)&NSymIndex[vertexSym];
-            for(j=0; j<cluster_new[i].vertexCnt; j++) {
+            cluster_new[i].vertex = (HSFBUFFER **)&NSymIndex[vertexSym];
+            for(j=0; j<cluster_new[i].vertexNum; j++) {
                 vertex = SearchVertexPtr((s32)(intptr_t)cluster_new[i].vertex[j]);
                 cluster_new[i].vertex[j] = vertex;
             }
@@ -1736,18 +1737,18 @@ static void ShapeLoad(void)
 #else
         shape_new = shape_file = (HsfShape *)((u32)fileptr+head.shape.ofs);
 #endif
-        Model.shapeCnt = head.shape.count;
+        Model.shapeNum = head.shape.count;
         Model.shape = shape_file;
-        for(i=0; i<Model.shapeCnt; i++) {
+        for(i=0; i<Model.shapeNum; i++) {
             u32 vertexSym;
-            HsfBuffer *vertex;
+            HSFBUFFER *vertex;
 
             shape_new[i].name = SetName((u32 *)&shape_file[i].name);
-            shape_new[i].count16[0] = shape_file[i].count16[0];
-            shape_new[i].count16[1] = shape_file[i].count16[1];
+            shape_new[i].num16[0] = shape_file[i].num16[0];
+            shape_new[i].num16[1] = shape_file[i].num16[1];
             vertexSym = (uintptr_t)shape_file[i].vertex;
-            shape_new[i].vertex = (HsfBuffer **)&NSymIndex[vertexSym];
-            for(j=0; j<shape_new[i].count16[1]; j++) {
+            shape_new[i].vertex = (HSFBUFFER **)&NSymIndex[vertexSym];
+            for(j=0; j<shape_new[i].num16[1]; j++) {
                 vertex = &vtxtop[(uintptr_t)shape_new[i].vertex[j]];
                 shape_new[i].vertex[j] = vertex;
             }
@@ -1758,23 +1759,23 @@ static void ShapeLoad(void)
 static void MapAttrLoad(void)
 {
     s32 i;
-    HsfMapAttr *mapattr_base;
-    HsfMapAttr *mapattr_file;
-    HsfMapAttr *mapattr_new;
+    HSFMAPATTR *mapattr_base;
+    HSFMAPATTR *mapattr_file;
+    HSFMAPATTR *mapattr_new;
     u16 *data;
 
     if(head.mapAttr.count) {
 #ifdef BYTESWAPPING
         HsfMapAttr32b *file_mapattr_real = (HsfMapAttr32b *)((uintptr_t)fileptr + head.mapAttr.ofs);
-        mapattr_file = mapattr_base = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfMapAttr) * head.mapAttr.count, MEMORY_DEFAULT_NUM);
+        mapattr_file = mapattr_base = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFMAPATTR) * head.mapAttr.count, MEMORY_DEFAULT_NUM);
         for (i = 0; i < head.mapAttr.count; i++) {
             byteswap_hsfmapattr(&file_mapattr_real[i], &mapattr_base[i]);
         }
 #else
-        mapattr_file = mapattr_base = (HsfMapAttr *)((u32)fileptr+head.mapAttr.ofs);
+        mapattr_file = mapattr_base = (HSFMAPATTR *)((u32)fileptr+head.mapAttr.ofs);
 #endif
         mapattr_new = mapattr_base;
-        Model.mapAttrCnt = head.mapAttr.count;
+        Model.mapAttrNum = head.mapAttr.count;
         Model.mapAttr = mapattr_base;
 #ifdef BYTESWAPPING
         data = (u16 *)&file_mapattr_real[head.mapAttr.count];
@@ -1794,32 +1795,32 @@ static void MapAttrLoad(void)
 
 static void BitmapLoad(void)
 {
-    HsfBitmap *bitmap_file;
-    HsfBitmap *bitmap_temp;
-    HsfBitmap *bitmap_new;
-    HsfPalette *palette;
+    HSFBITMAP *bitmap_file;
+    HSFBITMAP *bitmap_temp;
+    HSFBITMAP *bitmap_new;
+    HSFPALETTE *palette;
     void *data;
     s32 i;
 
     if(head.bitmap.count) {
 #ifdef BYTESWAPPING
         HsfBitmap32b *file_bitmap_real = (HsfBitmap32b *)((uintptr_t)fileptr + head.bitmap.ofs);
-        bitmap_temp = bitmap_file = BitmapTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfBitmap) * head.bitmap.count, MEMORY_DEFAULT_NUM);
+        bitmap_temp = bitmap_file = BitmapTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFBITMAP) * head.bitmap.count, MEMORY_DEFAULT_NUM);
         for (i = 0; i < head.bitmap.count; i++) {
             byteswap_hsfbitmap(&file_bitmap_real[i], &bitmap_file[i]);
         }
 #else
-        bitmap_temp = bitmap_file = (HsfBitmap *)((u32)fileptr+head.bitmap.ofs);
+        bitmap_temp = bitmap_file = (HSFBITMAP *)((u32)fileptr+head.bitmap.ofs);
         data = &bitmap_file[head.bitmap.count];
         for(i=0; i<head.bitmap.count; i++, bitmap_file++);
 #endif
         bitmap_new = bitmap_temp;
         Model.bitmap = bitmap_file;
-        Model.bitmapCnt = head.bitmap.count;
+        Model.bitmapNum = head.bitmap.count;
 #ifdef BYTESWAPPING
         data = (void *)&file_bitmap_real[head.bitmap.count];
 #else
-        bitmap_file = (HsfBitmap *)((u32)fileptr+head.bitmap.ofs);
+        bitmap_file = (HSFBITMAP *)((u32)fileptr+head.bitmap.ofs);
         data = &bitmap_file[head.bitmap.count];
 #endif
         for(i=0; i<head.bitmap.count; i++, bitmap_file++, bitmap_new++) {
@@ -1842,9 +1843,9 @@ static void PaletteLoad(void)
 {
     s32 i;
     s32 j;
-    HsfPalette *palette_file;
-    HsfPalette *palette_temp;
-    HsfPalette *palette_new;
+    HSFPALETTE *palette_file;
+    HSFPALETTE *palette_temp;
+    HSFPALETTE *palette_new;
 
     void *data_base;
     u16 *temp_data;
@@ -1853,24 +1854,24 @@ static void PaletteLoad(void)
     if(head.palette.count) {
 #ifdef BYTESWAPPING
         HsfPalette32b *file_palette_real = (HsfPalette32b *)((uintptr_t)fileptr + head.palette.ofs);
-        palette_temp = palette_file = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfPalette) * head.palette.count, MEMORY_DEFAULT_NUM);
+        palette_temp = palette_file = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFPALETTE) * head.palette.count, MEMORY_DEFAULT_NUM);
         for (i = 0; i < head.palette.count; i++) {
             byteswap_hsfpalette(&file_palette_real[i], &palette_file[i]);
         }
 #else
-        palette_temp = palette_file = (HsfPalette *)((u32)fileptr+head.palette.ofs);
+        palette_temp = palette_file = (HSFPALETTE *)((u32)fileptr+head.palette.ofs);
         data_base = (u16 *)&palette_file[head.palette.count];
         for(i=0; i<head.palette.count; i++, palette_file++) {
             temp_data = (u16 *)((uintptr_t)data_base+(uintptr_t)palette_file->data);
         }
 #endif
         Model.palette = palette_temp;
-        Model.paletteCnt = head.palette.count;
+        Model.paletteNum = head.palette.count;
         palette_new = palette_temp;
 #ifdef BYTESWAPPING
         data_base = (u16 *)&file_palette_real[head.palette.count];
 #else
-        palette_file = (HsfPalette *)((u32)fileptr+head.palette.ofs);
+        palette_file = (HSFPALETTE *)((u32)fileptr+head.palette.ofs);
         data_base = (u16 *)&palette_file[head.palette.count];
 #endif
         for(i=0; i<head.palette.count; i++, palette_file++, palette_new++) {
@@ -1926,7 +1927,7 @@ s32 CmpObjectName(char *name1, char *name2)
     return strcmp(name1, name2);
 }
 
-static inline char *MotionGetName(HsfTrack *track)
+static inline char *MotionGetName(HSFTRACK *track)
 {
     char *ret;
     if(DicStringTable) {
@@ -1940,7 +1941,7 @@ static inline char *MotionGetName(HsfTrack *track)
 static inline s32 FindObjectName(char *name)
 {
     s32 i;
-    HsfObject *object;
+    HSFOBJECT *object;
 
     object = objtop;
     for(i=0; i<head.object.count; i++, object++) {
@@ -1971,7 +1972,7 @@ static inline s32 FindMotionClusterName(char *name)
     HsfCluster *cluster;
 
     cluster = MotionModel->cluster;
-    for(i=0; i<MotionModel->clusterCnt; i++, cluster++) {
+    for(i=0; i<MotionModel->clusterNum; i++, cluster++) {
         if(!strcmp(cluster->name[0], name)) {
             return i;
         }
@@ -1982,7 +1983,7 @@ static inline s32 FindMotionClusterName(char *name)
 static inline s32 FindAttributeName(char *name)
 {
     s32 i;
-    HsfAttribute *attribute;
+    HSFATTRIBUTE *attribute;
 
     attribute = AttributeTop;
     for(i=0; i<head.attribute.count; i++, attribute++) {
@@ -1999,10 +2000,10 @@ static inline s32 FindAttributeName(char *name)
 static inline s32 FindMotionAttributeName(char *name)
 {
     s32 i;
-    HsfAttribute *attribute;
+    HSFATTRIBUTE *attribute;
 
     attribute = MotionModel->attribute;
-    for(i=0; i<MotionModel->attributeCnt; i++, attribute++) {
+    for(i=0; i<MotionModel->attributeNum; i++, attribute++) {
         if(!attribute->name) {
             continue;
         }
@@ -2014,7 +2015,7 @@ static inline s32 FindMotionAttributeName(char *name)
 }
 
 #ifdef BYTESWAPPING
-static void ByteSwapCurveStepOrLinearData(HsfTrack *track)
+static void ByteSwapCurveStepOrLinearData(HSFTRACK *track)
 {
     int i;
     float *data = track->data;
@@ -2024,7 +2025,7 @@ static void ByteSwapCurveStepOrLinearData(HsfTrack *track)
     }
 }
 
-static void ByteSwapCurveBitmapData(HsfTrack *track)
+static void ByteSwapCurveBitmapData(HSFTRACK *track)
 {
     int i;
     float *data = track->data;
@@ -2034,7 +2035,7 @@ static void ByteSwapCurveBitmapData(HsfTrack *track)
     }
 }
 
-static void ByteSwapCurveBezierData(HsfTrack *track)
+static void ByteSwapCurveBezierData(HSFTRACK *track)
 {
     int i;
     float *data = track->data;
@@ -2047,12 +2048,12 @@ static void ByteSwapCurveBezierData(HsfTrack *track)
 }
 #endif
 
-static inline void MotionLoadTransform(HsfTrack *track, void *data)
+static inline void MotionLoadTransform(HSFTRACK *track, void *data)
 {
     float *step_data;
     float *linear_data;
     float *bezier_data;
-    HsfTrack *out_track;
+    HSFTRACK *out_track;
     char *name;
     s32 numKeyframes;
     out_track = track;
@@ -2097,13 +2098,13 @@ static inline void MotionLoadTransform(HsfTrack *track, void *data)
     }
 }
 
-static inline void MotionLoadCluster(HsfTrack *track, void *data)
+static inline void MotionLoadCluster(HSFTRACK *track, void *data)
 {
     s32 numKeyframes;
     float *step_data;
     float *linear_data;
     float *bezier_data;
-    HsfTrack *out_track;
+    HSFTRACK *out_track;
     char *name;
 
     out_track = track;
@@ -2151,13 +2152,13 @@ static inline void MotionLoadCluster(HsfTrack *track, void *data)
     }
 }
 
-static inline void MotionLoadClusterWeight(HsfTrack *track, void *data)
+static inline void MotionLoadClusterWeight(HSFTRACK *track, void *data)
 {
     s32 numKeyframes;
     float *step_data;
     float *linear_data;
     float *bezier_data;
-    HsfTrack *out_track;
+    HSFTRACK *out_track;
     char *name;
 
     out_track = track;
@@ -2205,13 +2206,13 @@ static inline void MotionLoadClusterWeight(HsfTrack *track, void *data)
     }
 }
 
-static inline void MotionLoadMaterial(HsfTrack *track, void *data)
+static inline void MotionLoadMaterial(HSFTRACK *track, void *data)
 {
     float *step_data;
     float *linear_data;
     float *bezier_data;
     s32 numKeyframes;
-    HsfTrack *out_track;
+    HSFTRACK *out_track;
     out_track = track;
     numKeyframes = AS_S16(track->numKeyframes);
     switch(track->curveType) {
@@ -2250,23 +2251,23 @@ static inline void MotionLoadMaterial(HsfTrack *track, void *data)
     }
 }
 
-static inline void MotionLoadAttribute(HsfTrack *track, void *data)
+static inline void MotionLoadAttribute(HSFTRACK *track, void *data)
 {
-    HsfBitmapKey *file_frame;
-    HsfBitmapKey *new_frame;
+    HSFBITMAPKEY *file_frame;
+    HSFBITMAPKEY *new_frame;
     s32 i;
     float *step_data;
     float *linear_data;
     float *bezier_data;
-    HsfTrack *out_track;
+    HSFTRACK *out_track;
     char *name;
     out_track = track;
     if(AS_S16(out_track->target) != -1) {
         name = SetMotionName(&track->target);
         if(!MotionOnly) {
-            AS_S16(out_track->param) = FindAttributeName(name);
+            AS_S16(out_track->attrIdx) = FindAttributeName(name);
         } else {
-            AS_S16(out_track->param) = FindMotionAttributeName(name);
+            AS_S16(out_track->attrIdx) = FindMotionAttributeName(name);
         }
     }
 
@@ -2305,9 +2306,9 @@ static inline void MotionLoadAttribute(HsfTrack *track, void *data)
         {
 #ifdef BYTESWAPPING
             HsfBitmapKey32b *file_frame_real = (HsfBitmapKey32b *)((uintptr_t)data + (uintptr_t)track->data);
-            new_frame = file_frame = track->dataTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfBitmapKey) * track->numKeyframes, MEMORY_DEFAULT_NUM);
+            new_frame = file_frame = track->dataTop = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFBITMAPKEY) * track->numKeyframes, MEMORY_DEFAULT_NUM);
 #else
-            new_frame = file_frame = (HsfBitmapKey *)((uintptr_t)data + (uintptr_t)track->data);
+            new_frame = file_frame = (HSFBITMAPKEY *)((uintptr_t)data + (uintptr_t)track->data);
 #endif
             out_track->data = file_frame;
             for(i=0; i<out_track->numKeyframes; i++, file_frame++, new_frame++) {
@@ -2325,10 +2326,10 @@ static inline void MotionLoadAttribute(HsfTrack *track, void *data)
 
 static void MotionLoad(void)
 {
-    HsfMotion *file_motion;
-    HsfMotion *temp_motion;
-    HsfMotion *new_motion;
-    HsfTrack *track_base;
+    HSFMOTION *file_motion;
+    HSFMOTION *temp_motion;
+    HSFMOTION *new_motion;
+    HSFTRACK *track_base;
     void *track_data;
     s32 i;
 
@@ -2337,27 +2338,27 @@ static void MotionLoad(void)
     if(head.motion.count) {
 #ifdef BYTESWAPPING
         HsfMotion32b *file_motion_real = (HsfMotion32b *)((uintptr_t)fileptr + head.motion.ofs);
-        temp_motion = file_motion = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfMotion) * head.motion.count, MEMORY_DEFAULT_NUM);
+        temp_motion = file_motion = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFMOTION) * head.motion.count, MEMORY_DEFAULT_NUM);
         for (i = 0; i < head.motion.count; i++) {
             byteswap_hsfmotion(&file_motion_real[i], &file_motion[i]);
         }
 #else
-        temp_motion = file_motion = (HsfMotion *)((uintptr_t)fileptr+head.motion.ofs);
+        temp_motion = file_motion = (HSFMOTION *)((uintptr_t)fileptr+head.motion.ofs);
 #endif
         new_motion = temp_motion;
         Model.motion = new_motion;
-        Model.motionCnt = file_motion->numTracks;
+        Model.motionNum = file_motion->numTracks;
 #ifdef BYTESWAPPING
         {
             HsfTrack32b *track_base_real = (HsfTrack32b *)&file_motion_real[head.motion.count];
-            track_base = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfTrack) * file_motion->numTracks, MEMORY_DEFAULT_NUM);
+            track_base = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFTRACK) * file_motion->numTracks, MEMORY_DEFAULT_NUM);
             track_data = &track_base_real[file_motion->numTracks];
             for (i = 0; i < file_motion->numTracks; i++) {
                 byteswap_hsftrack(&track_base_real[i], &track_base[i]);
             }
         }
 #else
-        track_base = (HsfTrack *)&file_motion[head.motion.count];
+        track_base = (HSFTRACK *)&file_motion[head.motion.count];
         track_data = &track_base[file_motion->numTracks];
 #endif
         new_motion->track = track_base;
@@ -2417,29 +2418,29 @@ static void MotionLoad(void)
 
 static void MatrixLoad(void)
 {
-    HsfMatrix *matrix_file;
+    HSFMATRIX *matrix_file;
 
     if(head.matrix.count) {
 #ifdef BYTESWAPPING
         if (head.matrix.count > 1) {
             OSReport("MORE THAN ONE MATRIX, FIX PARSING!\n");
         }
-        matrix_file = HuMemDirectMallocNum(HEAP_DATA, sizeof(HsfMatrix) * head.matrix.count, MEMORY_DEFAULT_NUM);
+        matrix_file = HuMemDirectMallocNum(HEAP_DATA, sizeof(HSFMATRIX) * head.matrix.count, MEMORY_DEFAULT_NUM);
         byteswap_hsfmatrix((HsfMatrix32b *)((uintptr_t)fileptr + head.matrix.ofs), matrix_file);
 #else
-        matrix_file = (HsfMatrix *)((uintptr_t)fileptr+head.matrix.ofs);
-        matrix_file->data = (Mtx *)((u32)fileptr+head.matrix.ofs+sizeof(HsfMatrix));
+        matrix_file = (HSFMATRIX *)((uintptr_t)fileptr+head.matrix.ofs);
+        matrix_file->data = (Mtx *)((u32)fileptr+head.matrix.ofs+sizeof(HSFMATRIX));
 #endif
         Model.matrix = matrix_file;
-        Model.matrixCnt = head.matrix.count;
+        Model.matrixNum = head.matrix.count;
     }
 }
 
-static s32 SearchObjectSetName(HsfData *data, char *name)
+static s32 SearchObjectSetName(HSFDATA *data, char *name)
 {
-    HsfObject *object = data->object;
+    HSFOBJECT *object = data->object;
     s32 i;
-    for(i=0; i<data->objectCnt; i++, object++) {
+    for(i=0; i<data->objectNum; i++, object++) {
         if(!CmpObjectName(object->name, name)) {
             return i;
         }
@@ -2448,91 +2449,91 @@ static s32 SearchObjectSetName(HsfData *data, char *name)
     return -1;
 }
 
-static HsfBuffer *SearchVertexPtr(s32 id)
+static HSFBUFFER *SearchVertexPtr(s32 id)
 {
-    HsfBuffer *vertex; 
+    HSFBUFFER *vertex; 
     if(id == -1) {
         return NULL;
     }
 #ifdef BYTESWAPPING
     vertex = vtxtop;
 #else
-    vertex = (HsfBuffer *)((uintptr_t)fileptr+head.vertex.ofs);
+    vertex = (HSFBUFFER *)((uintptr_t)fileptr+head.vertex.ofs);
 #endif
     vertex += id;
     return vertex;
 }
 
-static HsfBuffer *SearchNormalPtr(s32 id)
+static HSFBUFFER *SearchNormalPtr(s32 id)
 {
-    HsfBuffer *normal; 
+    HSFBUFFER *normal; 
     if(id == -1) {
         return NULL;
     }
 #ifdef BYTESWAPPING
     normal = NormalTop;
 #else
-    normal = (HsfBuffer *)((uintptr_t)fileptr+head.normal.ofs);
+    normal = (HSFBUFFER *)((uintptr_t)fileptr+head.normal.ofs);
 #endif
     normal += id;
     return normal;
 }
 
-static HsfBuffer *SearchStPtr(s32 id)
+static HSFBUFFER *SearchStPtr(s32 id)
 {
-    HsfBuffer *st; 
+    HSFBUFFER *st; 
     if(id == -1) {
         return NULL;
     }
 #ifdef BYTESWAPPING
     st = StTop;
 #else
-    st = (HsfBuffer *)((uintptr_t)fileptr+head.st.ofs);
+    st = (HSFBUFFER *)((uintptr_t)fileptr+head.st.ofs);
 #endif
     st += id;
     return st;
 }
 
-static HsfBuffer *SearchColorPtr(s32 id)
+static HSFBUFFER *SearchColorPtr(s32 id)
 {
-    HsfBuffer *color; 
+    HSFBUFFER *color; 
     if(id == -1) {
         return NULL;
     }
 #ifdef BYTESWAPPING
     color = ColorTop;
 #else
-    color = (HsfBuffer *)((uintptr_t)fileptr+head.color.ofs);
+    color = (HSFBUFFER *)((uintptr_t)fileptr+head.color.ofs);
 #endif
     color += id;
     return color;
 }
 
-static HsfBuffer *SearchFacePtr(s32 id)
+static HSFBUFFER *SearchFacePtr(s32 id)
 {
-    HsfBuffer *face; 
+    HSFBUFFER *face; 
     if(id == -1) {
         return NULL;
     }
 #ifdef BYTESWAPPING
     face = FaceTop;
 #else
-    face = (HsfBuffer *)((uintptr_t)fileptr+head.face.ofs);
+    face = (HSFBUFFER *)((uintptr_t)fileptr+head.face.ofs);
 #endif
     face += id;
     return face;
 }
 
-static HsfCenv *SearchCenvPtr(s32 id)
+static HSFCENV *SearchCenvPtr(s32 id)
 {
-    HsfCenv *cenv; 
+    HSFCENV *cenv; 
     if(id == -1) {
         return NULL;
     }
 #ifdef BYTESWAPPING
     cenv = CenvTop;
 #else
-    cenv = (HsfCenv *)((uintptr_t)fileptr + head.cenv.ofs);
+    cenv = (HSFCENV *)((uintptr_t)fileptr + head.cenv.ofs);
 #endif
     cenv += id;
     return cenv;
@@ -2540,7 +2541,7 @@ static HsfCenv *SearchCenvPtr(s32 id)
 
 static HsfPart *SearchPartPtr(s32 id)
 {
-    HsfPart *part; 
+    HsfPart *part;
     if(id == -1) {
         return NULL;
     }
@@ -2553,9 +2554,9 @@ static HsfPart *SearchPartPtr(s32 id)
     return part;
 }
 
-static HsfPalette *SearchPalettePtr(s32 id)
+static HSFPALETTE *SearchPalettePtr(s32 id)
 {
-    HsfPalette *palette; 
+    HSFPALETTE *palette; 
     if(id == -1) {
         return NULL;
     }
@@ -2564,16 +2565,16 @@ static HsfPalette *SearchPalettePtr(s32 id)
     return palette;
 }
 
-static HsfBitmap *SearchBitmapPtr(s32 id)
+static HSFBITMAP *SearchBitmapPtr(s32 id)
 {
-    HsfBitmap *bitmap; 
+    HSFBITMAP *bitmap; 
     if(id == -1) {
         return NULL;
     }
 #ifdef BYTESWAPPING
     bitmap = BitmapTop;
 #else
-    bitmap = (HsfBitmap *)((uintptr_t)fileptr+head.bitmap.ofs);
+    bitmap = (HSFBITMAP *)((uintptr_t)fileptr+head.bitmap.ofs);
 #endif
     bitmap += id;
     return bitmap;
@@ -2591,69 +2592,70 @@ static char *GetMotionString(u16 *str_ofs)
     return ret;
 }
 
+
 #ifdef TARGET_PC
-void KillHSF(HsfData *data)
+void KillHSF(HSFDATA *data)
 {
     // TODO PC
     s32 i, j;
-    // if (data->attributeCnt)
+    // if (data->attributeNum)
     //     HuMemDirectFree(data->attribute);
-    // if (data->bitmapCnt)
+    // if (data->bitmapNum)
     //     HuMemDirectFree(data->bitmap);
-    // if (data->skeletonCnt)
+    // if (data->skeletonNum)
     //     HuMemDirectFree(data->skeleton);
-    // if (data->faceCnt) {
-    //     for (i = 0; i < data->faceCnt; i++) {
+    // if (data->faceNum) {
+    //     for (i = 0; i < data->faceNum; i++) {
     //         HuMemDirectFree(data->face[i].data);
     //     }
     //     HuMemDirectFree(data->face);
     // }
-    // if (data->materialCnt)
+    // if (data->materialNum)
     //     HuMemDirectFree(data->material);
-    // if (data->motionCnt) {
-    //     HsfMotion *motion = data->motion;
+    // if (data->motionNum) {
+    //     HSFMOTION *motion = data->motion;
     //     for (j = 0; j < motion->numTracks; j++) {
-    //         HsfTrack *track = motion->track;
+    //         HSFTRACK *track = motion->track;
     //         if (track->type == HSF_TRACK_ATTRIBUTE && track->curveType == HSF_CURVE_BITMAP) {
-    //             // in this case we needed to allocate space for HsfBitmapKey structs
+    //             // in this case we needed to allocate space for HSFBITMAPKEY structs
     //             HuMemDirectFree(track->dataTop);
     //         }
     //     }
     //     HuMemDirectFree(motion->track);
     //     HuMemDirectFree(data->motion);
     // }
-    // if (data->normalCnt)
+    // if (data->normalNum)
     //     HuMemDirectFree(data->normal);
-    // if (data->objectCnt)
+    // if (data->objectNum)
     //     HuMemDirectFree(data->object);
-    // if (data->matrixCnt)
+    // if (data->matrixNum)
     //     HuMemDirectFree(data->matrix);
-    // if (data->paletteCnt)
+    // if (data->paletteNum)
     //     HuMemDirectFree(data->palette);
-    // if (data->stCnt)
+    // if (data->stNum)
     //     HuMemDirectFree(data->st);
-    // if (data->vertexCnt)
+    // if (data->vertexNum)
     //     HuMemDirectFree(data->vertex);
-    // if (data->cenvCnt) {
-    //     for (i = 0; i < data->cenvCnt; i++) {
-    //         HsfCenv *cenv = &data->cenv[i];
+    // if (data->cenvNum) {
+    //     for (i = 0; i < data->cenvNum; i++) {
+    //         HSFCENV *cenv = &data->cenv[i];
     //         HuMemDirectFree(cenv->dualData);
     //         HuMemDirectFree(cenv->multiData);
     //     }
     //     HuMemDirectFree(data->cenv);
     // }
-    // if (data->clusterCnt)
+    // if (data->clusterNum)
     //     HuMemDirectFree(data->cluster);
-    // if (data->partCnt)
+    // if (data->partNum)
     //     HuMemDirectFree(data->part);
-    // if (data->shapeCnt)
+    // if (data->shapeNum)
     //     HuMemDirectFree(data->shape);
-    // if (data->mapAttrCnt)
+    // if (data->mapAttrNum)
     //     HuMemDirectFree(data->mapAttr);
     // HuMemDirectFree(data->symbol);
 #ifdef OPTIMIZED_TEXTURE_LOADING
-    for (i = 0; i < data->attributeCnt; i++) {
-        HsfAttribute *attr = &data->attribute[i];
+    for (i = 0; i < data->attributeNum; i++) {
+        HSFATTRIBUTE *attr = &data->attribute[i];
         if (attr->tex_initialized) {
             GXDestroyTexObj(&attr->tex_obj);
         }

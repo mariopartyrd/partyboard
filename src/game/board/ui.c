@@ -1144,7 +1144,7 @@ static void DestroyItemUse(void)
 {
     s32 i;
 
-    CharModelLayerSetAll(1);
+    CharEffectLayerSet(1);
     for (i = 0; i < 4; i++) {
         GWPlayer[i].show_next = 1;
     }

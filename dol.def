@@ -59,7 +59,7 @@ EXPORTS
     BoardCharWheelTargetSet
     BoardCharWheelWait
     BoardCoinChgCreate
-    BoardCoinChgExist
+    BoardCoinChgKillCheck
     BoardComFarPlayerFind
     BoardComKeySetDown
     BoardComKeySetLeft
@@ -405,39 +405,39 @@ EXPORTS
     C_QUATSlerp
     CamMotionEx
     CamMotionEx2
-    CharAMemPtrGet
-    CharARAMOpen
-    CharKill
-    CharKillAll
-    CharManInit
-    CharModelCoinEffectCreate
+    CharMotionAMemPGet
+    CharMotionInit
+    CharDataClose
+    CharClose
+    CharInit
+    CharEffectCoinGlowCreate
     CharModelCreate
     CharModelDataClose
-    CharModelEffectCreate
-    CharModelEffectEnableSet
-    CharModelEffectNpcInit
-    CharModelEffectNpcInitSilent
-    CharModelHookNameGet
-    CharModelItemHookCreate
+    CharEffectSmokeCreate
+    CharModelFxFlagSet
+    CharNpcDustSet
+    CharNpcDustVoiceOffSet
+    CharModelItemHookGet
+    CharModelHookDustCreate
     CharModelKill
-    CharModelLayerSetAll
+    CharEffectLayerSet
     CharModelLayerSetAll2
-    CharModelMotionCreate
-    CharModelMotionDataClose
-    CharModelMotionEndCheck
-    CharModelMotionIndexSet
-    CharModelMotionKill
-    CharModelMotionMaxTimeGet
-    CharModelMotionSet
-    CharModelMotionShiftIDGet
-    CharModelMotionShiftSet
-    CharModelMotionShiftTimeGet
-    CharModelMotionSpeedSet
-    CharModelMotionTimeGet
-    CharModelMotionTimeSet
-    CharModelStepTypeSet
-    CharModelTexNameGet
-    CharModelVoiceEnableSet
+    CharMotionCreate
+    CharMotionDataClose
+    CharMotionEndCheck
+    CharMotionNoSet
+    CharMotionKill
+    CharMotionMaxTimeGet
+    CharMotionSet
+    CharMotionShiftIDGet
+    CharMotionShiftSet
+    CharMotionShiftTimeGet
+    CharMotionSpeedSet
+    CharMotionTimeGet
+    CharMotionTimeSet
+    CharModelStepFxSet
+    CharModelEyeBmpGet
+    CharMotionVoiceOnSet
     DCFlushRange
     DCFlushRangeNoSync
     DCInvalidateRange

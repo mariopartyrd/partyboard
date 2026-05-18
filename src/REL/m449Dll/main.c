@@ -1665,30 +1665,30 @@ void fn_1_7F94(ModelData *model, ParticleData *particle, Mtx matrix)
     float var_f30;
     float var_f29;
 
-    HsfanimStruct01 *var_r31;
+    HU3DPARTICLEDATA *var_r31;
     s16 var_r29;
 
     if (particle->unk_34 == 0) {
-        for (var_r31 = particle->unk_48, var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
-            var_r31->unk00 = 0;
+        for (var_r31 = particle->data, var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
+            var_r31->time = 0;
             var_r31->unk40.a = 0;
             var_r31->unk2C = 0.0f;
         }
     }
     if (particle->unk_34 >= 0xFF) {
-        for (var_r31 = particle->unk_48, var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
-            var_r31->unk00 = 0xFF;
+        for (var_r31 = particle->data, var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
+            var_r31->time = 0xFF;
             var_r31->unk40.a = 0;
             var_r31->unk2C = 0.0f;
         }
     }
-    for (var_r31 = particle->unk_48, var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
+    for (var_r31 = particle->data, var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
         if (!var_r31->unk2C) {
             break;
         }
     }
-    for (var_r31 = particle->unk_48, var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
-        if (var_r31->unk00 == 1) {
+    for (var_r31 = particle->data, var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
+        if (var_r31->time == 1) {
             var_f31 = ((frand() & 0xFF) * 0x168) >> 8;
             var_f30 = 0.5 + (1.5 * (rand8() / 256.0));
             var_r31->unk08.x = 2.5 * (var_f30 * sind(var_f31));
@@ -1706,7 +1706,7 @@ void fn_1_7F94(ModelData *model, ParticleData *particle, Mtx matrix)
             var_r31->unk40.a = 0xFF;
             var_r31->unk2C = 50.0f;
         }
-        if (var_r31->unk00 < 0xF0) {
+        if (var_r31->time < 0xF0) {
             VECAdd(&var_r31->unk08, &var_r31->unk34, &var_r31->unk34);
             var_r31->unk08.x *= 0.9f;
             var_r31->unk08.z *= 0.9f;
@@ -1721,8 +1721,8 @@ void fn_1_7F94(ModelData *model, ParticleData *particle, Mtx matrix)
                 var_r31->unk2C = 0.0f;
             }
         }
-        var_r31->unk00 += var_r31->unk00 < 0x8000;
-        if (var_r31->unk00 >= 0xF0) {
+        var_r31->time += var_r31->time < 0x8000;
+        if (var_r31->time >= 0xF0) {
             var_r31->unk40.a = 0;
             var_r31->unk2C = 0.0f;
         }
@@ -1806,7 +1806,7 @@ void fn_1_8538(omObjData *var_r30)
     for (var_r29 = 0; var_r29 < 4; var_r29++) {
         if (var_r31->unk_08 != -1) {
             var_r30->motion[var_r29]
-                = CharModelMotionCreate(var_r31->unk_08, lbl_1_data_90[var_r29] + (lbl_1_data_B0[var_r29] != 0 ? var_r31->unk_08 : 0));
+                = CharMotionCreate(var_r31->unk_08, lbl_1_data_90[var_r29] + (lbl_1_data_B0[var_r29] != 0 ? var_r31->unk_08 : 0));
         }
         else {
             var_r30->motion[var_r29] = Hu3DJointMotionFile(var_r30->model[0], lbl_1_data_A0[var_r29]);
@@ -1816,7 +1816,7 @@ void fn_1_8538(omObjData *var_r30)
     Hu3DMotionTimeSet(var_r30->model[0], 20.0f);
     Hu3DModelAttrSet(var_r30->model[0], HU3D_MOTATTR_LOOP);
     Hu3DModelShadowSet(var_r30->model[0]);
-    CharModelVoiceEnableSet(var_r31->unk_08, var_r30->motion[3], 0);
+    CharMotionVoiceOnSet(var_r31->unk_08, var_r30->motion[3], 0);
     lbl_1_data_23C[var_r31->unk_00] = var_r31->unk_00 == 0 ? (rand8() % 3) : ((lbl_1_data_23C[0] + ((rand8() % 2)) + 1) % 3);
     if (var_r31->unk_00 == 0) {
         for (var_r29 = 0; var_r29 < 3; var_r29++) {

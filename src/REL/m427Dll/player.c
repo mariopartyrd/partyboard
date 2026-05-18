@@ -1223,13 +1223,13 @@ void fn_1_11A74(omObjData *object)
     else {
         fn_1_172F0(object->model[0], 0.3f);
     }
-    CharModelStepTypeSet(var_r27, 3);
+    CharModelStepFxSet(var_r27, 3);
     for (var_r29 = 0; var_r29 < 4; var_r29++) {
         object->motion[var_r29] = Hu3DJointMotionFile(object->model[0], var_r31->unk_0C + lbl_1_data_608[var_r29]);
     }
     var_r31->unk_2C = 0;
-    CharModelMotionSet(var_r31->unk_0C, object->motion[0]);
-    CharModelMotionDataClose(var_r27);
+    CharMotionSet(var_r31->unk_0C, object->motion[0]);
+    CharMotionDataClose(var_r27);
     var_r28 = Hu3DLLightCreateV(object->model[0], &lbl_1_data_564, &lbl_1_data_570, &lbl_1_data_57C);
     var_r31->unk_14 = var_r28;
     Hu3DLLightStaticSet(object->model[0], var_r28, 1);
@@ -1283,14 +1283,14 @@ void fn_1_11ED8(omObjData *object)
             var_r29 = 1;
             if (var_r29 != var_r31->unk_2C) {
                 var_r31->unk_2C = var_r29;
-                CharModelMotionShiftSet(var_r31->unk_0C, object->motion[var_r31->unk_2C], 0.0f, 8.0f, 0x40000001);
+                CharMotionShiftSet(var_r31->unk_0C, object->motion[var_r31->unk_2C], 0.0f, 8.0f, 0x40000001);
             }
             break;
         case 1:
             var_r29 = 0;
-            if ((var_r29 != var_r31->unk_2C) && (CharModelMotionShiftIDGet(var_r31->unk_0C) == -1)) {
+            if ((var_r29 != var_r31->unk_2C) && (CharMotionShiftIDGet(var_r31->unk_0C) == -1)) {
                 var_r31->unk_2C = var_r29;
-                CharModelMotionShiftSet(var_r31->unk_0C, object->motion[var_r31->unk_2C], 0.0f, 8.0f, 0x40000001);
+                CharMotionShiftSet(var_r31->unk_0C, object->motion[var_r31->unk_2C], 0.0f, 8.0f, 0x40000001);
                 var_r31->unk_28 = 0;
             }
             break;
@@ -1311,22 +1311,22 @@ void fn_1_11ED8(omObjData *object)
             else {
                 var_r29 = 0;
             }
-            if ((CharModelMotionShiftIDGet(var_r31->unk_0C) == -1)
-                && ((var_r29 != var_r31->unk_2C) || (CharModelMotionEndCheck(var_r31->unk_0C) == 1))) {
+            if ((CharMotionShiftIDGet(var_r31->unk_0C) == -1)
+                && ((var_r29 != var_r31->unk_2C) || (CharMotionEndCheck(var_r31->unk_0C) == 1))) {
                 if (var_r31->unk_2C == var_r29) {
-                    CharModelMotionTimeSet(var_r31->unk_0C, 0.0f);
+                    CharMotionTimeSet(var_r31->unk_0C, 0.0f);
                 }
                 else {
                     var_r31->unk_2C = var_r29;
-                    CharModelMotionShiftSet(var_r31->unk_0C, object->motion[var_r31->unk_2C], 0.0f, 8.0f, 0);
+                    CharMotionShiftSet(var_r31->unk_0C, object->motion[var_r31->unk_2C], 0.0f, 8.0f, 0);
                 }
             }
             break;
         case 3:
             var_r29 = 2;
-            if ((var_r29 != var_r31->unk_2C) && (CharModelMotionShiftIDGet(var_r31->unk_0C) == -1)) {
+            if ((var_r29 != var_r31->unk_2C) && (CharMotionShiftIDGet(var_r31->unk_0C) == -1)) {
                 var_r31->unk_2C = var_r29;
-                CharModelMotionShiftSet(var_r31->unk_0C, object->motion[var_r31->unk_2C], 0.0f, 8.0f, 0x40000001);
+                CharMotionShiftSet(var_r31->unk_0C, object->motion[var_r31->unk_2C], 0.0f, 8.0f, 0x40000001);
                 var_r31->unk_28 = 0;
             }
             if (var_r31->unk_2C == 2) {
@@ -1337,13 +1337,13 @@ void fn_1_11ED8(omObjData *object)
             break;
         case 4:
             var_r29 = 0;
-            if ((var_r29 != var_r31->unk_2C) && (CharModelMotionShiftIDGet(var_r31->unk_0C) == -1)) {
+            if ((var_r29 != var_r31->unk_2C) && (CharMotionShiftIDGet(var_r31->unk_0C) == -1)) {
                 var_r31->unk_2C = var_r29;
                 if (object->model[1] != -1) {
                     Hu3DMotionShiftSet(object->model[1], object->motion[var_r31->unk_2C], 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
                 }
                 else {
-                    CharModelMotionShiftSet(var_r31->unk_0C, object->motion[var_r31->unk_2C], 0.0f, 8.0f, 0x40000001);
+                    CharMotionShiftSet(var_r31->unk_0C, object->motion[var_r31->unk_2C], 0.0f, 8.0f, 0x40000001);
                 }
                 var_r31->unk_28 = 0;
             }
@@ -1362,16 +1362,16 @@ void fn_1_11ED8(omObjData *object)
             if (var_r31->unk_2C == 1) {
                 Hu3DModelAttrSet(object->model[0], HU3D_MOTATTR_LOOP);
             }
-            if ((CharModelMotionShiftIDGet(var_r31->unk_0C) == -1) && (var_r29 != var_r31->unk_2C)) {
+            if ((CharMotionShiftIDGet(var_r31->unk_0C) == -1) && (var_r29 != var_r31->unk_2C)) {
                 var_r31->unk_2C = var_r29;
-                CharModelMotionShiftSet(var_r31->unk_0C, object->motion[var_r31->unk_2C], 0.0f, 8.0f, 0x40000001);
+                CharMotionShiftSet(var_r31->unk_0C, object->motion[var_r31->unk_2C], 0.0f, 8.0f, 0x40000001);
             }
             break;
         case 6:
             var_r29 = 3;
-            if ((var_r29 != var_r31->unk_2C) && (CharModelMotionShiftIDGet(var_r31->unk_0C) == -1)) {
+            if ((var_r29 != var_r31->unk_2C) && (CharMotionShiftIDGet(var_r31->unk_0C) == -1)) {
                 var_r31->unk_2C = var_r29;
-                CharModelMotionShiftSet(var_r31->unk_0C, object->motion[var_r31->unk_2C], 0.0f, 8.0f, 0);
+                CharMotionShiftSet(var_r31->unk_0C, object->motion[var_r31->unk_2C], 0.0f, 8.0f, 0);
                 CharFXPlay(var_r31->unk_0C, 0x124);
                 var_r31->unk_28 = 0;
             }
@@ -2342,9 +2342,9 @@ void fn_1_1723C(Mtx arg0, Vec *arg1)
 
 void fn_1_172F0(s32 arg0, float arg8)
 {
-    HsfMaterial *var_r31;
+    HSFMATERIAL *var_r31;
     s32 var_r30;
-    HsfData *var_r29;
+    HSFDATA *var_r29;
     s32 var_r28;
     ModelData *var_r27;
     s32 var_r26;
@@ -2352,7 +2352,7 @@ void fn_1_172F0(s32 arg0, float arg8)
     var_r27 = &Hu3DData[arg0];
     var_r29 = var_r27->hsfData;
     var_r31 = var_r29->material;
-    var_r26 = var_r29->materialCnt;
+    var_r26 = var_r29->materialNum;
     for (var_r28 = 0; var_r28 < var_r26; var_r28++, var_r31++) {
         var_r31->vtxMode = 1;
         var_r30 = var_r31->litColor[0] * arg8;

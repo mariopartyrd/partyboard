@@ -29,7 +29,7 @@ u32 lbl_1_data_138 = 0xFFFF0000;
 s32 lbl_1_data_13C[7] = { 0x30, 0x2D, 0x3A, 0x2E, DATA_MAKE_NUM(DATADIR_M409, 0x32), 0x17, 0x18 };
 GXColor lbl_1_data_158[8] = { { 0xFF, 0x00, 0x00, 0xFF }, { 0x00, 0x00, 0xFF, 0xFF }, { 0xFF, 0x80, 0x80, 0xFF }, { 0x00, 0xFF, 0x00, 0xFF },
     { 0x80, 0x00, 0xC0, 0xFF }, { 0x90, 0x30, 0x00, 0xFF }, { 0xFF, 0xFF, 0x00, 0xFF }, { 0x00, 0x00, 0x00, 0xFF } };
-HsfVector2f lbl_1_data_178[4] = {
+HuVec2f lbl_1_data_178[4] = {
     { 72.0f, 80.0f },
     { 504.0f, 80.0f },
     { 72.0f, 400.0f },
@@ -103,18 +103,18 @@ void fn_1_6928(omObjData *arg0)
 
     for (var_r28 = 0; var_r28 < 7; var_r28++) {
         if ((lbl_1_data_13C[var_r28] & 0xFFFF0000) != 0) {
-            arg0->motion[var_r28] = CharModelMotionCreate(var_r31->unk1, var_r31->unk1 + lbl_1_data_13C[var_r28]);
+            arg0->motion[var_r28] = CharMotionCreate(var_r31->unk1, var_r31->unk1 + lbl_1_data_13C[var_r28]);
         }
         else {
-            arg0->motion[var_r28] = CharModelMotionCreate(var_r31->unk1, lbl_1_data_13C[var_r28]);
+            arg0->motion[var_r28] = CharMotionCreate(var_r31->unk1, lbl_1_data_13C[var_r28]);
         }
     }
-    CharModelMotionDataClose(var_r31->unk1);
-    CharModelMotionSet(var_r31->unk1, arg0->motion[var_r31->unk1C]);
+    CharMotionDataClose(var_r31->unk1);
+    CharMotionSet(var_r31->unk1, arg0->motion[var_r31->unk1C]);
     omSetTra(arg0, var_r31->unk24.x, var_r31->unk24.y, var_r31->unk24.z);
     Hu3DModelPosSet(var_r30, var_r31->unk24.x, var_r31->unk24.y, var_r31->unk24.z);
     Hu3DModelRotSet(var_r30, 0.0f, 30.0f, 0.0f);
-    CharModelStepTypeSet(var_r31->unk1, 0);
+    CharModelStepFxSet(var_r31->unk1, 0);
     arg0->model[1] = var_r30 = Hu3DModelCreateFile(DATA_MAKE_NUM(DATADIR_M409, 0x12));
     Hu3DModelHookSet(arg0->model[0], (char *)sp38[var_r31->unk1], arg0->model[1]);
     var_r30 = fn_1_DA48(2, 1);
@@ -312,8 +312,8 @@ void fn_1_7344(omObjData *arg0)
             }
             break;
         case 1:
-            if (CharModelMotionEndCheck(temp_r31->unk1) != 0) {
-                if (CharModelMotionTimeGet(temp_r31->unk1) <= 0.0f) {
+            if (CharMotionEndCheck(temp_r31->unk1) != 0) {
+                if (CharMotionTimeGet(temp_r31->unk1) <= 0.0f) {
                     var_r28 = 0;
                 }
                 else {
@@ -334,7 +334,7 @@ void fn_1_7344(omObjData *arg0)
                     var_f31 = 0.0f;
                 }
             }
-            else if (CharModelMotionEndCheck(temp_r31->unk1) != 0) {
+            else if (CharMotionEndCheck(temp_r31->unk1) != 0) {
                 var_r28 = 2;
                 var_r27 = 1;
                 var_f31 = 0.0f;
@@ -344,7 +344,7 @@ void fn_1_7344(omObjData *arg0)
             if (temp_r31->unk18 < 0) {
                 temp_r31->unk18 = CharFXPlay(temp_r31->unk1, 0x125);
             }
-            if (CharModelMotionEndCheck(temp_r31->unk1) != 0) {
+            if (CharMotionEndCheck(temp_r31->unk1) != 0) {
                 temp_r31->unk3C.y = fn_1_AD40(temp_r31->unk3C.y, 180.0f, 0.8f);
                 if (ABS(temp_r31->unk3C.y) > 170.0f) {
                     var_r28 = 2;
@@ -364,7 +364,7 @@ void fn_1_7344(omObjData *arg0)
     }
     if (var_r28 != temp_r31->unk1C) {
         temp_r31->unk1C = var_r28;
-        CharModelMotionShiftSet(temp_r31->unk1, arg0->motion[temp_r31->unk1C], var_f31, 8.0f, var_r27);
+        CharMotionShiftSet(temp_r31->unk1, arg0->motion[temp_r31->unk1C], var_f31, 8.0f, var_r27);
     }
     omSetTra(arg0, temp_r31->unk24.x, temp_r31->unk24.y, temp_r31->unk24.z);
     omSetRot(arg0, temp_r31->unk3C.x, temp_r31->unk3C.y, temp_r31->unk3C.z);
@@ -1227,26 +1227,26 @@ f32 fn_1_B9E0(Vec *arg0, Vec *arg1, Vec *arg2, Vec *arg3, Vec *arg4)
 void fn_1_BE90(ModelData *model, ParticleData *particle, Mtx matrix)
 {
     s32 var_r29;
-    HsfanimStruct01 *var_r31;
+    HU3DPARTICLEDATA *var_r31;
 
-    var_r31 = particle->unk_48;
+    var_r31 = particle->data;
     for (var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
         var_r31->unk34.x = 0.0f;
         var_r31->unk34.y = 200.0f;
         var_r31->unk34.z = -500.0f;
         var_r31->unk2C = 80.0f;
     }
-    DCFlushRange(particle->unk_48, particle->unk_30 * 0x44);
+    DCFlushRange(particle->data, particle->unk_30 * 0x44);
 }
 
 f32 fn_1_BF38(s16 arg0)
 {
     MotionData *motionData;
-    HsfMotion *hsfMotionData;
+    HSFMOTION *hsfMotionData;
     f32 length;
 
     motionData = &Hu3DMotion[arg0];
     hsfMotionData = motionData->hsfData->motion;
-    length = hsfMotionData->len;
+    length = hsfMotionData->maxTime;
     return length;
 }

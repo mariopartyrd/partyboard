@@ -600,7 +600,7 @@ void fn_1_2428(u16 arg0, u16 arg1)
 void fn_1_2470(omObjData *arg0)
 {
     ModelData *temp_r29;
-    HsfObject *temp_r28;
+    HSFOBJECT *temp_r28;
     f32 temp_f31;
     f32 var_f30;
     f32 var_f29;
@@ -647,9 +647,9 @@ void fn_1_2470(omObjData *arg0)
     temp_r27->unk1C = 5;
     temp_r29 = &Hu3DData[temp_r26];
     temp_r28 = temp_r29->hsfData->root;
-    lbl_1_bss_60 = temp_r28->data.childrenCount;
+    lbl_1_bss_60 = temp_r28->mesh.childrenCount;
     lbl_1_bss_64 = HuMemDirectMalloc(HEAP_DATA, lbl_1_bss_60 * sizeof(unkStruct6));
-    OSReport("Koopa Object Count %d\n", temp_r29->hsfData->objectCnt);
+    OSReport("Koopa Object Count %d\n", temp_r29->hsfData->objectNum);
 
     for (var_r30 = 0; var_r30 < lbl_1_bss_60; var_r30++) {
         lbl_1_bss_64[var_r30].unk20 = 0;
@@ -657,7 +657,7 @@ void fn_1_2470(omObjData *arg0)
 
     for (var_r30 = 0; var_r30 < lbl_1_bss_60; var_r30++) {
         lbl_1_bss_64[var_r30].unk4 = var_r30;
-        fn_1_5C2C(temp_r26, temp_r28->data.children[var_r30], &lbl_1_bss_64[var_r30], 2);
+        fn_1_5C2C(temp_r26, temp_r28->mesh.children[var_r30], &lbl_1_bss_64[var_r30], 2);
         if (lbl_1_bss_64[var_r30].unk20 != 0) {
             Hu3DModelAttrSet(lbl_1_bss_64[var_r30].unk0, HU3D_ATTR_DISPOFF);
             Hu3DModelPosSet(lbl_1_bss_64[var_r30].unk0, 0.0f, 250.0f, 0.0f);
@@ -1317,7 +1317,7 @@ void fn_1_57B4(unkStruct6 *arg0)
     DCFlushRangeNoSync(arg0->unkC, arg0->unk8 * 0xC);
 }
 
-void fn_1_5C2C(s16 arg0, HsfObject *arg1, unkStruct6 *arg2, u16 arg3)
+void fn_1_5C2C(s16 arg0, HSFOBJECT *arg1, unkStruct6 *arg2, u16 arg3)
 {
     Mtx sp68;
     Vec sp44[3];
@@ -1328,10 +1328,10 @@ void fn_1_5C2C(s16 arg0, HsfObject *arg1, unkStruct6 *arg2, u16 arg3)
     Vec *var_r21;
     Vec *var_r19;
     s16 var_r20;
-    HsfVector2f *var_r22;
+    HuVec2f *var_r22;
     s16 var_r24;
     s16 var_r23;
-    HsfTransform *var_r25;
+    HSFTRANSFORM *var_r25;
     s16 var_r27;
     ModelData *var_r29;
     s16 var_r28;
@@ -1347,26 +1347,26 @@ void fn_1_5C2C(s16 arg0, HsfObject *arg1, unkStruct6 *arg2, u16 arg3)
         var_r29->unk_120 = (ParticleData *)arg2;
         var_r29->unk_58.x = var_r29->unk_58.z = var_r29->unk_58.y = 1.0f;
         arg2->unk2 = arg3;
-        arg2->unk28 = &arg1->data.material[((s16 *)(arg1->data.face->data))[1] & 0xFFF];
-        arg2->unk2C = arg1->data.attribute;
+        arg2->unk28 = &arg1->mesh.material[((s16 *)(arg1->mesh.face->data))[1] & 0xFFF];
+        arg2->unk2C = arg1->mesh.attribute;
         arg2->unk38 = NULL;
         arg2->unk3C = 0xFF;
         arg2->unk3E = 0;
-        arg2->unk18 = HuMemDirectMallocNum(HEAP_DATA, arg1->data.vertex->count * sizeof(Vec), var_r29->unk_48);
+        arg2->unk18 = HuMemDirectMallocNum(HEAP_DATA, arg1->mesh.vertex->count * sizeof(Vec), var_r29->unk_48);
         fn_1_6554(arg2, arg1);
         fn_1_6B58(arg2, arg1);
         arg2->unkC = HuMemDirectMallocNum(HEAP_DATA, arg2->unk8 * sizeof(Vec), var_r29->unk_48);
         arg2->unk10 = HuMemDirectMallocNum(HEAP_DATA, arg2->unk8 * sizeof(Vec), var_r29->unk_48);
         arg2->unk14 = HuMemDirectMallocNum(HEAP_DATA, arg2->unk8 * sizeof(Vec), var_r29->unk_48);
-        if (arg2->unk28->numAttrs != 0) {
-            arg2->unk1C = HuMemDirectMallocNum(HEAP_DATA, arg1->data.st->count * 8, var_r29->unk_48);
-            var_r22 = arg1->data.st->data;
+        if (arg2->unk28->attrNum != 0) {
+            arg2->unk1C = HuMemDirectMallocNum(HEAP_DATA, arg1->mesh.st->count * 8, var_r29->unk_48);
+            var_r22 = arg1->mesh.st->data;
         }
         else {
             arg2->unk1C = NULL;
             var_r22 = NULL;
         }
-        var_r25 = &arg1->data.base;
+        var_r25 = &arg1->mesh.base;
         MTXScale(sp68, var_r25->scale.x, var_r25->scale.y, var_r25->scale.z);
         mtxRotCat(sp68, var_r25->rot.x, var_r25->rot.y, var_r25->rot.z);
         mtxTransCat(sp68, var_r25->pos.x, var_r25->pos.y, var_r25->pos.z);
@@ -1383,14 +1383,14 @@ void fn_1_5C2C(s16 arg0, HsfObject *arg1, unkStruct6 *arg2, u16 arg3)
                     var_r27 = arg2->unk24[var_r30].unk18[var_r28];
                     var_r23 = arg2->unk24[var_r30].unk0[var_r28].unk0;
                 }
-                MTXMultVec(sp68, &((Vec *)(arg1->data.vertex->data))[var_r23], &sp38);
+                MTXMultVec(sp68, &((Vec *)(arg1->mesh.vertex->data))[var_r23], &sp38);
                 arg2->unkC[var_r27] = sp38;
                 sp44[var_r28] = arg2->unkC[var_r27];
                 arg2->unk14[var_r27] = arg2->unk18[var_r23];
                 sp2C.x += sp38.x;
                 sp2C.y += sp38.y;
                 sp2C.z += sp38.z;
-                if (arg2->unk28->numAttrs != 0) {
+                if (arg2->unk28->attrNum != 0) {
                     var_r23 = arg2->unk24[var_r30].unk0[var_r28].unk6;
                     var_r27 = var_r23;
                     arg2->unk1C[var_r27].x = var_r22[var_r23].x;
@@ -1410,8 +1410,8 @@ void fn_1_5C2C(s16 arg0, HsfObject *arg1, unkStruct6 *arg2, u16 arg3)
         memcpy(arg2->unk10, arg2->unkC, arg2->unk8 * 0xC);
         DCFlushRangeNoSync(arg2->unkC, arg2->unk8 * 0xC);
         DCFlushRangeNoSync(arg2->unk14, arg2->unk8 * 0xC);
-        if (arg2->unk28->numAttrs != 0) {
-            DCFlushRangeNoSync(arg2->unk1C, arg1->data.st->count * 8);
+        if (arg2->unk28->attrNum != 0) {
+            DCFlushRangeNoSync(arg2->unk1C, arg1->mesh.st->count * 8);
         }
         var_r20 = 0;
         var_r19 = var_r21 = HuMemDirectMallocNum(HEAP_DATA, 0x20000, var_r29->unk_48);
@@ -1429,7 +1429,7 @@ void fn_1_5C2C(s16 arg0, HsfObject *arg1, unkStruct6 *arg2, u16 arg3)
                     }
                     GXPosition1x16(var_r27);
                     GXNormal1x16(var_r27);
-                    if (arg2->unk28->numAttrs != 0) {
+                    if (arg2->unk28->attrNum != 0) {
                         GXTexCoord1x16(arg2->unk24[var_r30].unk0[var_r28].unk6);
                     }
                 }
@@ -1440,7 +1440,7 @@ void fn_1_5C2C(s16 arg0, HsfObject *arg1, unkStruct6 *arg2, u16 arg3)
                     }
                     GXPosition1x16(arg2->unk24[var_r30].unk20[var_r24].unk0);
                     GXNormal1x16(arg2->unk24[var_r30].unk20[var_r24].unk0);
-                    if (arg2->unk28->numAttrs != 0) {
+                    if (arg2->unk28->attrNum != 0) {
                         GXTexCoord1x16(arg2->unk24[var_r30].unk20[var_r24].unk6);
                     }
                 }
@@ -1459,7 +1459,7 @@ void fn_1_5C2C(s16 arg0, HsfObject *arg1, unkStruct6 *arg2, u16 arg3)
                     }
                     GXPosition1x16(var_r27);
                     GXNormal1x16(var_r27);
-                    if (arg2->unk28->numAttrs != 0) {
+                    if (arg2->unk28->attrNum != 0) {
                         GXTexCoord1x16(arg2->unk24[var_r30].unk0[var_r28].unk6);
                     }
                 }
@@ -1475,29 +1475,29 @@ void fn_1_5C2C(s16 arg0, HsfObject *arg1, unkStruct6 *arg2, u16 arg3)
     }
 }
 
-void fn_1_6554(unkStruct6 *arg0, HsfObject *arg1)
+void fn_1_6554(unkStruct6 *arg0, HSFOBJECT *arg1)
 {
     Vec sp20[3];
     f32 spC[5];
     f32 var_f28;
-    HsfBuffer *temp_r26;
+    HSFBUFFER *temp_r26;
     s16 var_r28;
     s16 var_r29;
-    HsfFace *var_r30;
+    HSFFACE *var_r30;
 
-    temp_r26 = arg1->data.face;
+    temp_r26 = arg1->mesh.face;
 
-    for (var_r28 = 0; var_r28 < arg1->data.vertex->count; var_r28++) {
+    for (var_r28 = 0; var_r28 < arg1->mesh.vertex->count; var_r28++) {
         arg0->unk18[var_r28].x = 0.0f;
         arg0->unk18[var_r28].y = 0.0f;
         arg0->unk18[var_r28].z = 0.0f;
     }
-    var_r30 = (HsfFace *)temp_r26->data;
+    var_r30 = (HSFFACE *)temp_r26->data;
 
     for (var_r28 = 0; var_r28 < temp_r26->count; var_r28++, var_r30++) {
-        sp20[0] = ((Vec *)(arg1->data.vertex->data))[var_r30->indices[0][0]];
-        sp20[1] = ((Vec *)(arg1->data.vertex->data))[var_r30->indices[1][0]];
-        sp20[2] = ((Vec *)(arg1->data.vertex->data))[var_r30->indices[2][0]];
+        sp20[0] = ((Vec *)(arg1->mesh.vertex->data))[var_r30->indices[0][0]];
+        sp20[1] = ((Vec *)(arg1->mesh.vertex->data))[var_r30->indices[1][0]];
+        sp20[2] = ((Vec *)(arg1->mesh.vertex->data))[var_r30->indices[2][0]];
         fn_1_91A4(&sp20[0], &sp20[1], &sp20[2], spC);
         spC[0] = -spC[0];
         spC[1] = -spC[1];
@@ -1532,7 +1532,7 @@ void fn_1_6554(unkStruct6 *arg0, HsfObject *arg1)
         }
     }
 
-    for (var_r28 = 0; var_r28 < arg1->data.vertex->count; var_r28++) {
+    for (var_r28 = 0; var_r28 < arg1->mesh.vertex->count; var_r28++) {
         sp20[0].x = arg0->unk18[var_r28].x;
         sp20[0].y = arg0->unk18[var_r28].y;
         sp20[0].z = arg0->unk18[var_r28].z;
@@ -1543,24 +1543,24 @@ void fn_1_6554(unkStruct6 *arg0, HsfObject *arg1)
     }
 }
 
-void fn_1_6B58(unkStruct6 *arg0, HsfObject *arg1)
+void fn_1_6B58(unkStruct6 *arg0, HSFOBJECT *arg1)
 {
-    HsfBuffer *temp_r25;
+    HSFBUFFER *temp_r25;
     s32 var_r28;
     s32 var_r30;
     u8 var_r24;
     ModelData *var_r22;
     unkStruct8 *var_r31;
     unkStruct11 *temp_r26;
-    HsfFace *var_r29;
+    HSFFACE *var_r29;
 
     var_r22 = &Hu3DData[arg0->unk0];
-    temp_r25 = arg1->data.face;
+    temp_r25 = arg1->mesh.face;
     var_r24 = ((arg0->unk2 & 1) != 0) ? 1 : 0;
     arg0->unk20 = 0;
 
     var_r28 = 0;
-    var_r29 = (HsfFace *)temp_r25->data;
+    var_r29 = (HSFFACE *)temp_r25->data;
     for (; var_r28 < temp_r25->count; var_r28++, var_r29++) {
         switch (var_r29->type & 7) {
             case 2:
@@ -1577,14 +1577,14 @@ void fn_1_6B58(unkStruct6 *arg0, HsfObject *arg1)
     arg0->unk24 = HuMemDirectMallocNum(HEAP_DATA, arg0->unk20 * sizeof(unkStruct8), var_r22->unk_48);
     var_r31 = arg0->unk24;
     if (var_r24 != 0) {
-        var_r30 = arg1->data.vertex->count;
+        var_r30 = arg1->mesh.vertex->count;
     }
     else {
         var_r30 = 0;
     }
 
     var_r28 = 0;
-    var_r29 = (HsfFace *)temp_r25->data;
+    var_r29 = (HSFFACE *)temp_r25->data;
     for (; var_r28 < temp_r25->count; var_r28++, var_r29++) {
         switch (var_r29->type & 7) {
             case 2:
@@ -1794,7 +1794,7 @@ void fn_1_7934(unkStruct6 *arg0, unkStruct8 *arg1, Vec *arg2)
     }
 }
 
-void fn_1_7D60(HsfBitmap *arg0, HsfAttribute *arg1, s16 arg2)
+void fn_1_7D60(HSFBITMAP *arg0, HSFATTRIBUTE *arg1, s16 arg2)
 {
     GXTexObj sp1C;
     GXTlutObj sp10;
@@ -1810,8 +1810,8 @@ void fn_1_7D60(HsfBitmap *arg0, HsfAttribute *arg1, s16 arg2)
     }
     temp_r29 = arg0->sizeX;
     temp_r28 = arg0->sizeY;
-    var_r27 = (arg1->wrap_s == 1) ? GX_REPEAT : GX_CLAMP;
-    var_r26 = (arg1->wrap_t == 1) ? GX_REPEAT : GX_CLAMP;
+    var_r27 = (arg1->wrapS == 1) ? GX_REPEAT : GX_CLAMP;
+    var_r26 = (arg1->wrapT == 1) ? GX_REPEAT : GX_CLAMP;
     switch (arg0->dataFmt) {
         case 6:
             GXInitTexObj(&sp1C, arg0->data, temp_r29, temp_r28, GX_TF_RGBA8, var_r27, var_r26, GX_FALSE);
@@ -1862,7 +1862,7 @@ void fn_1_806C(ModelData *arg0, Mtx arg1)
 {
     Mtx sp14;
     GXColor sp10;
-    HsfAttribute *temp_r29;
+    HSFATTRIBUTE *temp_r29;
     unkStruct14 *temp_r31;
     m440Func14 temp_r27;
 
@@ -1893,7 +1893,7 @@ void fn_1_806C(ModelData *arg0, Mtx arg1)
     GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_NRM, GX_NRM_XYZ, GX_F32, 0);
     GXSETARRAY(GX_VA_NRM, temp_r31->unk14, temp_r31->unk8 * sizeof(Vec), sizeof(Vec), TRUE);
     lbl_1_bss_C = temp_r31->unk3C;
-    if (temp_r31->unk28->numAttrs == 0) {
+    if (temp_r31->unk28->attrNum == 0) {
         GXSetNumTevStages(1);
         GXSetTevOrder(GX_TEVSTAGE0, GX_TEXCOORD_NULL, GX_TEXMAP_NULL, GX_COLOR_NULL);
         GXSetTevColorIn(GX_TEVSTAGE0, GX_CC_ONE, GX_CC_ZERO, GX_CC_ZERO, GX_CC_ZERO);
@@ -1908,7 +1908,7 @@ void fn_1_806C(ModelData *arg0, Mtx arg1)
         GXSetVtxAttrFmt(GX_VTXFMT0, GX_VA_TEX0, GX_TEX_ST, GX_F32, 0);
         // TODO PC arg1->data.st->count * sizeof(Vec2f), save that into a new field after we have united struct 6 and 14
         GXSETARRAY(GX_VA_TEX0, temp_r31->unk1C, sizeof(Vec2f), sizeof(Vec2f), TRUE);
-        temp_r29 = &temp_r31->unk2C[temp_r31->unk28->attrs[0]];
+        temp_r29 = &temp_r31->unk2C[temp_r31->unk28->attr[0]];
         fn_1_7D60(temp_r29->bitmap, temp_r29, 0);
         lbl_1_bss_2C = 1;
         HuSprTexLoad(hiliteAnim[0], 0, lbl_1_bss_2C, GX_CLAMP, GX_CLAMP, GX_LINEAR);
@@ -1921,7 +1921,7 @@ void fn_1_806C(ModelData *arg0, Mtx arg1)
     GXCallDisplayList(temp_r31->unk30, temp_r31->unk34);
 }
 
-void fn_1_8470(HsfMaterial *arg0, HsfAttribute *arg1)
+void fn_1_8470(HSFMATERIAL *arg0, HSFATTRIBUTE *arg1)
 {
     ModelData sp40;
     Mtx sp10;
@@ -1983,7 +1983,7 @@ void fn_1_8470(HsfMaterial *arg0, HsfAttribute *arg1)
             GXSetTevColorOp(var_r31, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_TRUE, GX_TEVPREV);
             GXSetTevAlphaIn(var_r31, GX_CA_ZERO, GX_CA_APREV, GX_CA_A0, GX_CA_ZERO);
             GXSetTevAlphaOp(var_r31, GX_TEV_ADD, GX_TB_ZERO, GX_CS_SCALE_1, GX_FALSE, GX_TEVPREV);
-            var_f31 = 6.0f * (arg0->hilite_scale / 300.0f);
+            var_f31 = 6.0f * (arg0->hiliteScale / 300.0f);
             if (var_f31 < 0.1) {
                 var_f31 = 0.1f;
             }
@@ -2021,7 +2021,7 @@ void fn_1_8470(HsfMaterial *arg0, HsfAttribute *arg1)
     GXSetNumTexGens(var_r28);
     GXSetNumTevStages(var_r31);
     if (var_r27 != 0) {
-        var_f30 = arg0->hilite_scale;
+        var_f30 = arg0->hiliteScale;
     }
     else {
         var_f30 = 0.0f;
@@ -2255,7 +2255,7 @@ s16 fn_1_956C(AnimData *arg0, s16 arg1, f32 arg2, s16 arg3, s16 arg4)
     s16 var_r20;
     s16 var_r22;
     s16 var_r19;
-    HsfVector2f *var_r29;
+    HuVec2f *var_r29;
     s16 var_r30;
     unkStruct5 *var_r31;
     void *var_r21;
@@ -2423,7 +2423,7 @@ void fn_1_9C04(ModelData *arg0, Mtx arg1)
     s16 temp_r0;
     u8 temp_r0_2;
     unkStruct5 *temp_r30;
-    HsfVector2f *var_r27;
+    HuVec2f *var_r27;
     s16 var_r26;
     unkStruct4 *var_r29;
     m440Func5 var_r23;
@@ -2521,7 +2521,7 @@ void fn_1_9C04(ModelData *arg0, Mtx arg1)
     GXCallDisplayList(temp_r30->unk28, temp_r30->unk4);
 }
 
-void fn_1_A1B8(HsfVector2f *arg0, s16 arg1, s16 arg2, f32 arg8, f32 arg9)
+void fn_1_A1B8(HuVec2f *arg0, s16 arg1, s16 arg2, f32 arg8, f32 arg9)
 {
     s16 var_r31;
     s16 var_r30;
@@ -2535,7 +2535,7 @@ void fn_1_A1B8(HsfVector2f *arg0, s16 arg1, s16 arg2, f32 arg8, f32 arg9)
     }
 }
 
-void fn_1_A284(HsfVector2f *arg0, HsfVector2f *arg1, s16 arg2, f32 arg3, f32 arg4)
+void fn_1_A284(HuVec2f *arg0, HuVec2f *arg1, s16 arg2, f32 arg3, f32 arg4)
 {
     arg0[0].x = arg1[arg2].x;
     arg0[0].y = arg1[arg2].y;

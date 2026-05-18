@@ -191,14 +191,14 @@ void fn_1_8BC(void)
     s32 var_r28;
     s32 var_r26;
     unkStruct2 *temp_r25;
-    HsfTransform *temp_r24;
+    HSFTRANSFORM *temp_r24;
     Process *var_r23;
     s32 temp_r22;
     AnimData *var_r21;
     s16 var_r20;
     s16 var_r19;
     s32 var_r18;
-    HsfObject *var_r17;
+    HSFOBJECT *var_r17;
 
     nMap = 0;
     HuAudSndGrpSet(0x25);
@@ -375,7 +375,7 @@ void fn_1_8BC(void)
             OSReport("objname %s\n", lbl_1_data_298[var_r28]);
             OSPanic("m412.c", 0x258, "ObjPtr");
         }
-        temp_r24 = &var_r17->data.base;
+        temp_r24 = &var_r17->mesh.base;
         lbl_1_bss_13C[var_r28].x = temp_r24->pos.x;
         lbl_1_bss_13C[var_r28].y = temp_r24->pos.y;
         lbl_1_bss_13C[var_r28].z = temp_r24->pos.z;
@@ -410,7 +410,7 @@ void fn_1_8BC(void)
         Hu3DModelScaleSet(temp_r30->unk2, 1.0f, -1.0f, 1.0f);
         Hu3DModelAttrSet(temp_r30->unk2, HU3D_ATTR_CULL_FRONT);
         Hu3DModelLayerSet(temp_r30->unk2, 0);
-        CharModelLayerSetAll(3);
+        CharEffectLayerSet(3);
         temp_r30->unk54.x = temp_r30->unk54.z = temp_r30->unk54.y = 0.0f;
         temp_r30->unk54.y = fn_1_1D08(45.0f + (90.0f * temp_r30->unk3C) + lbl_1_bss_778);
         temp_r30->unk40.x = (400.0 * sind(temp_r30->unk54.y));
@@ -428,16 +428,16 @@ void fn_1_8BC(void)
         Hu3DModelShadowSet(temp_r30->unk0);
 
         for (var_r26 = 0; var_r26 < 6; var_r26++) {
-            temp_r30->unkC[var_r26] = CharModelMotionCreate(lbl_1_data_0[GWPlayerCfg[var_r28].character], lbl_1_data_60[var_r26]);
+            temp_r30->unkC[var_r26] = CharMotionCreate(lbl_1_data_0[GWPlayerCfg[var_r28].character], lbl_1_data_60[var_r26]);
             var_r27
                 = HuDataSelHeapReadNum((u16)lbl_1_data_60[var_r26] | lbl_1_data_40[GWPlayerCfg[var_r28].character], MEMORY_DEFAULT_NUM, HEAP_DATA);
             temp_r30->unk18[var_r26] = Hu3DJointMotion(temp_r30->unk2, var_r27);
         }
-        CharModelMotionSet(lbl_1_data_0[GWPlayerCfg[var_r28].character], temp_r30->unkC[0]);
+        CharMotionSet(lbl_1_data_0[GWPlayerCfg[var_r28].character], temp_r30->unkC[0]);
         Hu3DModelAttrSet(temp_r30->unk0, HU3D_MOTATTR_LOOP);
         Hu3DMotionSet(temp_r30->unk2, temp_r30->unk18[0]);
         Hu3DModelAttrSet(temp_r30->unk2, HU3D_MOTATTR_LOOP);
-        CharModelMotionDataClose(lbl_1_data_0[GWPlayerCfg[var_r28].character]);
+        CharMotionDataClose(lbl_1_data_0[GWPlayerCfg[var_r28].character]);
         var_r27 = HuDataSelHeapReadNum(DATA_MAKE_NUM(DATADIR_M412, 0x1C), MEMORY_DEFAULT_NUM, HEAP_DATA);
         temp_r30->unk6 = var_r29 = Hu3DModelCreate(var_r27);
         Hu3DModelLayerSet(var_r29, 1);
@@ -509,8 +509,8 @@ void fn_1_1D88(void)
 void fn_1_1DBC(void)
 {
     Vec sp8;
-    HsfObject *var_r27;
-    HsfTransform *temp_r31;
+    HSFOBJECT *var_r27;
+    HSFTRANSFORM *temp_r31;
     unkStruct4 *temp_r30;
     Vec *temp_r29;
     s32 var_r28;
@@ -524,7 +524,7 @@ void fn_1_1DBC(void)
         OSReport("objname %s\n", lbl_1_data_298[temp_r30->unk4]);
         OSPanic("m412.c", 0x32E, "ObjPtr");
     }
-    temp_r31 = &var_r27->data.base;
+    temp_r31 = &var_r27->mesh.base;
     temp_r29 = &lbl_1_bss_13C[temp_r30->unk4];
     temp_r31->pos.x = temp_r29->x;
     temp_r31->pos.y = temp_r29->y;
@@ -1626,14 +1626,14 @@ loop_6:
                 if (temp_r31->unk60.z >= 8.0f) {
                     if (temp_r31->unk30 != 2) {
                         temp_r31->unk30 = 2;
-                        CharModelMotionShiftSet(
+                        CharMotionShiftSet(
                             lbl_1_data_0[GWPlayerCfg[temp_r31->unk24].character], temp_r31->unkC[2], 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
                         Hu3DMotionShiftSet(temp_r31->unk2, temp_r31->unk18[2], 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
                     }
                 }
                 else if (temp_r31->unk30 != 1) {
                     temp_r31->unk30 = 1;
-                    CharModelMotionShiftSet(lbl_1_data_0[GWPlayerCfg[temp_r31->unk24].character], temp_r31->unkC[1], 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
+                    CharMotionShiftSet(lbl_1_data_0[GWPlayerCfg[temp_r31->unk24].character], temp_r31->unkC[1], 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
                     Hu3DMotionShiftSet(temp_r31->unk2, temp_r31->unk18[1], 0.0f, 8.0f, HU3D_MOTATTR_LOOP);
                 }
                 temp_r31->unk7C.x += 0.1f * sp1A0.x;
@@ -1641,7 +1641,7 @@ loop_6:
             }
             else if (temp_r31->unk30 != 0) {
                 temp_r31->unk30 = 0;
-                CharModelMotionSet(lbl_1_data_0[GWPlayerCfg[temp_r31->unk24].character], temp_r31->unkC[0]);
+                CharMotionSet(lbl_1_data_0[GWPlayerCfg[temp_r31->unk24].character], temp_r31->unkC[0]);
                 Hu3DModelAttrSet(temp_r31->unk0, HU3D_MOTATTR_LOOP);
                 Hu3DMotionSet(temp_r31->unk2, temp_r31->unk18[0]);
                 Hu3DMotionSpeedSet(temp_r31->unk2, 2.0f);
@@ -1743,7 +1743,7 @@ loop_6:
                 HuPrcVSleep();
             }
         case 4:
-            CharModelMotionShiftSet(lbl_1_data_0[GWPlayerCfg[temp_r31->unk24].character], temp_r31->unkC[0], 0.0f, 5.0f, HU3D_MOTATTR_LOOP);
+            CharMotionShiftSet(lbl_1_data_0[GWPlayerCfg[temp_r31->unk24].character], temp_r31->unkC[0], 0.0f, 5.0f, HU3D_MOTATTR_LOOP);
             Hu3DMotionShiftSet(temp_r31->unk2, temp_r31->unk18[0], 0.0f, 5.0f, HU3D_MOTATTR_LOOP);
             var_r27 = 30;
             sp12C = fn_1_27C4(var_r27, lbl_1_bss_778, temp_r31->unk54.y);
@@ -1757,7 +1757,7 @@ loop_6:
             while (lbl_1_bss_794 < 5) {
                 HuPrcVSleep();
             }
-            CharModelMotionShiftSet(lbl_1_data_0[GWPlayerCfg[temp_r31->unk24].character], temp_r31->unkC[5], 0.0f, 5.0f, HU3D_MOTATTR_NONE);
+            CharMotionShiftSet(lbl_1_data_0[GWPlayerCfg[temp_r31->unk24].character], temp_r31->unkC[5], 0.0f, 5.0f, HU3D_MOTATTR_NONE);
             Hu3DMotionShiftSet(temp_r31->unk2, temp_r31->unk18[5], 0.0f, 5.0f, HU3D_MOTATTR_NONE);
 
             while (1) {
@@ -1768,7 +1768,7 @@ loop_6:
 
 void fn_1_A01C(ModelData *model, ParticleData *particle, f32 (*matrix)[4])
 {
-    HsfanimStruct01 *var_r31;
+    HU3DPARTICLEDATA *var_r31;
     f32 var_f29;
     f32 var_f28;
     f32 var_f30;
@@ -1781,12 +1781,12 @@ void fn_1_A01C(ModelData *model, ParticleData *particle, f32 (*matrix)[4])
     unkStruct *temp_r30;
 
     if (particle->unk_34 == 0) {
-        var_r31 = particle->unk_48;
+        var_r31 = particle->data;
         for (var_r28 = 0; var_r28 < particle->unk_30; var_r28++, var_r31++) {
             var_r31->unk14.x = var_r31->unk2C = 0.0f;
         }
     }
-    var_r31 = particle->unk_48;
+    var_r31 = particle->data;
 
     for (var_r26 = 0; var_r26 < 0x20; var_r26++) {
         temp_r30 = lbl_1_bss_278[var_r26];
@@ -1829,7 +1829,7 @@ void fn_1_A01C(ModelData *model, ParticleData *particle, f32 (*matrix)[4])
             temp_r30->unkA++;
         }
     }
-    var_r31 = particle->unk_48;
+    var_r31 = particle->data;
     for (var_r28 = 0; var_r28 < particle->unk_30; var_r28++, var_r31++) {
         if (var_r31->unk14.x != 0.0f) {
             VECAdd(&var_r31->unk08, &var_r31->unk34, &var_r31->unk34);
@@ -1856,7 +1856,7 @@ void fn_1_A01C(ModelData *model, ParticleData *particle, f32 (*matrix)[4])
 
 void fn_1_A618(ModelData *model, ParticleData *particle, f32 (*matrix)[4])
 {
-    HsfanimStruct01 *var_r31;
+    HU3DPARTICLEDATA *var_r31;
     f32 var_f31;
     f32 var_f30;
     f32 var_f29;
@@ -1868,13 +1868,13 @@ void fn_1_A618(ModelData *model, ParticleData *particle, f32 (*matrix)[4])
     unkStruct *temp_r28;
 
     if (particle->unk_34 == 0) {
-        var_r31 = particle->unk_48;
+        var_r31 = particle->data;
 
         for (var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
             var_r31->unk14.x = var_r31->unk2C = 0.0f;
         }
     }
-    var_r31 = particle->unk_48;
+    var_r31 = particle->data;
 
     for (var_r26 = 0; var_r26 < 0x20; var_r26++) {
         temp_r28 = lbl_1_bss_278[var_r26];
@@ -1910,7 +1910,7 @@ void fn_1_A618(ModelData *model, ParticleData *particle, f32 (*matrix)[4])
             temp_r28->unkA = 0;
         }
     }
-    var_r31 = particle->unk_48;
+    var_r31 = particle->data;
     for (var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
         if (0.0f != var_r31->unk14.x) {
             VECAdd(&var_r31->unk08, &var_r31->unk34, &var_r31->unk34);
@@ -1937,20 +1937,20 @@ void fn_1_A618(ModelData *model, ParticleData *particle, f32 (*matrix)[4])
 
 void fn_1_AA88(ModelData *model, ParticleData *particle, f32 (*matrix)[4])
 {
-    HsfanimStruct01 *var_r31;
+    HU3DPARTICLEDATA *var_r31;
     f32 var_f31;
     s16 var_r27;
     s16 var_r28;
     unkStruct2 *temp_r29;
 
     if (particle->unk_34 == 0) {
-        var_r31 = particle->unk_48;
+        var_r31 = particle->data;
 
         for (var_r28 = 0; var_r28 < particle->unk_30; var_r28++, var_r31++) {
             var_r31->unk14.x = var_r31->unk2C = 0.0f;
         }
     }
-    var_r31 = particle->unk_48;
+    var_r31 = particle->data;
 
     for (var_r27 = 0; var_r27 < 6; var_r27++) {
         temp_r29 = &lbl_1_bss_33C[var_r27];
@@ -1972,7 +1972,7 @@ void fn_1_AA88(ModelData *model, ParticleData *particle, f32 (*matrix)[4])
         var_r31->unk14.z = 17.0f;
         temp_r29->unk20 = 0;
     }
-    var_r31 = particle->unk_48;
+    var_r31 = particle->data;
 
     for (var_r28 = 0; var_r28 < particle->unk_30; var_r28++, var_r31++) {
         if (0.0f != var_r31->unk14.x) {
@@ -2029,7 +2029,7 @@ void fn_1_ADC8(void)
         if (var_f31 == 90.0f) {
             for (var_r31 = 0; var_r31 < 4; var_r31++) {
                 temp_r30 = &lbl_1_bss_4D4[var_r31];
-                CharModelMotionShiftSet(lbl_1_data_0[GWPlayerCfg[var_r31].character], temp_r30->unkC[3], 0.0f, 5.0f, HU3D_MOTATTR_NONE);
+                CharMotionShiftSet(lbl_1_data_0[GWPlayerCfg[var_r31].character], temp_r30->unkC[3], 0.0f, 5.0f, HU3D_MOTATTR_NONE);
                 Hu3DMotionShiftSet(temp_r30->unk2, temp_r30->unk18[3], 0.0f, 5.0f, HU3D_MOTATTR_NONE);
             }
         }
@@ -2040,7 +2040,7 @@ void fn_1_ADC8(void)
     for (var_r31 = 0; var_r31 < 4; var_r31++) {
         temp_r30 = &lbl_1_bss_4D4[var_r31];
         PlayerFXPlay(temp_r30->unk24, 0x128);
-        CharModelMotionShiftSet(lbl_1_data_0[GWPlayerCfg[var_r31].character], temp_r30->unkC[4], 0.0f, 5.0f, HU3D_MOTATTR_NONE);
+        CharMotionShiftSet(lbl_1_data_0[GWPlayerCfg[var_r31].character], temp_r30->unkC[4], 0.0f, 5.0f, HU3D_MOTATTR_NONE);
         Hu3DMotionShiftSet(temp_r30->unk2, temp_r30->unk18[4], 0.0f, 5.0f, HU3D_MOTATTR_NONE);
     }
 }

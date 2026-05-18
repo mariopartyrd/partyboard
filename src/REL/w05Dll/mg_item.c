@@ -89,8 +89,8 @@ void fn_1_6B7C(void)
     Hu3DModelObjPosGet(BoardModelIDGet(BoardPlayerModelGet(lbl_1_bss_B6)), "a-itemhook-r", &sp1C);
     VECAdd(&sp1C, &sp10, &sp1C);
     sp1C.y += 25.0f;
-    CharModelLayerSetAll(7);
-    CharModelEffectCreate(-1, &sp1C);
+    CharEffectLayerSet(7);
+    CharEffectSmokeCreate(-1, &sp1C);
     HuPadRumbleStop(GWPlayer[lbl_1_bss_B6].port);
     BoardModelAttrSet(lbl_1_bss_14[0], 0x40000002);
     HuPrcSleep(0x1E);
@@ -515,8 +515,8 @@ void fn_1_850C(omObjData *arg0)
         Hu3DModelObjPosGet(BoardModelIDGet(BoardPlayerModelGet(lbl_1_bss_B6)), "a-itemhook-r", &sp14);
         VECAdd(&sp14, &sp8, &sp14);
         sp14.y += 25.0f;
-        CharModelLayerSetAll(7);
-        CharModelEffectCreate(-1, &sp14);
+        CharEffectLayerSet(7);
+        CharEffectSmokeCreate(-1, &sp14);
         arg0->work[0] = 0xA;
         arg0->func = fn_1_8668;
     }
@@ -783,7 +783,7 @@ void fn_1_91DC(void)
 void fn_1_9268(ModelData *model, ParticleData *particle, f32 (*matrix)[4])
 {
     Vec sp8;
-    HsfanimStruct01 *var_r31;
+    HU3DPARTICLEDATA *var_r31;
     f32 temp_f30;
     f32 temp_f29;
     f32 temp_f31;
@@ -791,7 +791,7 @@ void fn_1_9268(ModelData *model, ParticleData *particle, f32 (*matrix)[4])
     s32 var_r29;
 
     if (particle->unk_34 == 0) {
-        var_r31 = particle->unk_48;
+        var_r31 = particle->data;
         for (var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
             var_r31->unk40.a = 0;
             var_r31->unk2C = 0.0f;
@@ -803,7 +803,7 @@ void fn_1_9268(ModelData *model, ParticleData *particle, f32 (*matrix)[4])
     BoardModelPosGet(particle->unk_02, &sp8);
 
     for (var_r29 = 0; var_r29 < 0x16; var_r29++) {
-        var_r31 = particle->unk_48;
+        var_r31 = particle->data;
 
         for (var_r28 = 0; var_r28 < particle->unk_30; var_r28++, var_r31++) {
             if (var_r31->unk2C == 0.0f)
@@ -821,7 +821,7 @@ void fn_1_9268(ModelData *model, ParticleData *particle, f32 (*matrix)[4])
             var_r31->unk2C = 15.0f * temp_f31;
         }
     }
-    var_r31 = particle->unk_48;
+    var_r31 = particle->data;
     for (var_r29 = 0; var_r29 < particle->unk_30; var_r29++, var_r31++) {
         if (0.0f != var_r31->unk2C) {
             var_r31->unk34.y -= var_r31->unk08.x;
