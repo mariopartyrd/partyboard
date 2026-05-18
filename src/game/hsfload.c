@@ -1,6 +1,7 @@
 #include "game/hsfload.h"
 #include "game/EnvelopeExec.h"
 #include "ctype.h"
+#include "game/hsfformat.h"
 #include "string.h"
 
 #ifdef TARGET_PC
@@ -1268,8 +1269,8 @@ static void DispObject(HSFOBJECT *parent, HSFOBJECT *object)
 #ifdef BYTESWAPPING
             LoadEnvelopeSourceData(new_object, data);
 #else
-            new_object->data.vtxtop = (void *)((uintptr_t)fileptr + (uintptr_t)data->vtxtop);
-            new_object->data.normtop = (void *)((uintptr_t)fileptr + (uintptr_t)data->normtop);
+            new_object->mesh.vtxtop = (void *)((uintptr_t)fileptr + (uintptr_t)data->vtxtop);
+            new_object->mesh.normtop = (void *)((uintptr_t)fileptr + (uintptr_t)data->normtop);
 #endif
             new_object->mesh.base.pos.x = data->base.pos.x;
             new_object->mesh.base.pos.y = data->base.pos.y;
@@ -1530,7 +1531,7 @@ static void CenvLoad(void)
             cenv_new[i].singleData = (HSFCENVSINGLE *)((uintptr_t)cenv_file[i].singleData + (uintptr_t)data_base);
 #ifndef BYTESWAPPING
             cenv_new[i].dualData = (HSFCENVDUAL *)((uintptr_t)cenv_file[i].dualData + (uintptr_t)data_base);
-            cenv_new[i].multiData = (HSFCENVMULTI *)((uintptr_t)cenv_file[i].multiData + (uintptr_t)data_base);
+            cenv_new[i].multiData = (HsfCenvMulti *)((uintptr_t)cenv_file[i].multiData + (uintptr_t)data_base);
 #endif
             cenv_new[i].singleCount = cenv_file[i].singleCount;
             cenv_new[i].dualCount = cenv_file[i].dualCount;
@@ -1544,7 +1545,7 @@ static void CenvLoad(void)
 #else
             weight_base = (void *)((uintptr_t)weight_base + (cenv_new[i].singleCount * sizeof(HSFCENVSINGLE)));
             weight_base = (void *)((uintptr_t)weight_base + (cenv_new[i].dualCount * sizeof(HSFCENVDUAL)));
-            weight_base = (void *)((uintptr_t)weight_base + (cenv_new[i].multiCount * sizeof(HSFCENVMULTI)));
+            weight_base = (void *)((uintptr_t)weight_base + (cenv_new[i].multiCount * sizeof(HsfCenvMulti)));
 #endif
         }
         for(i=0; i<head.cenv.count; i++) {
@@ -2547,7 +2548,7 @@ static HsfPart *SearchPartPtr(s32 id)
 #ifdef BYTESWAPPING
     part = PartTop;
 #else
-    part = (HSFPART *)((uintptr_t)fileptr+head.part.ofs);
+    part = (HsfPart *)((uintptr_t)fileptr+head.part.ofs);
 #endif
     part += id;
     return part;
