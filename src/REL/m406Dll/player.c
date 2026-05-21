@@ -1923,7 +1923,7 @@ s32 fn_1_13C10(Vec *arg0, Vec *arg1)
     var_r21 = arg0->z / -10000.0f;
     if (var_r21 >= 6) {
 #ifdef NON_MATCHING
-        // TODO PC is this right?
+        // TODO NON_MATCHING is this right?
         return 1;
 #else
         return;
@@ -2071,7 +2071,7 @@ float fn_1_143F4(Vec *arg0, UnkM406PlayerStruct2 *arg1)
     s32 var_r21;
 
 #ifdef NON_MATCHING
-    sp8 = -5.0f; // TODO PC is this right?
+    sp8 = -5.0f; // TODO NON_MATCHING is this right?
 #endif
 
     arg1->unk_00 = NULL;

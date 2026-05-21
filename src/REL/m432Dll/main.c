@@ -2043,7 +2043,7 @@ void fn_1_93BC(UnkM432DllStruct *arg0)
     UnkM432DllStruct *var_r27;
     s32 var_r20;
 
-#ifdef TARGET_PC
+#ifdef NON_MATCHING
     var_r30 = NULL;
 #endif
 

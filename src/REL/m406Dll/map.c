@@ -1273,7 +1273,7 @@ void fn_1_4964(ModelData *arg0)
         fn_1_71C4(spC4, spA0, 100.0f + (50.0f * (0.007874016f * (frand() & 0x7F))), -0.1f, sp3C);
     }
     var_r29 = var_r30->unk_2C;
-#ifdef NON_MATCHING
+#if defined(NON_MATCHING)
     memset(&lbl_1_bss_48, 0, sizeof(UnkM406Struct5));
 #else
     memset(lbl_1_bss_48, 0, sizeof(UnkM406Struct5));

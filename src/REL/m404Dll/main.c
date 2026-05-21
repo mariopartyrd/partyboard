@@ -12,7 +12,7 @@
 #include "game/sprite.h"
 #include "game/wipe.h"
 
-#include "string.h"
+#include <string.h>
 #include "version.h"
 
 #ifndef __MWERKS__
@@ -472,7 +472,7 @@ void fn_1_7E0(omObjData *object)
                     espTPLvlSet(var_r31->unk_02[var_r30], 0.5f);
                     break;
                 case 2:
-#ifdef NON_MATCHING
+#if defined(NON_MATCHING) 
                     // TODO 1 or 0?
                     var_r31->unk_02[var_r30] = espEntry(lbl_1_data_86C[var_r27->unk_02[5]], 0, 0);
 #else

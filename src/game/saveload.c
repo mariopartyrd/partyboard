@@ -9,8 +9,8 @@
 #include "game/sprite.h"
 #include "game/window.h"
 
-#include "stddef.h"
-#include "string.h"
+#include <stddef.h>
+#include <string.h>
 
 #ifdef TARGET_PC
 #include <port/byteswap.h>

@@ -19,7 +19,7 @@
 
 #include "ext_math.h"
 
-#include <game/hsfex.h>
+#include "game/hsfex.h"
 
 typedef struct {
     struct {

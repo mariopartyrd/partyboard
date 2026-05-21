@@ -2,7 +2,7 @@
 #include "game/msm.h"
 #include "game/pad.h"
 
-#ifdef TARGET_PC
+#ifndef __MWERKS__
 #include <stdlib.h>
 #endif
 

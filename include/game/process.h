@@ -4,10 +4,13 @@
 #include "dolphin/types.h"
 
 #ifdef TARGET_PC
-#include <stdio.h>
 #include "libco/libco.h"
 #else
 #include "game/jmp.h"
+#endif
+
+#ifndef __MWERKS__
+#include <stdio.h>
 #endif
 
 #define PROCESS_STAT_PAUSE 0x1

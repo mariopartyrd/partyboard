@@ -16,9 +16,9 @@
 #include "ext_math.h"
 #include "string.h"
 
-#include <game/board/tutorial.h>
-#include <game/chrman.h>
-#include <game/hsfex.h>
+#include "game/board/tutorial.h"
+#include "game/chrman.h"
+#include "game/hsfex.h"
 
 typedef struct bowser_event_data {
     s16 sprite[3];

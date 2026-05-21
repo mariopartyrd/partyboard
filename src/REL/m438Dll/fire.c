@@ -6,7 +6,7 @@
 #include "game/sprite.h"
 #include <string.h>
 
-#include <ext_math.h>
+#include "ext_math.h"
 
 SHARED_SYM extern u8 texMtxTbl[];
 

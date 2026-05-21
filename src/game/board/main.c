@@ -22,16 +22,16 @@
 #include "game/wipe.h"
 #include "string.h"
 
-#include <game/armem.h>
-#include <game/audio.h>
-#include <game/board/audio.h>
-#include <game/board/boo_house.h>
-#include <game/board/bowser.h>
-#include <game/board/fortune.h>
-#include <game/board/mg_setup.h>
-#include <game/board/roll.h>
-#include <game/board/window.h>
-#include <game/chrman.h>
+#include "game/armem.h"
+#include "game/audio.h"
+#include "game/board/audio.h"
+#include "game/board/boo_house.h"
+#include "game/board/bowser.h"
+#include "game/board/fortune.h"
+#include "game/board/mg_setup.h"
+#include "game/board/roll.h"
+#include "game/board/window.h"
+#include "game/chrman.h"
 
 extern void BoardLast5Exec(void);
 

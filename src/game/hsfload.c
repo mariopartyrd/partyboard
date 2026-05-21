@@ -2,7 +2,7 @@
 #include "game/EnvelopeExec.h"
 #include "ctype.h"
 #include "game/hsfformat.h"
-#include "string.h"
+#include <string.h>
 
 #ifdef TARGET_PC
 #include <stdio.h>
@@ -12,6 +12,7 @@
 #include "game/memory.h"
 #include "port/byteswap.h"
 #endif
+#include "game/hsfformat.h"
 
 #define AS_S16(field) (*((s16 *)&(field)))
 #define AS_U16(field) (*((u16 *)&(field)))

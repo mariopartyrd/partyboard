@@ -5,7 +5,6 @@
 
 #include "dolphin/mtx.h"
 
-
 #ifndef __MWERKS__
 #include "game/hsfdraw.h"
 #endif

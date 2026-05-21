@@ -19,12 +19,12 @@
 #include "math.h"
 #include "version.h"
 
-#ifdef TARGET_PC
-#include <port/byteswap.h>
+#ifndef __MWERKS__
+#include <string.h>
 #endif
 
-#ifdef NON_MATCHING
-#include <string.h>
+#ifdef TARGET_PC
+#include <port/byteswap.h>
 #endif
 
 // bss

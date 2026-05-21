@@ -12,7 +12,7 @@
 #include "version.h"
 #include <string.h>
 
-#ifdef NON_MATCHING
+#ifndef __MWERKS__
 #include "game/frand.h"
 #endif
 

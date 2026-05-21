@@ -11,7 +11,6 @@
 #include "game/minigame_seq.h"
 #include "game/window.h"
 
-
 #define OM_OVL_HIS_MAX 16
 #define OM_MAX_GROUPS 10
 

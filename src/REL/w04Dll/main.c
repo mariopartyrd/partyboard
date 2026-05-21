@@ -20,7 +20,7 @@
 #include "dolphin.h"
 #include "math.h"
 
-#if TARGET_PC
+#ifndef __MWERKS__
 #include "game/frand.h"
 #endif
 

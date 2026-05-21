@@ -298,7 +298,7 @@ static s32 fn_1_11B0(s16 arg0, s16 arg1)
     var_r26 = 0;
 #if VERSION_PAL
     HuWinHomeClear(lbl_1_bss_4);
-    HuWinMesSet(lbl_1_bss_4, MAKE_MESSID_PTR(lbl_1_data_32C[arg0]));
+    HU_WIN_MES_SET_PTR(lbl_1_bss_4, MAKE_MESSID_PTR(lbl_1_data_32C[arg0]));
 #else
     HuWinHomeClear(lbl_1_bss_2);
     HU_WIN_MES_SET_PTR(lbl_1_bss_2, MAKE_MESSID_PTR(lbl_1_data_32C[arg0]));

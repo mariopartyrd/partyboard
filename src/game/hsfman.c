@@ -21,7 +21,7 @@
 #endif
 
 #ifndef __MWERKS__
-#include "string.h"
+#include <string.h>
 #endif
 
 #define SHADOW_HEAP_SIZE 0x9000
@@ -2146,7 +2146,7 @@ void Hu3DProjectionTPLvlSet(s16 arg0, f32 arg8) {
     Hu3DProjection[arg0].unk_00 = 255.0f * arg8;
 }
 
-void Hu3DMipMapSet(char* arg0, s16 arg1, char* arg2, f32 arg8) {
+void Hu3DMipMapSet(char* arg0, s16 arg1, char *arg2, f32 arg8) {
     HSFBITMAP* temp_r31;
     AnimBmpData* var_r30;
     s16 i;

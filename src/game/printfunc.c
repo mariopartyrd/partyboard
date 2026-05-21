@@ -3,8 +3,8 @@
 #include "game/disp.h"
 #include "game/init.h"
 
-#include "stdarg.h"
-#include "stdio.h"
+#include <stdio.h>
+#include <stdarg.h>
 
 #ifdef TARGET_PC
 #include <string.h>

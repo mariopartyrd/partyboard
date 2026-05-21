@@ -1,7 +1,10 @@
-#ifndef M410DLL_H
-#define M410DLL_H
+#ifndef REL_M410DLL_H
+#define REL_M410DLL_H
 
 #include "dolphin.h"
+#include "game/hsfformat.h"
+#include "game/process.h"
+#include "game/object.h"
 
 typedef struct UnkM410Struct {
     u32 unk_00;

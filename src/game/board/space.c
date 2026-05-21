@@ -17,11 +17,11 @@
 #include "ext_math.h"
 #include "string.h"
 
-#include <game/audio.h>
-#include <game/board/basic_space.h>
-#include <game/board/bowser.h>
-#include <game/board/fortune.h>
-#include <game/board/warp.h>
+#include "game/audio.h"
+#include "game/board/basic_space.h"
+#include "game/board/bowser.h"
+#include "game/board/fortune.h"
+#include "game/board/warp.h"
 
 #if TARGET_PC
 #include <port/byteswap.h>

@@ -22,7 +22,7 @@
 #include "game/pad.h"
 
 #include "ext_math.h"
-#include "stdlib.h"
+#include <stdlib.h>
 #include <string.h>
 
 static void InitJunction(s32, s32, f32);

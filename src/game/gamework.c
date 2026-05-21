@@ -1,7 +1,7 @@
 #include "game/gamework.h"
 #include "game/flag.h"
 #include "game/gamework_data.h"
-#include "string.h"
+#include <string.h>
 #include "version.h"
 
 #ifndef __MWERKS__

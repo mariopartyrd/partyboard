@@ -775,7 +775,7 @@ void fn_1_25D0(void)
         Hu3DModelTPLvlSet(temp_r31->unk06, 128.0f);
         Hu3DModelAttrSet(temp_r31->unk06, HU3D_ATTR_NOCULL);
         for (j = 0; j < lbl_1_bss_E38; j++) {
-            temp_r31->unk6C[j] = Hu3DModelObjPtrGet(temp_r31->unk00, lbl_1_data_1C8[lbl_1_bss_E3C][j]);
+            temp_r31->unk6C[j] = (HSFOBJECT *)Hu3DModelObjPtrGet(temp_r31->unk00, lbl_1_data_1C8[lbl_1_bss_E3C][j]);
             if (!temp_r31->unk6C[j]) {
                 OSReport("objname %s\n", lbl_1_data_1C8[lbl_1_bss_E3C][j]);
                 OSPanic("m411.c", 908, "ObjPtr");
@@ -791,12 +791,12 @@ void fn_1_25D0(void)
             temp_r27->scale.x = temp_r26->scale.x;
             temp_r27->scale.y = temp_r26->scale.y;
             temp_r27->scale.z = temp_r26->scale.z;
-            temp_r31->unk94[j] = Hu3DModelObjPtrGet(temp_r31->unk06, lbl_1_data_1C8[lbl_1_bss_E3C][j]);
+            temp_r31->unk94[j] = (HSFOBJECT *)Hu3DModelObjPtrGet(temp_r31->unk06, lbl_1_data_1C8[lbl_1_bss_E3C][j]);
             if (!temp_r31->unk94[j]) {
                 OSReport("objname %s\n", lbl_1_data_1C8[lbl_1_bss_E3C][j]);
                 OSPanic("m411.c", 919, "ObjPtr");
             }
-            temp_r31->unkBC[j] = Hu3DModelObjPtrGet(temp_r31->unk04, lbl_1_data_1C8[lbl_1_bss_E3C][j]);
+            temp_r31->unkBC[j] = (HSFOBJECT *)Hu3DModelObjPtrGet(temp_r31->unk04, lbl_1_data_1C8[lbl_1_bss_E3C][j]);
             if (!temp_r31->unkBC[j]) {
                 OSReport("objname %s\n", lbl_1_data_1C8[lbl_1_bss_E3C][j]);
                 OSPanic("m411.c", 925, "ObjPtr");

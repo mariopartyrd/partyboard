@@ -16,8 +16,8 @@
 
 #include "ext_math.h"
 
-#include <game/board/tutorial.h>
-#include <game/hsfex.h>
+#include "game/board/tutorial.h"
+#include "game/hsfex.h"
 
 // bss
 static s16 houseMdl[6];
@@ -695,7 +695,7 @@ void ApplyCoinSteal(s16 arg0, s16 arg1)
     sprintf(stealAmountStr, "%d", arg0);
     HuAudFXPlay(0x4B);
     BoardWinCreate(2, var_r31, 3);
-    BOARD_WIN_INSERT_MES_SET_PTR((uintptr_t)stealAmountStr, 0);
+    BoardWinInsertMesSet(MAKE_MESSID_PTR(stealAmountStr), 0);
     BoardWinWait();
     BoardWinKill();
     BoardStatusShowSetForce(currPlayer);

@@ -8,9 +8,9 @@
 
 #include "game/wipe.h"
 
-#include <game/audio.h>
-#include <game/board/window.h>
-#include <game/objsub.h>
+#include "game/audio.h"
+#include "game/board/window.h"
+#include "game/objsub.h"
 
 static Vec camTargetFortune;
 static Vec camPosFortune;

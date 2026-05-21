@@ -1,7 +1,7 @@
 #include "game/mapspace.h"
 #include "game/hsfman.h"
 
-#include <ext_math.h>
+#include "ext_math.h"
 
 #ifdef __MWERKS__
 extern void HuSetVecF(Vec*, double, double, double);
@@ -725,8 +725,7 @@ static BOOL GetPolygonCircleMtx(s16 *arg0, Vec *arg1, float *arg2, float *arg3) 
         MTXMultVec(MapMT, &spC4, &spC4);
         DefSetHitFace(spC4.x, spC4.y, spC4.z);
         temp_r29 = &HitFaceVec[HitFaceCount];
-#ifdef TARGET_PC
-        // TODO PC is this the right solution?
+#ifdef NON_MATCHING
         compute_tri_normal(temp_r29, &arg1[arg0[0] & 0x7FFF], &arg1[arg0[1]], &arg1[arg0[2]]);
 #else
         compute_tri_normal(temp_r29, &arg1[arg0[0]], &arg1[arg0[1]], &arg1[arg0[2]]);

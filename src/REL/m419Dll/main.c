@@ -2345,8 +2345,8 @@ void fn_1_B054(StructBss200 *arg0)
                 var_f31 = fn_1_21D4(atan2d(var_f30 - arg0->unk54, var_f29 - arg0->unk5C));
             }
             else {
-#ifdef TARGET_PC
-                // TODO PC, the value is slightly higher in the emulator
+#ifdef NON_MATCHING
+                // TODO the value is slightly higher in the emulator
                 var_f29 = 0.0f;
                 var_f30 = 0.0f;
                 var_f31 = 0.0f;

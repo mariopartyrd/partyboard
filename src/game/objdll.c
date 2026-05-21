@@ -2,6 +2,10 @@
 #include "game/dvd.h"
 #include "game/memory.h"
 
+#ifndef __MWERKS__
+#include <string.h>
+#endif
+
 #if defined(__linux__) || defined(__APPLE__)
 #include <dlfcn.h>
 #endif
@@ -10,7 +14,6 @@ typedef s32 (*DLLProlog)(void);
 typedef void (*DLLEpilog)(void);
 
 #ifdef TARGET_PC
-#include <string.h>
 typedef void (*DLLObjectSetup)(void);
 #endif
 

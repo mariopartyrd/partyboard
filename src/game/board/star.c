@@ -26,7 +26,7 @@
 #include "ext_math.h"
 
 #ifndef __MWERKS__
-#include <game/board/view.h>
+#include "game/board/view.h"
 #endif
 
 typedef struct {

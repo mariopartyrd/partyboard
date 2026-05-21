@@ -17,7 +17,6 @@
 #include "game/wipe.h"
 #include "version.h"
 
-
 #ifdef TARGET_PC
 #include "game/disp.h"
 #include "port/settings.h"

@@ -29,10 +29,10 @@
 
 #include "ext_math.h"
 
-#include <game/msm.h>
+#include "game/msm.h"
 
 #ifndef __MWERKS__
-#include <game/hsfex.h>
+#include "game/hsfex.h"
 extern s32 rand8(void);
 #endif
 

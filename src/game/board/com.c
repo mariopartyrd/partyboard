@@ -12,7 +12,7 @@
 
 #include "ext_math.h"
 
-#include <game/board/boo_house.h>
+#include "game/board/boo_house.h"
 
 typedef BOOL (*UseCheckFunc)(s32 player, s32 item);
 

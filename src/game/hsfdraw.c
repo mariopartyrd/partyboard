@@ -6,7 +6,7 @@
 #include "game/sprite.h"
 
 #include "ext_math.h"
-#include "string.h"
+#include <string.h>
 
 static void objCall(ModelData *arg0, HSFOBJECT *arg1);
 static void objMesh(ModelData *arg0, HSFOBJECT *arg1);

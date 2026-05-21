@@ -27,7 +27,7 @@
 #include <string.h>
 
 #ifndef __MWERKS__
-#include <game/board/shop.h>
+#include "game/board/shop.h"
 #endif
 
 typedef struct {

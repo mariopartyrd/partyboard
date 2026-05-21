@@ -18,8 +18,8 @@
 #include "game/window.h"
 #include "game/wipe.h"
 
-#include <game/board/audio.h>
-#include <game/hsfex.h>
+#include "game/board/audio.h"
+#include "game/hsfex.h"
 
 typedef struct {
     struct {
