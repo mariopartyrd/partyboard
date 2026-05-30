@@ -544,10 +544,19 @@ static u8 winBGMake(AnimData *bg, AnimData *frame)
     bmp = frame->bmp;
     palette = bmp->palData;
     for (w = 0; w < bmp->palNum; w++, palette++) {
+#ifdef BYTESWAPPING
+        // Animation metadata is byte-swapped on PC, but palette texels stay in
+        // GameCube byte order for the texture decoder.
+        if (*palette == 0x00FC) {
+            *palette = 0x1461;
+            break;
+        }
+#else
         if (*palette == 0xFC00) {
             *palette = 0x6114;
             break;
         }
+#endif
     }
     DCStoreRangeNoSync(bmp->palData, 0x200);
     return w;
