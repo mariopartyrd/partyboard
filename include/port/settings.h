@@ -96,6 +96,7 @@ struct UserSettings {
 
         // Cheats
         ConfigVar<bool> infiniteHearts;
+        ConfigVar<bool> unlockAllMinigames;
 
         // Technical
 
@@ -134,6 +135,7 @@ extern "C" {
 
 CARDFileType partyboard_settings_card_file_type(void);
 bool partyboard_settings_enableTurboKeybind(void);
+bool partyboard_settings_unlock_all_minigames(void);
 
 #ifdef __cplusplus
 }

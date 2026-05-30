@@ -6,6 +6,7 @@
 
 #ifndef __MWERKS__
 #include "game/pad.h"
+#include "port/settings.h"
 #endif
 
 SHARED_SYM s16 GwLanguage = 1;
@@ -268,6 +269,11 @@ s32 GWMGAvailGet(s32 id)
     s32 word;
     s32 bit;
     id -= 401;
+#ifndef __MWERKS__
+    if ((u32)id < 64U && partyboard_settings_unlock_all_minigames()) {
+        return 1;
+    }
+#endif
     word = id >> 5;
     bit = id % 32;
     if (GWGameStat.mg_avail[word] & (1 << bit)) {
