@@ -1822,6 +1822,7 @@ static void LoadTexture(ModelData *arg0, HSFBITMAP *arg1, HSFATTRIBUTE *arg2, s1
     var_r22 = (arg2->wrapS == 1) ? GX_REPEAT : GX_CLAMP;
     var_r21 = (arg2->wrapT == 1) ? GX_REPEAT : GX_CLAMP;
     var_r20 = (arg2->flag & 0x80) ? GX_TRUE : GX_FALSE;
+    // Paletted animated HSF textures can reuse cached TLUT objects while swapping palette data.
     switch (arg1->dataFmt) {
         case 6:
             if (!arg2->tex_initialized) {
@@ -1844,6 +1845,9 @@ static void LoadTexture(ModelData *arg0, HSFBITMAP *arg1, HSFATTRIBUTE *arg2, s1
                 GXInitTlutObj(tlut_obj, arg1->palData, GX_TL_RGB565, arg1->palSize);
                 arg2->tlut_initialized = TRUE;
             }
+            else {
+                GXInitTlutObjData(tlut_obj, arg1->palData);
+            }
             GXLoadTlut(tlut_obj, arg3);
             if (!arg2->tex_initialized) {
                 GXInitTexObjCI(tex_obj, arg1->data, var_r27, var_r26, fmt, var_r22, var_r21, var_r20, arg3);
@@ -1854,6 +1858,9 @@ static void LoadTexture(ModelData *arg0, HSFBITMAP *arg1, HSFATTRIBUTE *arg2, s1
             if (!arg2->tlut_initialized) {
                 GXInitTlutObj(tlut_obj, arg1->palData, GX_TL_RGB5A3, arg1->palSize);
                 arg2->tlut_initialized = TRUE;
+            }
+            else {
+                GXInitTlutObjData(tlut_obj, arg1->palData);
             }
             GXLoadTlut(tlut_obj, arg3);
             if (!arg2->tex_initialized) {
@@ -1914,6 +1921,9 @@ static void LoadTexture(ModelData *arg0, HSFBITMAP *arg1, HSFATTRIBUTE *arg2, s1
                     GXInitTlutObj(tlut_obj, &((s16 *)arg1->palData)[(arg1->palSize + 0xF) & 0xFFF0], GX_TL_IA8, arg1->palSize);
                     arg2->tlut8000_initialized = TRUE;
                 }
+                else {
+                    GXInitTlutObjData(tlut_obj, &((s16 *)arg1->palData)[(arg1->palSize + 0xF) & 0xFFF0]);
+                }
                 GXLoadTlut(tlut_obj, arg3 & 0x7FFF);
                 if (!arg2->tex8000_initialized) {
                     GXInitTexObjCI(tex_obj, arg1->data, var_r27, var_r26, fmt, var_r22, var_r21, var_r20, arg3 & 0x7FFF);
@@ -1924,6 +1934,9 @@ static void LoadTexture(ModelData *arg0, HSFBITMAP *arg1, HSFATTRIBUTE *arg2, s1
                 if (!arg2->tlut_initialized) {
                     GXInitTlutObj(tlut_obj, arg1->palData, GX_TL_IA8, arg1->palSize);
                     arg2->tlut_initialized = TRUE;
+                }
+                else {
+                    GXInitTlutObjData(tlut_obj, arg1->palData);
                 }
                 GXLoadTlut(tlut_obj, arg3);
                 if (!arg2->tex_initialized) {

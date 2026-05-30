@@ -408,7 +408,6 @@ extern "C" int port_main(int argc, char* argv[]) {
         config.allowJoystickBackgroundEvents = partyboard::getSettings().game.allowBackgroundInput;
         config.pauseOnFocusLost = partyboard::getSettings().game.pauseOnFocusLost;
         // config.imGuiInitCallback = &aurora_imgui_init_callback;
-        config.allowTextureReplacements = true;
         config.allowTextureDumps = false;
         auroraInfo = aurora_initialize(argc, argv, &config);
     }
