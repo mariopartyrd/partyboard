@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdint>
 #include <memory>
 #include "imgui.h"
 #include "misc/cpp/imgui_stdlib.h"
