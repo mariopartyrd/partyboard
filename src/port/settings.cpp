@@ -61,6 +61,7 @@ UserSettings g_userSettings = {
         .isoVerification {"backend.isoVerification", DiscVerificationState::Unknown},
         .graphicsBackend {"backend.graphicsBackend", "auto"},
         .skipPreLaunchUI {"backend.skipPreLaunchUI", false},
+        .skipBootSequence {"backend.skipBootSequence", false},
         .showPipelineCompilation {"backend.showPipelineCompilation", false},
         .wasPresetChosen {"backend.wasPresetChosen", false},
         .enableCrashReporting {"backend.enableCrashReporting", true},
@@ -110,6 +111,7 @@ void registerSettings() {
     Register(g_userSettings.backend.isoVerification);
     Register(g_userSettings.backend.graphicsBackend);
     Register(g_userSettings.backend.skipPreLaunchUI);
+    Register(g_userSettings.backend.skipBootSequence);
     Register(g_userSettings.backend.showPipelineCompilation);
     Register(g_userSettings.backend.wasPresetChosen);
     Register(g_userSettings.backend.enableCrashReporting);
@@ -130,6 +132,11 @@ CARDFileType partyboard_settings_card_file_type(void)
 bool partyboard_settings_enableTurboKeybind(void)
 {
     return partyboard::getSettings().game.enableTurboKeybind;
+}
+
+bool partyboard_settings_skipBootSequence(void)
+{
+    return partyboard::getSettings().backend.skipBootSequence;
 }
 
 }

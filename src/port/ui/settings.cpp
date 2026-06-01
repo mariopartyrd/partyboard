@@ -718,6 +718,12 @@ SettingsWindow::SettingsWindow(bool prelaunch)
                 .helpText = "When starting Party Board, skip the main menu and boot straight into the "
                             "game if a disc image is available.",
             });
+        config_bool_select(leftPane, rightPane, getSettings().backend.skipBootSequence,
+            {
+                .key = "Skip Game Boot Sequence",
+                .helpText = "Start directly at mode select after running the startup initialization normally "
+                            "performed by the logos, title, and file select screens.",
+            });
         // config_bool_select(leftPane, rightPane, getSettings().backend.showPipelineCompilation,
         //     {
         //         .key = "Show Pipeline Compilation",

@@ -83,6 +83,11 @@ void fn_1_414(void)
 {
     fn_1_9F4();
     if (omovlevtno) {
+#ifdef TARGET_PC
+        if (omovlevtno == MODESEL_EVENT_SKIP_BOOT) {
+            FileSelectAutoLoadDefault();
+        }
+#endif
         HuAudSeqPlay(43);
     }
     else {

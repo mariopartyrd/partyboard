@@ -19,10 +19,15 @@
 
 #include "data_num/title.h"
 
+#ifdef TARGET_PC
+#include "REL/modeseldll.h"
+#endif
+
 
 #ifdef TARGET_PC
 #include "port/byteswap.h"
 #include "port/port_version.h"
+#include "port/settings.h"
 #endif
 
 #define HU_PAD_BTN_ALL (HuPadBtn[0] | HuPadBtn[1] | HuPadBtn[2] | HuPadBtn[3])
@@ -93,6 +98,21 @@ void ObjectSetup(void)
  BOOL LanguageMenuExec(void);
  #endif
 
+#ifdef TARGET_PC
+ static void BootInitForSkippedSequence(void)
+ {
+     if (!SystemInitF) {
+         CharInit();
+         HuWindowInit();
+         MGSeqInit();
+         HuWinInit(1);
+         HuAudSndGrpSetSet(0);
+         SystemInitF = TRUE;
+     }
+     initLanguageF = TRUE;
+ }
+#endif
+
  void BootExec(void)
  {
      AnimData *data;
@@ -133,6 +153,22 @@ void ObjectSetup(void)
          }
      }
 #endif
+#endif
+#ifdef TARGET_PC
+     if (omovlevtno == 0 && partyboard_settings_skipBootSequence()) {
+         for (i = 0; i < 4; i++) {
+             GWPlayerCfg[i].pad_idx = i;
+         }
+         BootInitForSkippedSequence();
+         omOvlCallEx(DLL_modeseldll, 1, MODESEL_EVENT_SKIP_BOOT, 0);
+         for (i = 0; i < 4; i++) {
+             GWPlayerCfg[i].character = -1;
+         }
+         HuPrcEnd();
+         do {
+             HuPrcVSleep();
+         } while (1);
+     }
 #endif
      group = HuSprGrpCreate(2);
 #if defined(__MWERKS__) || defined(BYTESWAPPING)

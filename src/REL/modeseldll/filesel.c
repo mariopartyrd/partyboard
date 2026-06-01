@@ -92,6 +92,75 @@ void fn_1_5D30(void);
 s32 fn_1_61B4(void);
 void fn_1_AAB8(void);
 
+#ifdef TARGET_PC
+static void FileSelectUseDefaultGameStat(void)
+{
+    SLSaveFlagSet(0);
+    GWGameStatReset();
+#ifdef TARGET_PC
+    if (partyboard_version_is_pal()) {
+        _ClearFlag(0x1000B);
+    }
+#else
+    #if VERSION_PAL
+    _ClearFlag(0x1000B);
+    #endif
+#endif
+    GWGameStat.sound_mode = msmSysGetOutputMode();
+}
+
+s32 FileSelectAutoLoadDefault(void)
+{
+    s32 result;
+    BOOL mounted = FALSE;
+
+    SLCurSlotNoSet(0);
+    SLCurBoxNoSet(0);
+    SLSaveFlagSet(1);
+
+    result = HuCardMount(curSlotNo);
+    if (result == CARD_RESULT_READY) {
+        mounted = TRUE;
+        SLSerialNoGet();
+        result = HuCardOpen(curSlotNo, SaveFileNameTbl[curBoxNo], &curFileInfo);
+        if (result == CARD_RESULT_READY) {
+            result = HuCardRead(&curFileInfo, &saveBuf.buf[0], SAVE_BUF_SIZE, 0);
+            HuCardClose(&curFileInfo);
+            if (result == CARD_RESULT_READY && SLCheckSumCheck()) {
+                SLLoadGameStat();
+#ifdef TARGET_PC
+                if (partyboard_version_is_pal()) {
+                    if (GwLanguageSave != -1) {
+                        GWGameStat.language = GwLanguageSave;
+                    }
+                    GwLanguage = GWGameStat.language;
+                }
+#else
+                #if VERSION_PAL
+                if (GwLanguageSave != -1) {
+                    GWGameStat.language = GwLanguageSave;
+                }
+                GwLanguage = GWGameStat.language;
+                _ClearFlag(0x1000B);
+                #endif
+#endif
+                HuCardUnMount(curSlotNo);
+                OSReport("File select skipped: loaded %s from slot %d\n", SaveFileNameTbl[curBoxNo], curSlotNo);
+                return 1;
+            }
+        }
+    }
+
+    if (mounted) {
+        HuCardUnMount(curSlotNo);
+    }
+    FileSelectUseDefaultGameStat();
+    OSReport("File select skipped: using default save state (slot %d file %s result %d)\n",
+        curSlotNo, SaveFileNameTbl[curBoxNo], result);
+    return 1;
+}
+#endif
+
 s32 fn_1_37DC(void)
 {
     s16 i;
