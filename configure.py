@@ -215,6 +215,8 @@ cflags_base = [
     "-i libs/dolphin/include/dolphin",  # for types.h includes
     "-multibyte",
     f"-DVERSION={version_num}",
+    "-DMUSY_TARGET_PC=0",
+    "-DMUSY_TARGET_DOLPHIN=1",
     "-DMUSY_TARGET=MUSY_TARGET_DOLPHIN",
 ]
 
@@ -303,6 +305,8 @@ cflags_musyx = [
     "-Cpp_exceptions off",
     "-str reuse,pool,readonly",
     "-fp_contract off",
+    "-DMUSY_TARGET_PC=0",
+    "-DMUSY_TARGET_DOLPHIN=1",
     "-DMUSY_TARGET=MUSY_TARGET_DOLPHIN",
     "-sym on",
     "-i libs/dolphin/include",
@@ -323,6 +327,8 @@ cflags_musyx_debug = [
     "-fp hard",
     "-enum int",
     "-Cpp_exceptions off",
+    "-DMUSY_TARGET_PC=0",
+    "-DMUSY_TARGET_DOLPHIN=1",
     "-DMUSY_TARGET=MUSY_TARGET_DOLPHIN",
 ]
 

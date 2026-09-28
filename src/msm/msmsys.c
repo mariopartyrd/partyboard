@@ -1,3 +1,4 @@
+#include "msm/msmpc.h"
 #include "msm/msmsys.h"
 #include "msm/msmfio.h"
 #include "msm/msmmem.h"
@@ -5,7 +6,75 @@
 #include "msm/msmse.h"
 #include "msm/msmstream.h"
 
+#ifdef TARGET_PC
+#include "port/audio.h"
+#endif
+#ifdef BYTESWAPPING
+#include "port/byteswap.h"
+#include <stddef.h>
+#endif
+
 static MSM_SYS sys;
+
+#ifdef BYTESWAPPING
+static void msmSysByteswapHeader(MSM_HEADER *header)
+{
+    s32 *field = &header->magic;
+    u32 i;
+
+    _Static_assert(sizeof(MSM_HEADER) == 0x60, "MSM_HEADER only contains 32-bit fields");
+    for (i = 0; i < sizeof(MSM_HEADER) / sizeof(s32); i++) {
+        byteswap_s32(&field[i]);
+    }
+}
+
+static void msmSysByteswapInfo(MSM_INFO *info)
+{
+    byteswap_s16(&info->musMax);
+    byteswap_s16(&info->seMax);
+    byteswap_s32(&info->minMem);
+    byteswap_s32(&info->aramSize);
+    byteswap_s32(&info->grpBufSizeA);
+    byteswap_s32(&info->grpBufSizeB);
+    byteswap_s32(&info->dummyMusSize);
+    byteswap_s32(&info->unk24);
+}
+
+static void msmSysByteswapGrpInfo(MSM_GRP_INFO *grpInfo, u32 size)
+{
+    u32 i;
+
+    for (i = 0; i < size / sizeof(MSM_GRP_INFO); i++, grpInfo++) {
+        byteswap_u16(&grpInfo->gid);
+        byteswap_s32(&grpInfo->dataOfs);
+        byteswap_s32(&grpInfo->dataSize);
+        byteswap_s32(&grpInfo->sampOfs);
+        byteswap_s32(&grpInfo->sampSize);
+    }
+}
+
+static void msmSysByteswapAuxParam(MSM_AUXPARAM *auxParam, u32 size)
+{
+    u32 *field;
+    u32 i;
+    u32 j;
+
+    for (i = 0; i < size / sizeof(MSM_AUXPARAM); i++, auxParam++) {
+        field = (u32 *)&auxParam->revHi;
+        for (j = 0; j < (sizeof(MSM_AUXPARAM) - offsetof(MSM_AUXPARAM, revHi)) / sizeof(u32); j++) {
+            byteswap_u32(&field[j]);
+        }
+    }
+}
+
+static void msmSysByteswapGrpHead(MSM_GRP_HEAD *grpHead)
+{
+    byteswap_s32(&grpHead->poolOfs);
+    byteswap_s32(&grpHead->projOfs);
+    byteswap_s32(&grpHead->sdirOfs);
+    byteswap_s32(&grpHead->sngOfs);
+}
+#endif
 
 static void msmSysServer(void)
 {
@@ -17,6 +86,11 @@ static void msmSysServer(void)
             msmStreamPeriodicProc();
         }
     }
+#ifdef TARGET_PC
+    if (sys.oldAIDCallback == NULL) {
+        return;
+    }
+#endif
     sys.oldAIDCallback();
 }
 
@@ -117,12 +191,15 @@ static s32 msmSysLoadBaseGroup(void *buf)
             msmFioClose(&file);
             return MSM_ERR_READFAIL;
         }
+#ifdef BYTESWAPPING
+        msmSysByteswapGrpHead(grpData);
+#endif
         if (msmFioRead(&file, buf, grpInfo->sampSize, grpInfo->sampOfs + sys.header->sampOfs) < 0) {
             msmFioClose(&file);
             return MSM_ERR_READFAIL;
         }
-        if (!sndPushGroup((void*) (grpData->projOfs + (u32) grpData), grpInfo->gid, buf,
-            (void*) (grpData->sdirOfs + (u32) grpData), (void*) (grpData->poolOfs + (u32) grpData)))
+        if (!sndPushGroup((void*) (grpData->projOfs + (uintptr_t) grpData), grpInfo->gid, buf,
+            (void*) (grpData->sdirOfs + (uintptr_t) grpData), (void*) (grpData->poolOfs + (uintptr_t) grpData)))
         {
             msmFioClose(&file);
             return MSM_ERR_GRP_FAILPUSH;
@@ -189,6 +266,9 @@ s32 msmSysGroupInit(DVDFileInfo *file)
     if (msmFioRead(file, sys.grpInfo, sys.header->grpInfoSize, sys.header->grpInfoOfs) < 0) {
         return MSM_ERR_READFAIL;
     }
+#ifdef BYTESWAPPING
+    msmSysByteswapGrpInfo(sys.grpInfo, sys.header->grpInfoSize);
+#endif
     if ((sys.grpBufA = msmMemAlloc(sys.info->grpBufSizeA * sys.grpStackAMax)) == NULL) {
         return MSM_ERR_OUTOFMEM;
     }
@@ -209,13 +289,13 @@ s32 msmSysGroupInit(DVDFileInfo *file)
         stack = &sys.grpStackA[i];
         stack->grpId = stack->baseGrpF = 0;
         stack->num = 0;
-        stack->buf = (void*) ((u32) sys.grpBufA + sys.info->grpBufSizeA * i);
+        stack->buf = (void*) ((uintptr_t) sys.grpBufA + sys.info->grpBufSizeA * i);
     }
     for (i = 0; i < sys.grpStackBMax; i++) {
         stack = &sys.grpStackB[i];
         stack->grpId = stack->baseGrpF = 0;
         stack->num = 0;
-        stack->buf = (void*) ((u32) sys.grpBufB + sys.info->grpBufSizeB * i);
+        stack->buf = (void*) ((uintptr_t) sys.grpBufB + sys.info->grpBufSizeB * i);
     }
     sys.sampSize = 0;
     for (i = 0; i < sys.baseGrpNum; i++) {
@@ -242,18 +322,26 @@ s32 msmSysGroupInit(DVDFileInfo *file)
 
 void msmSysIrqDisable(void)
 {
+#ifdef TARGET_PC
+    partyboard_audio_lock();
+#else
     if (sys.irqDepth++ == 0) {
         sys.irqState = OSDisableInterrupts();
     }
+#endif
 }
 
 void msmSysIrqEnable(void)
 {
+#ifdef TARGET_PC
+    partyboard_audio_unlock();
+#else
     if (sys.irqDepth != 0) {
         if (--sys.irqDepth == 0) {
             OSRestoreInterrupts(sys.irqState);
         }
     }
+#endif
 }
 
 static BOOL msmSysCheckBaseGroupNo(s32 grpId)
@@ -523,8 +611,11 @@ static s32 msmSysPushGroup(DVDFileInfo *file, void *buf, MSM_GRP_STACK *grp, s32
         return MSM_ERR_READFAIL;
     }
     grpBuf = grp->buf;
-    if (!sndPushGroup((void*) (grpBuf->projOfs + (u32) grpBuf), grpInfo->gid, buf,
-        (void*) (grpBuf->sdirOfs + (u32) grpBuf), (void*) (grpBuf->poolOfs + (u32) grpBuf)))
+#ifdef BYTESWAPPING
+    msmSysByteswapGrpHead(grpBuf);
+#endif
+    if (!sndPushGroup((void*) (grpBuf->projOfs + (uintptr_t) grpBuf), grpInfo->gid, buf,
+        (void*) (grpBuf->sdirOfs + (uintptr_t) grpBuf), (void*) (grpBuf->poolOfs + (uintptr_t) grpBuf)))
     {
         return MSM_ERR_GRP_FAILPUSH;
     }
@@ -725,7 +816,11 @@ static void msmSysPopGroup(s32 no)
     }
 }
 
+#ifdef TARGET_PC
+s32 msmSysLoadGroup(s32 grpId, void *buf, BOOL ignored)
+#else
 s32 msmSysLoadGroup(s32 grpId, void *buf)
+#endif
 {
     MSM_GRP_STACK *grpStack;
     MSM_GRP_INFO *grpInfo;
@@ -780,7 +875,9 @@ s32 msmSysInit(MSM_INIT *init, MSM_ARAM *aram)
     s32 result;
     void *temp;
 
+#ifndef TARGET_PC
     SND_HOOKS sndHooks = { msmMemAlloc, msmMemFree };
+#endif
     DVDFileInfo sp10;
     if (sndIsInstalled() == 1) {
         return MSM_ERR_INSTALLED;
@@ -804,6 +901,9 @@ s32 msmSysInit(MSM_INIT *init, MSM_ARAM *aram)
         msmFioClose(&sp10);
         return MSM_ERR_READFAIL;
     }
+#ifdef BYTESWAPPING
+    msmSysByteswapHeader(sys.header);
+#endif
     if (sys.header->version != MSM_FILE_VERSION) {
         msmFioClose(&sp10);
         return MSM_ERR_INVALIDFILE;
@@ -816,6 +916,13 @@ s32 msmSysInit(MSM_INIT *init, MSM_ARAM *aram)
         msmFioClose(&sp10);
         return MSM_ERR_READFAIL;
     }
+#ifdef BYTESWAPPING
+    msmSysByteswapInfo(sys.info);
+#endif
+#ifdef TARGET_PC
+    // MSM doesnt need to reserve any ARAM on PC
+    (void)aram;
+#else
     if (aram != NULL) {
         if (aram->skipARInit == 0) {
             ARInit(aram->stackIndex, aram->aramEnd);
@@ -837,6 +944,7 @@ s32 msmSysInit(MSM_INIT *init, MSM_ARAM *aram)
             sys.arInitF = TRUE;
         }
     }
+#endif
     result = msmSysGroupInit(&sp10);
     if (result != 0) {
         msmFioClose(&sp10);
@@ -866,6 +974,9 @@ s32 msmSysInit(MSM_INIT *init, MSM_ARAM *aram)
                 result = MSM_ERR_READFAIL;
             }
             else {
+#ifdef BYTESWAPPING
+                msmSysByteswapAuxParam(sys.auxParam, sys.header->auxParamSize);
+#endif
                 result = 0;
             }
         }
@@ -880,7 +991,12 @@ s32 msmSysInit(MSM_INIT *init, MSM_ARAM *aram)
         return result;
     }
     AIInit(NULL);
+#ifdef TARGET_PC
+    // use system allocator
+    partyboard_audio_pre_init();
+#else
     sndSetHooks(&sndHooks);
+#endif
     if (sndInit(sys.info->voices, sys.info->music, sys.info->sfx, 1, 0, sys.info->aramSize) != 0) {
         return MSM_ERR_INITFAIL;
     }
@@ -908,5 +1024,8 @@ s32 msmSysInit(MSM_INIT *init, MSM_ARAM *aram)
     }
     msmSysSetOutputMode(OSGetSoundMode() == 0 ? SND_OUTPUTMODE_MONO : SND_OUTPUTMODE_STEREO);
     sndVolume(0x7F, 0, 0xFF);
+#ifdef TARGET_PC
+    partyboard_audio_start();
+#endif
     return 0;
 }

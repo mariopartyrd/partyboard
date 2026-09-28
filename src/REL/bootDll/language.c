@@ -13,6 +13,7 @@
 #include "game/audio.h"
 #include "game/chrman.h"
 #include "game/minigame_seq.h"
+#include "game/msm.h"
 
 #include "math.h"
 #include "ext_math.h"
@@ -88,11 +89,9 @@ BOOL LanguageMenuExec(void)
     if(!SystemInitF) {
         void *group_samp;
         HuWindowInit();
-#ifndef TARGET_PC
         group_samp = HuMemDirectMalloc(HEAP_DATA, msmSysGetSampSize(0));
         msmSysLoadGroup(0, group_samp, 0);
         HuMemDirectFree(group_samp);
-#endif
     }
     for(i=0; i<5; i++) {
         modelId[i] = Hu3DModelCreateFile(TITLE_FLAG_HSF);

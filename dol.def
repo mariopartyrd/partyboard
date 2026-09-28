@@ -1046,10 +1046,14 @@ EXPORTS
     msmMusGetStatus
     msmMusPlay
     msmMusSetMasterVolume
+    msmSeGetEntryID
+    msmSeGetNumPlay
     msmSeSetListener
     msmSeSetParam
     msmSeStopAll
     msmSysGetOutputMode
+    msmSysGetSampSize
+    msmSysLoadGroup
     msmSysSetOutputMode
     mtxRot
     mtxRotCat

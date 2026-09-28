@@ -1,5 +1,11 @@
+#include "msm/msmpc.h"
 #include "msm/msmmus.h"
+#include "msm/msmfio.h"
 #include "msm/msmmem.h"
+
+#ifdef BYTESWAPPING
+#include "port/byteswap.h"
+#endif
 
 typedef struct MusPlayer_s {
     /* 0x00 */ s16 musId;
@@ -361,7 +367,7 @@ int msmMusPlay(int musId, MSM_MUSPARAM* musParam) {
         if (temp_r3_2 == NULL) {
             return MSM_ERR_MUSGRP_NOTLOADED;
         }
-        temp_r27->arrfile = (void*) ((u32) temp_r3_2 + temp_r3_2->sngOfs + temp_r28->songOfs);
+        temp_r27->arrfile = (void*) ((uintptr_t) temp_r3_2 + temp_r3_2->sngOfs + temp_r28->songOfs);
     }
     temp_r27->busyF = 1;
     temp_r27->vol = temp_r28->vol;
@@ -422,6 +428,14 @@ s32 msmMusInit(MSM_SYS* arg0, DVDFileInfo* arg1) {
     if (msmFioRead(arg1, mus.musData, arg0->header->musSize, arg0->header->musOfs) < 0) {
         return MSM_ERR_READFAIL;
     }
+#ifdef BYTESWAPPING
+    for (var_r8 = 0; var_r8 < arg0->header->musSize / sizeof(MSM_MUS); var_r8++) {
+        byteswap_u16(&mus.musData[var_r8].sgid);
+        byteswap_u16(&mus.musData[var_r8].sid);
+        byteswap_s32(&mus.musData[var_r8].songOfs);
+        byteswap_s32(&mus.musData[var_r8].songSize);
+    }
+#endif
     temp_r4 = arg0->info->dummyMusSize;
     if (temp_r4 != 0) {
         if ((mus.musBuf = msmMemAlloc(temp_r4 * arg0->info->musChanMax)) == NULL) {
@@ -435,7 +449,7 @@ s32 msmMusInit(MSM_SYS* arg0, DVDFileInfo* arg1) {
     mus.dummyMusOfs = arg0->header->dummyMusOfs;
     mus.msmEntryNum = arg0->msmEntryNum;
     for (var_r8 = 0; var_r8 < mus.musChanMax; var_r8++) {
-        mus.player[var_r8].songBuf = (void*) ((u32) mus.musBuf + arg0->info->dummyMusSize * var_r8);
+        mus.player[var_r8].songBuf = (void*) ((uintptr_t) mus.musBuf + arg0->info->dummyMusSize * var_r8);
         mus.player[var_r8].musId = -1;
         mus.player[var_r8].busyF = 0;
     }

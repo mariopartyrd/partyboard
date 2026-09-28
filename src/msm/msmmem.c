@@ -6,7 +6,12 @@ typedef struct MSMBlock_s {
     u32 freeSize;
     u32 size;
     void* ptr;
+#ifdef TARGET_PC
+    // this looks bad but hear me out... keep allocations 32B aligned with 64 bit pointers
+    char pad[64 - 3 * sizeof(void*) - 2 * sizeof(u32)];
+#else
     char pad[12];
+#endif
 } MSMBLOCK;
 
 typedef struct MSMMem_s {
@@ -30,7 +35,7 @@ void msmMemFree(void* ptr) {
     block = &base[-1];
     blockPrev = block->prev;
     blockNext = block->next;
-    if (mem.ptr > block || ((u32)mem.ptr + (u32)mem.size) <= (u32)block) {
+    if (mem.ptr > block || ((uintptr_t)mem.ptr + (u32)mem.size) <= (uintptr_t)block) {
         return;
     }
 
@@ -60,7 +65,7 @@ void* msmMemAlloc(u32 size) {
     MSMBLOCK* blockPrev;
     MSMBLOCK* blockNext;
 
-    allocSize = size + 0x20;
+    allocSize = size + sizeof(MSMBLOCK);
     alignOfs = allocSize & 0x1F;
     if (alignOfs) {
         allocSize += 0x20 - alignOfs;
@@ -81,11 +86,11 @@ void* msmMemAlloc(u32 size) {
     
     freeSize = blockPrev->freeSize;
     if (freeSize != 0) {
-        freeSize -= 0x20;
+        freeSize -= sizeof(MSMBLOCK);
     }
-    block = (void*)((u32)blockPrev->ptr + (freeSize));
+    block = (void*)((uintptr_t)blockPrev->ptr + (freeSize));
     blockNext = blockPrev->next;
-    if ((mem.ptr > block) || ((void*)((u32)mem.ptr + (u32)mem.size) <= block)) {
+    if ((mem.ptr > block) || ((void*)((uintptr_t)mem.ptr + (u32)mem.size) <= block)) {
         return NULL;
     }
     block->freeSize = allocSize;
@@ -109,7 +114,7 @@ void msmMemInit(void* ptr, u32 size) {
     MSMBLOCK* block;
     s32 ofs;
 
-    ofs = (s32)ptr & 0x1F;
+    ofs = (uintptr_t)ptr & 0x1F;
     switch (ofs) {
         default:
             ofs = 0x20 - ofs;
@@ -119,9 +124,13 @@ void msmMemInit(void* ptr, u32 size) {
             break;
     }
     
-    mem.ptr = (void*)((s32)ptr + ofs);
+    mem.ptr = (void*)((uintptr_t)ptr + ofs);
+#ifdef TARGET_PC
+    mem.size = ((uintptr_t)ptr + size - (uintptr_t)mem.ptr) & ~0x1F;
+#else
     ofs = (s32)ptr + size;
     mem.size = ((ofs - (s32)mem.ptr) & ~0x1F);
+#endif
     block = &mem.first;
     block->freeSize = 0;
     block->size = mem.size;

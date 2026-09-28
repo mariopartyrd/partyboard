@@ -1,6 +1,13 @@
+#include "msm/msmpc.h"
 #include "msm/msmse.h"
 #include "msm/msmfio.h"
 #include "msm/msmmem.h"
+
+#include <string.h>
+
+#ifdef BYTESWAPPING
+#include "port/byteswap.h"
+#endif
 
 #define SE_PLAYER_EMIT (1 << 0)
 
@@ -611,6 +618,9 @@ int msmSePlay(int seId, MSM_SEPARAM* param) {
 
 s32 msmSeInit(MSM_SYS* arg0, DVDFileInfo* arg1) {
     s32 playerSize;
+#ifdef BYTESWAPPING
+    u32 i;
+#endif
 
     se.sfx = 0;
     se.seMax = 0;
@@ -626,6 +636,13 @@ s32 msmSeInit(MSM_SYS* arg0, DVDFileInfo* arg1) {
     if (msmFioRead(arg1, se.seData, arg0->header->seSize, arg0->header->seOfs) < 0) {
         return MSM_ERR_READFAIL;
     }
+#ifdef BYTESWAPPING
+    for (i = 0; i < arg0->header->seSize / sizeof(MSM_SE); i++) {
+        byteswap_u16(&se.seData[i].gid);
+        byteswap_u16(&se.seData[i].fxId);
+        byteswap_s16(&se.seData[i].pitchBend);
+    }
+#endif
     playerSize = arg0->info->sfx * sizeof(SE_PLAYER);
     if ((se.player = msmMemAlloc(playerSize)) == NULL) {
         return MSM_ERR_OUTOFMEM;
