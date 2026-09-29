@@ -1,13 +1,14 @@
 #ifndef PORT_BYTESWAP_H_
 #define PORT_BYTESWAP_H_
-#include <game/gamework_data.h>
 
 #ifdef __cplusplus
 extern "C" {
-#endif
-
+    #endif
+    
 #include "game/animdata.h"
 #include "game/hsfformat.h"
+#include "game/gamework_data.h"
+#include "game/THPSimple.h"
 #include "ext_math.h"
 
 typedef struct AnimData32b {
@@ -360,6 +361,10 @@ void byteswap_hsfface(HsfFace32b *src, HSFFACE *dest);
 void byteswap_gamestat(GameStat *src);
 void byteswap_systemstate(SystemState *src);
 void byteswap_playerstate(PlayerState *src);
+
+void byteswap_thpheader(THPHeader *src);
+void byteswap_unkthpstruct01(UnkThpStruct01 *src);
+void byteswap_thpaudiorecordheader(THPAudioRecordHeader *src);
 
 #ifdef __cplusplus
 }

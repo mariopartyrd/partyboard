@@ -2,8 +2,47 @@
 #define _GAME_THPSIMPLE_H
 
 #include "dolphin.h"
+
+// TODO move these to aurora
+#ifdef TARGET_PC
+
+typedef struct THPAudioRecordHeader {
+    u32 offsetNextChannel;
+    u32 sampleSize;
+    s16 lCoef[8][2];
+    s16 rCoef[8][2];
+    s16 lYn1;
+    s16 lYn2;
+    s16 rYn1;
+    s16 rYn2;
+} THPAudioRecordHeader;
+
+// Size 0x30
+typedef struct THPHeader {
+    char mMagic[4];             // _00
+    u32 mVersion;               // _04
+    u32 mBufferSize;            // _08
+    u32 mAudioMaxSamples;       // _0C
+    f32 mFrameRate;             // _10
+    u32 mNumFrames;             // _14
+    u32 mFirstFrameSize;        // _18
+    u32 mMovieDataSize;         // _1C
+    u32 mCompInfoDataOffsets;   // _20
+    u32 mOffsetDataOffsets;     // _24
+    u32 mMovieDataOffsets;      // _28
+    u32 mFinalFrameDataOffsets; // _2C
+} THPHeader;
+
+// Size 0x14
+typedef struct THPFrameCompInfo {
+    u32 mNumComponents; // _00
+    u8 mFrameComp[16];  // _04
+} THPFrameCompInfo;
+
+#else
 #include "dolphin/thp/THPFile.h"
 #include "dolphin/thp/THPInfo.h"
+#endif
 
 // THPReadBuffer?
 typedef struct {

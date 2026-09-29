@@ -7,19 +7,25 @@
 
 #include <string.h>
 
+#ifndef TARGET_PC
 #define THP_DECODE_STACK_SIZE 0x2000
+#endif
 
 static void THPTestProc(void);
 static void THPViewFunc(HU3DMODEL *arg0, Mtx arg1);
 static void THPViewSprFunc(HUSPRITE *arg0);
+#ifndef TARGET_PC
 static void THPDecodeFunc(void *param);
+#endif
 
 static char THPFileName[64];
 
 static UnkThpStruct04 audioTrack;
+#ifndef TARGET_PC
 static s32 decodeRate;
 static u8 *decodeStackP;
 static OSThread *decodeThread;
+#endif
 static s16 THPLoopF;
 static s16 THPStat;
 static u32 THPFrame;
@@ -134,6 +140,16 @@ static void THPTestProc(void)
     s32 temp_r29;
     u32 var_r28;
     void *temp_r30;
+#ifdef TARGET_PC
+    f32 frameRate;
+    double framePeriod;
+    double elapsed = 0.0;
+    OSTime lastFrameTime;
+#endif
+
+#ifdef TARGET_PC
+    var_r28 = 0;
+#endif
 
     while (THPSimpleOpen(THPFileName) == 0) {
         OSReport("THPSimpleOpen fail");
@@ -154,9 +170,18 @@ static void THPTestProc(void)
         HuPrcVSleep();
     }
     HuPrcVSleep();
+#ifdef TARGET_PC
+    frameRate = SimpleControl.unk3C.mFrameRate;
+    if (!(frameRate > 0.0f && frameRate <= 120.0f)) {
+        frameRate = 30.0f;
+    }
+    framePeriod = (double) OS_TIMER_CLOCK / frameRate;
+    lastFrameTime = OSGetNativeTime();
+#else
     decodeStackP = HuMemDirectMalloc(HEAP_SYSTEM, THP_DECODE_STACK_SIZE);
     decodeThread = OSSetIdleFunction(THPDecodeFunc, NULL, (decodeStackP + THP_DECODE_STACK_SIZE), THP_DECODE_STACK_SIZE);
     decodeRate = 0;
+#endif
     THPStart = 1;
     if (SimpleControl.unk19C == 1) {
         Hu3DModelAttrReset(SimpleControl.unk19E, HU3D_ATTR_DISPOFF);
@@ -191,7 +216,44 @@ static void THPTestProc(void)
         if (var_r28 != 0) {
             THPSimpleAudioStart();
             var_r28 = 0;
+#ifdef TARGET_PC
+            elapsed = framePeriod;
+            lastFrameTime = OSGetNativeTime();
+#endif
         }
+#ifdef TARGET_PC
+        if (THPStat == 4) {
+            OSTime now = OSGetNativeTime();
+            OSTime delta = now - lastFrameTime;
+            s32 decodeCount = 0;
+
+            lastFrameTime = now;
+            // HuPrcCall runs before drawing each Aurora frame. A long pause
+            // should resume from the next movie frame, not decode the backlog.
+            if (delta > OS_MSEC_TO_TICKS(250)) {
+                elapsed = framePeriod;
+            } else {
+                elapsed += delta;
+            }
+            while (elapsed >= framePeriod && decodeCount < 4) {
+                s32 result = THPSimpleDecode();
+                if (result == 1) {
+                    OSReport("Fail to decode video data");
+                    break;
+                }
+                if (result != 0) {
+                    break;
+                }
+                elapsed -= framePeriod;
+                decodeCount++;
+            }
+            if (elapsed > framePeriod * 4) {
+                elapsed = framePeriod;
+            }
+        } else {
+            lastFrameTime = OSGetNativeTime();
+        }
+#endif
         HuPrcVSleep();
     }
     if (SimpleControl.unk19C == 1) {
@@ -200,8 +262,10 @@ static void THPTestProc(void)
     else {
         HuSprKill(SimpleControl.unk19E);
     }
+#ifndef TARGET_PC
     OSCancelThread(decodeThread);
     HuMemDirectFree(decodeStackP);
+#endif
     THPSimpleAudioStop();
     THPSimpleLoadStop();
     THPSimpleClose();
@@ -221,9 +285,18 @@ static void THPViewFunc(HU3DMODEL *arg0, Mtx arg1)
     if (THPStart != 0) {
         GXSetZMode(GX_TRUE, GX_LEQUAL, GX_TRUE);
         GXSetCullMode(GX_CULL_NONE);
+#ifdef TARGET_PC
+        {
+            s32 frame = THPSimpleDrawCurrentFrame(RenderMode, &spC, arg1, -audioTrack.unk00 / 2, audioTrack.unk04 / 2, audioTrack.unk00, -audioTrack.unk04);
+            if (frame >= 0) {
+                THPFrame = frame;
+            }
+        }
+#else
         THPFrame
             = THPSimpleDrawCurrentFrame(RenderMode, &spC, arg1, -audioTrack.unk00 / 2, audioTrack.unk04 / 2, audioTrack.unk00, -audioTrack.unk04);
         THPSimpleAudioStart();
+#endif
     }
 }
 
@@ -254,10 +327,20 @@ static void THPViewSprFunc(HUSPRITE *arg0)
         temp_r30 = -((s32)audioTrack.unk00 / 2);
         temp_r29 = -((s32)audioTrack.unk04 / 2);
         GXSetZMode(GX_FALSE, GX_ALWAYS, GX_FALSE);
+#ifdef TARGET_PC
+        {
+            s32 frame = THPSimpleDrawCurrentFrame(RenderMode, &sp8, sp48, temp_r30, temp_r29, audioTrack.unk00, audioTrack.unk04);
+            if (frame >= 0) {
+                THPFrame = frame;
+            }
+        }
+#else
         THPFrame = THPSimpleDrawCurrentFrame(RenderMode, &sp8, sp48, temp_r30, temp_r29, audioTrack.unk00, audioTrack.unk04);
+#endif
     }
 }
 
+#ifndef TARGET_PC
 static void THPDecodeFunc(void *param)
 {
     while (1) {
@@ -270,3 +353,4 @@ static void THPDecodeFunc(void *param)
         VIWaitForRetrace();
     }
 }
+#endif

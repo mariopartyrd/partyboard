@@ -869,6 +869,35 @@ template <typename B> void bswap(B &base, PlayerState &obj)
     bswap(base, obj.stars_max);
 }
 
+template <typename B> void bswap(B &base, THPHeader &obj)
+{
+    bswap(base, obj.mVersion);
+    bswap(base, obj.mBufferSize);
+    bswap(base, obj.mFrameRate);
+    bswap(base, obj.mNumFrames);
+    bswap(base, obj.mAudioMaxSamples);
+    bswap(base, obj.mFirstFrameSize);
+    bswap(base, obj.mMovieDataOffsets);
+    bswap(base, obj.mMovieDataSize);
+    bswap(base, obj.mOffsetDataOffsets);
+    bswap(base, obj.mCompInfoDataOffsets);
+    bswap(base, obj.mFinalFrameDataOffsets);
+}
+
+template <typename B> void bswap(B &base, THPAudioRecordHeader &obj)
+{
+    bswap(base, obj.offsetNextChannel);
+    bswap(base, obj.sampleSize);
+    for (int i = 0; i < 8; i++) {
+        bswap_flat(base, obj.lCoef[i], 2);
+        bswap_flat(base, obj.rCoef[i], 2);
+    }
+    bswap(base, obj.lYn1);
+    bswap(base, obj.lYn2);
+    bswap(base, obj.rYn1);
+    bswap(base, obj.rYn2);
+}
+
 void byteswap_clear_visited_ptrs()
 {
     sVisitedPtrs.clear();
@@ -1082,6 +1111,16 @@ void byteswap_systemstate(SystemState *src)
 }
 
 void byteswap_playerstate(PlayerState *src)
+{
+    bswap(*src, *src);
+}
+
+void byteswap_thpheader(THPHeader *src)
+{
+    bswap(*src, *src);
+}
+
+void byteswap_thpaudiorecordheader(THPAudioRecordHeader *src)
 {
     bswap(*src, *src);
 }

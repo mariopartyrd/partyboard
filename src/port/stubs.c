@@ -29,31 +29,6 @@ u32 OSGetSoundMode()
     return 2;
 }
 
-void DCFlushRange(void *addr, u32 nBytes)
-{
-    //puts("DCFlushRange is a stub");
-}
-
-void DCFlushRangeNoSync(void *addr, u32 nBytes)
-{
-    //puts("DCFlushRangeNoSync is a stub");
-}
-
-void DCInvalidateRange(void *addr, u32 nBytes)
-{
-    //puts("DCInvalidateRange is a stub");
-}
-
-void DCStoreRange(void *addr, u32 nBytes)
-{
-    //puts("DCStoreRange is a stub");
-}
-
-void DCStoreRangeNoSync(void *addr, u32 nBytes)
-{
-    //puts("DCStoreRangeNoSync is a stub");
-}
-
 void DEMOUpdateStats(unsigned char inc)
 {
     puts("DEMOUpdateStats is a stub");
@@ -63,29 +38,6 @@ void DEMOPrintStats(void)
 {
     puts("DEMOPrintStats is a stub");
 }
-
-// s32 DVDCancel(volatile DVDCommandBlock *block)
-// {
-//     puts("DVDCancel is a stub");
-//     return 0;
-// }
-
-// int DVDReadAbsAsyncForBS(DVDCommandBlock* block, void* addr, s32 length, s32 offset, DVDCBCallback callback)
-// {
-//     puts("DVDReadAbsAsyncForBS is a stub");
-//     return 0;
-// }
-
-// int DVDReadDiskID(DVDCommandBlock* block, DVDDiskID* diskID, DVDCBCallback callback)
-// {
-//     puts("DVDReadDiskID is a stub");
-//     return 0;
-// }
-//
-// void DVDReset()
-// {
-//     puts("DVDReset is a stub");
-// }
 
 BOOL EXIDeselect(s32 chan)
 {
@@ -129,11 +81,6 @@ BOOL EXIUnlock(s32 chan)
     return FALSE;
 }
 
-void LCEnable()
-{
-    puts("LCEnable is a stub");
-}
-
 void OSClearContext(OSContext *context)
 {
     puts("OSClearContext is a stub");
@@ -141,19 +88,13 @@ void OSClearContext(OSContext *context)
 
 BOOL OSDisableInterrupts()
 {
-    puts("OSDisableInterrupts is a stub");
+    // puts("OSDisableInterrupts is a stub");
     return FALSE;
 }
 
 void OSDumpContext(OSContext *context)
 {
     puts("OSDumpContext is a stub");
-}
-
-OSThread *OSGetCurrentThread()
-{
-    puts("OSGetCurrentThread is a stub");
-    return 0;
 }
 
 u16 OSGetFontEncode()
@@ -210,14 +151,8 @@ void OSResetSystem(int reset, u32 resetCode, BOOL forceMenu)
 
 BOOL OSRestoreInterrupts(BOOL level)
 {
-    puts("OSRestoreInterrupts is a stub");
+    // puts("OSRestoreInterrupts is a stub");
     return FALSE;
-}
-
-s32 OSResumeThread(OSThread *thread)
-{
-    puts("OSResumeThread is a stub");
-    return 0;
 }
 
 void OSSetCurrentContext(OSContext *context)
@@ -230,21 +165,10 @@ void OSSetStringTable(void *stringTable)
     puts("OSSetStringTable is a stub");
 }
 
-s32 OSSuspendThread(OSThread *thread)
-{
-    puts("OSSuspendThread is a stub");
-    return 0;
-}
-
 BOOL OSUnlink(OSModuleInfo *oldModule)
 {
     puts("OSUnlink is a stub");
     return FALSE;
-}
-
-void OSWakeupThread(OSThreadQueue *queue)
-{
-    puts("OSWakeupThread is a stub");
 }
 
 void PPCHalt()
@@ -310,18 +234,6 @@ void __GXSetSUTexSize()
 u32 __OSGetDIConfig()
 {
     puts("__OSGetDIConfig is a stub");
-    return 0;
-}
-
-__OSInterruptHandler __OSSetInterruptHandler(__OSInterrupt interrupt, __OSInterruptHandler handler)
-{
-    puts("__OSSetInterruptHandler is a stub");
-    return 0;
-}
-
-OSInterruptMask __OSUnmaskInterrupts(OSInterruptMask mask)
-{
-    puts("__OSUnmaskInterrupts is a stub");
     return 0;
 }
 
@@ -433,53 +345,3 @@ s32 HuSoftResetButtonCheck(void)
     return 0;
 }
 
-s16 HuTHPSprCreateVol(char *path, s16 loop, s16 prio, float volume)
-{
-    return 0;
-}
-
-s16 HuTHPSprCreate(char *path, s16 loop, s16 prio)
-{
-    return 0;
-}
-
-s16 HuTHP3DCreateVol(char *path, s16 loop, float volume)
-{
-    return 0;
-}
-
-s16 HuTHP3DCreate(char *path, s16 loop)
-{
-    return 0;
-}
-
-void HuTHPStop(void)
-{
-}
-
-void HuTHPClose(void)
-{
-}
-
-void HuTHPRestart(void)
-{
-}
-
-BOOL HuTHPEndCheck(void)
-{
-    return TRUE;
-}
-
-s32 HuTHPFrameGet(void)
-{
-    return 0;
-}
-
-s32 HuTHPTotalFrameGet(void)
-{
-    return 0;
-}
-
-void HuTHPSetVolume(s32 left, s32 right)
-{
-}

@@ -328,8 +328,6 @@ void ObjectSetup(void)
          HuSprAttrSet(group, 0, HUSPR_ATTR_DISPOFF);
          HuSprAttrSet(group, 1, HUSPR_ATTR_DISPOFF);
          group_thp = HuSprGrpCreate(1);
-#ifdef __MWERKS__
-         // TODO PC
          sprite_thp = HuTHPSprCreateVol("movie/opmov_a00.thp", 0, 100, 122);
          HuSprGrpMemberSet(group_thp, 0, sprite_thp);
          HuSprPosSet(group_thp, 0, 288, 240);
@@ -339,7 +337,6 @@ void ObjectSetup(void)
          HuWinBGTPLvlSet(demoWinId, 0);
          HuWinPriSet(demoWinId, 10);
          HuWinAttrSet(demoWinId, 0x800);
-#endif
          HuPrcSleep(5);
          WipeCreate(WIPE_MODE_IN, WIPE_TYPE_NORMAL, 10);
          while (WipeStatGet()) {

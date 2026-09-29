@@ -71,6 +71,9 @@ set(GAME_FILES
         src/game/ShapeExec.c
         src/game/sprman.c
         src/game/sprput.c
+        src/game/THPDraw.c
+        src/game/thpmain.c
+        src/game/THPSimple.c
         src/game/window.c
         src/game/wipe.c
 

@@ -1,16 +1,23 @@
 #include "game/THPSimple.h"
 #include "game/THPDraw.h"
+
+#ifdef TARGET_PC
+#include "port/byteswap.h"
+#include "port/audio.h"
+#endif
+
 #include <string.h>
 
 #define ALIGN32(val) (((val) + 0x1F) & ~0x1F)
 
 static void __THPSimpleDVDCallback(s32 result, DVDFileInfo *fileInfo);
 static s32 VideoDecode(void *arg0);
+
 static void THPAudioMixCallback(void);
 
 UnkThpStruct10 SimpleControl;
 static u8 SoundBuffer[2][0x280];
-static u8 WorkBuffer[0x40] ATTRIBUTE_ALIGN(32);
+static u8 ATTRIBUTE_ALIGN(32) WorkBuffer[0x40];
 
 static s32 SoundBufferIndex;
 static void *LastAudioBuffer;
@@ -19,11 +26,20 @@ static s32 bufIdx;
 static s32 AudioSystem;
 static void (*OldAIDCallback)();
 static s32 Initialized;
+#ifdef TARGET_PC
+static s16 AudioHistory[2][2];
+static u32 AudioPhase;
+static u32 AudioRate;
+static s32 AudioPrimed;
+#endif
 
 s32 THPSimpleInit(s32 arg0) {
     s32 temp_r31;
 
     memset(&SimpleControl, 0, sizeof(SimpleControl));
+#ifdef TARGET_PC
+    bufIdx = 0;
+#endif
     LCEnable();
     if (THPInit() == 0) {
         return 0;
@@ -33,18 +49,27 @@ s32 THPSimpleInit(s32 arg0) {
     SoundBufferIndex = 0;
     LastAudioBuffer = NULL;
     CurAudioBuffer = NULL;
+#ifdef TARGET_PC
+    AudioPhase = 0;
+    AudioRate = 0;
+    AudioPrimed = 0;
+#endif
     OldAIDCallback = AIRegisterDMACallback(THPAudioMixCallback);
+#ifndef TARGET_PC
     if (OldAIDCallback == NULL && AudioSystem != 0) {
         AIRegisterDMACallback(NULL);
         OSRestoreInterrupts(temp_r31);
         return 0;
     }
+#endif
     OSRestoreInterrupts(temp_r31);
     if (AudioSystem == 0) {
         memset(SoundBuffer, 0, sizeof(SoundBuffer));
         DCFlushRange(SoundBuffer, sizeof(SoundBuffer));
-        AIInitDMA((u32) &SoundBuffer[SoundBufferIndex], sizeof(SoundBuffer[0]));
+#ifndef TARGET_PC
+        AIInitDMA((uintptr_t) &SoundBuffer[SoundBufferIndex], sizeof(SoundBuffer[0]));
         AIStartDMA();
+#endif
     }
     Initialized = 1;
     return 1;
@@ -53,12 +78,16 @@ s32 THPSimpleInit(s32 arg0) {
 void THPSimpleQuit(void) {
     s32 temp_r31;
 
+#ifdef TARGET_PC
+    AIRegisterDMACallback(OldAIDCallback);
+#else
     LCDisable();
     temp_r31 = OSDisableInterrupts();
     if (OldAIDCallback) {
         AIRegisterDMACallback(OldAIDCallback);
     }
     OSRestoreInterrupts(temp_r31);
+#endif
     Initialized = 0;
 }
 
@@ -82,6 +111,9 @@ s32 THPSimpleOpen(char *arg0) {
         return 0;
     }
     memcpy(&SimpleControl.unk3C, &WorkBuffer, sizeof(SimpleControl.unk3C));
+#ifdef TARGET_PC
+    byteswap_thpheader(&SimpleControl.unk3C);
+#endif
     if (strcmp(SimpleControl.unk3C.mMagic, "THP") != 0) {
         DVDClose(&SimpleControl.unk00);
         return 0;
@@ -96,6 +128,9 @@ s32 THPSimpleOpen(char *arg0) {
         return 0;
     }
     memcpy(&SimpleControl.unk6C, &WorkBuffer, sizeof(SimpleControl.unk6C));
+#ifdef TARGET_PC
+    byteswap_u32(&SimpleControl.unk6C.mNumComponents);
+#endif
     var_r31 += sizeof(SimpleControl.unk6C);
     SimpleControl.unk9F = 0;
     for (i = 0; i < SimpleControl.unk6C.mNumComponents; i++) {
@@ -106,6 +141,10 @@ s32 THPSimpleOpen(char *arg0) {
                     return 0;
                 }
                 memcpy(&SimpleControl.unk80, &WorkBuffer, sizeof(SimpleControl.unk80));
+#ifdef TARGET_PC
+            byteswap_u32(&SimpleControl.unk80.unk00);
+            byteswap_u32(&SimpleControl.unk80.unk04);
+#endif
                 var_r31 += sizeof(SimpleControl.unk80);
                 break;
             case 1:
@@ -238,8 +277,14 @@ static inline void THPSimpleInlineFunc(void) {
 static void __THPSimpleDVDCallback(s32 result, DVDFileInfo *fileInfo) {
     s32 var_r31;
 
+#ifdef TARGET_PC
+    partyboard_audio_lock();
+#endif
     if (result == -1) {
         SimpleControl.unkA4 = 1;
+#ifdef TARGET_PC
+        partyboard_audio_unlock();
+#endif
         return;
     }
     if (result != -3) {
@@ -248,6 +293,9 @@ static void __THPSimpleDVDCallback(s32 result, DVDFileInfo *fileInfo) {
         SimpleControl.unkB8++;
         SimpleControl.unkCC[SimpleControl.unkB0].unk08 = 1;
         SimpleControl.unkA0 += SimpleControl.unkB4;
+#ifdef TARGET_PC
+        byteswap_s32(SimpleControl.unkCC[SimpleControl.unkB0].unk00);
+#endif
         SimpleControl.unkB4 = *SimpleControl.unkCC[SimpleControl.unkB0].unk00;
         if (SimpleControl.unkB0 + 1 >= 10) {
             var_r31 = 0;
@@ -259,6 +307,9 @@ static void __THPSimpleDVDCallback(s32 result, DVDFileInfo *fileInfo) {
             THPSimpleInlineFunc();
         }
     }
+#ifdef TARGET_PC
+    partyboard_audio_unlock();
+#endif
 }
 
 s32 THPSimplePreLoad(s32 arg0) {
@@ -276,6 +327,9 @@ s32 THPSimplePreLoad(s32 arg0) {
                 SimpleControl.unkA4 = 1;
                 return 0;
             }
+#ifdef TARGET_PC
+            byteswap_s32(SimpleControl.unkCC[SimpleControl.unkB0].unk00);
+#endif
             SimpleControl.unkA0 += SimpleControl.unkB4;
             SimpleControl.unkB4 = *SimpleControl.unkCC[SimpleControl.unkB0].unk00;
             SimpleControl.unkCC[SimpleControl.unkB0].unk08 = 1;
@@ -301,11 +355,26 @@ s32 THPSimplePreLoad(s32 arg0) {
 }
 
 void THPSimpleAudioStart(void) {
+#ifdef TARGET_PC
+    partyboard_audio_lock();
+    if (SimpleControl.unk9D != 1) {
+        AudioPrimed = 0;
+    }
+#endif
     SimpleControl.unk9D = 1;
+#ifdef TARGET_PC
+    partyboard_audio_unlock();
+#endif
 }
 
 void THPSimpleAudioStop(void) {
+#ifdef TARGET_PC
+    partyboard_audio_lock();
+#endif
     SimpleControl.unk9D = 0;
+#ifdef TARGET_PC
+    partyboard_audio_unlock();
+#endif
 }
 
 s32 THPSimpleLoadStop(void) {
@@ -320,10 +389,20 @@ s32 THPSimpleLoadStop(void) {
         for (i = 0; i < 10; i++) {
             SimpleControl.unkCC[i].unk08 = 0;
         }
+#ifdef TARGET_PC
+        partyboard_audio_lock();
+#endif
         for (i = 0; i < 4; i++) {
             SimpleControl.unk164[i].unk08 = 0;
         }
+#ifdef TARGET_PC
+        AudioPrimed = 0;
+        partyboard_audio_unlock();
+#endif
         SimpleControl.unk144[0].unk0C = -1;
+#ifdef TARGET_PC
+        bufIdx = 0;
+#endif
         SimpleControl.unkA0 = SimpleControl.unk3C.mMovieDataOffsets;
         SimpleControl.unkB4 = SimpleControl.unk3C.mFirstFrameSize;
         SimpleControl.unkB0 = 0;
@@ -347,13 +426,33 @@ s32 THPSimpleDecode(void) {
     s32 temp_r25;
     s32 var_r28;
     s32 i;
+#ifdef TARGET_PC
+    s32 frameReady;
+
+    partyboard_audio_lock();
+    frameReady = SimpleControl.unkCC[SimpleControl.unkAC].unk08 != 0;
+    partyboard_audio_unlock();
+    if (frameReady) {
+#else
 
     if (SimpleControl.unkCC[SimpleControl.unkAC].unk08 != 0) {
+#endif
         var_r30 = SimpleControl.unkCC[SimpleControl.unkAC].unk00 + 2;
         var_r29 = (u8*) (&SimpleControl.unkCC[SimpleControl.unkAC].unk00[SimpleControl.unk6C.mNumComponents] + 2);
         if (SimpleControl.unk9F != 0) {
+#ifdef TARGET_PC
+            s32 audioSlotFree;
+            partyboard_audio_lock();
+            audioSlotFree = SimpleControl.unk164[SimpleControl.unk194].unk08 == 0;
+            partyboard_audio_unlock();
+            if (audioSlotFree) {
+#else
             if (SimpleControl.unk164[SimpleControl.unk194].unk08 == 0) {
+#endif
                 for (i = 0; i < SimpleControl.unk6C.mNumComponents; var_r29 += *var_r30, var_r30++, i++) {
+#ifdef TARGET_PC
+        byteswap_s32(var_r30);
+#endif
                     switch (SimpleControl.unk6C.mFrameComp[i]) {
                         case 0:
                             if (VideoDecode(var_r29) == 0) {
@@ -362,10 +461,16 @@ s32 THPSimpleDecode(void) {
                             break;
                         case 1:
                             temp_r26 = THPAudioDecode(SimpleControl.unk164[SimpleControl.unk194].unk00, var_r29, 0);
+#ifdef TARGET_PC
+                            partyboard_audio_lock();
+#endif
                             temp_r27 = OSDisableInterrupts();
                             SimpleControl.unk164[SimpleControl.unk194].unk08 = temp_r26;
                             SimpleControl.unk164[SimpleControl.unk194].unk04 = SimpleControl.unk164[SimpleControl.unk194].unk00;
                             OSRestoreInterrupts(temp_r27);
+#ifdef TARGET_PC
+                            partyboard_audio_unlock();
+#endif
                             SimpleControl.unk194++;
                             if (SimpleControl.unk194 >= 4) {
                                 SimpleControl.unk194 = 0;
@@ -380,11 +485,15 @@ s32 THPSimpleDecode(void) {
             for (i = 0; i < SimpleControl.unk6C.mNumComponents; var_r29 += *var_r30, var_r30++, i++) {
                 if ((s32) SimpleControl.unk6C.mFrameComp[i] != 0) {
                     (void) i; // required to match. Optimized out unreachable code?
-                } else if (VideoDecode(var_r29) == 0) {
+                }
+                else if (VideoDecode(var_r29) == 0) {
                     return 1;
                 }
             }
         }
+#ifdef TARGET_PC
+        partyboard_audio_lock();
+#endif
         SimpleControl.unkCC[SimpleControl.unkAC].unk08 = 0;
         if (SimpleControl.unkAC + 1 >= 10) {
             var_r28 = 0;
@@ -397,6 +506,9 @@ s32 THPSimpleDecode(void) {
             THPSimpleInlineFunc();
         }
         OSRestoreInterrupts(temp_r25);
+#ifdef TARGET_PC
+        partyboard_audio_unlock();
+#endif
         return 0;
     } else {
         return 2;
@@ -405,6 +517,17 @@ s32 THPSimpleDecode(void) {
 
 static s32 VideoDecode(void *arg0) {
     s32 temp_r31;
+#ifdef TARGET_PC
+    s32 nextIdx = (bufIdx + 1) & 1;
+
+    temp_r31 = THPVideoDecode(arg0, SimpleControl.unk144[nextIdx].unk00, SimpleControl.unk144[nextIdx].unk04, SimpleControl.unk144[nextIdx].unk08, SimpleControl.unk94);
+    if (temp_r31 == 0) {
+        s32 frame = SimpleControl.unkCC[SimpleControl.unkAC].unk04;
+        bufIdx = nextIdx;
+        SimpleControl.unk144[0].unk0C = frame;
+        return 1;
+    }
+#else
 
     bufIdx = (bufIdx + 1) & 1;
     temp_r31 = THPVideoDecode(arg0, SimpleControl.unk144[bufIdx].unk00, SimpleControl.unk144[bufIdx].unk04, SimpleControl.unk144[bufIdx].unk08, SimpleControl.unk94);
@@ -412,6 +535,7 @@ static s32 VideoDecode(void *arg0) {
         SimpleControl.unk144[0].unk0C = SimpleControl.unkCC[SimpleControl.unkAC].unk04;
         return 1;
     }
+#endif
     return 0;
 }
 
@@ -580,7 +704,7 @@ static void MixAudio(void *arg0, void *arg1, u32 arg2) {
 
 s32 THPSimpleGetVideoInfo(UnkThpStruct04 *arg0) {
     if (SimpleControl.unk98 != 0) {
-        memcpy(arg0, &SimpleControl.unk80, 8);
+        memcpy(arg0, &SimpleControl.unk80, sizeof(SimpleControl.unk80));
         return 1;
     }
     return 0;
@@ -593,12 +717,76 @@ s32 THPSimpleGetTotalFrame(void) {
     return 0;
 }
 
+#ifdef TARGET_PC
+static void THPAudioMixCallback(void) {
+    PartyboardAudioOutput current;
+    s16 *output;
+    size_t frames;
+    u32 rate;
+    u32 channels;
+    size_t i;
+    u32 channel;
+
+    if (OldAIDCallback != NULL) {
+        OldAIDCallback();
+    }
+    if (!partyboard_audio_output_get(&current)) {
+        return;
+    }
+    output = current.samples;
+    frames = current.frames;
+    rate = current.rate;
+    channels = current.channels;
+
+    if (AudioSystem == 0) {
+        memset(output, 0, frames * channels * sizeof(*output));
+    }
+    if (frames == 0 || rate == 0 || channels < 2) {
+        return;
+    }
+    if (SimpleControl.unk98 == 0 || SimpleControl.unk9D != 1 || SimpleControl.unk9F == 0) {
+        AudioPrimed = 0;
+        return;
+    }
+
+    if (!AudioPrimed || AudioRate != rate) {
+        AudioPhase = 0;
+        AudioRate = rate;
+        MixAudio(AudioHistory[0], NULL, 1);
+        MixAudio(AudioHistory[1], NULL, 1);
+        AudioPrimed = 1;
+    }
+
+    for (i = 0; i < frames; i++, output += channels) {
+        for (channel = 0; channel < 2; channel++) {
+            // THP decodes right, left; the PC output expects front left, front right.
+            s32 a = AudioHistory[0][1 - channel];
+            s32 b = AudioHistory[1][1 - channel];
+            s32 sample = a + (s32) (((s64) (b - a) * AudioPhase) / rate);
+            s32 mixed = output[channel] + sample;
+            if (mixed < -0x8000) {
+                mixed = -0x8000;
+            } else if (mixed > 0x7FFF) {
+                mixed = 0x7FFF;
+            }
+            output[channel] = mixed;
+        }
+        AudioPhase += 32000;
+        while (AudioPhase >= rate) {
+            AudioPhase -= rate;
+            AudioHistory[0][0] = AudioHistory[1][0];
+            AudioHistory[0][1] = AudioHistory[1][1];
+            MixAudio(AudioHistory[1], NULL, 1);
+        }
+    }
+}
+#else
 static void THPAudioMixCallback(void) {
     s32 temp_r31;
 
     if (AudioSystem == 0) {
         SoundBufferIndex ^= 1;
-        AIInitDMA((u32) SoundBuffer[SoundBufferIndex], sizeof(SoundBuffer[0]));
+        AIInitDMA((uintptr_t) SoundBuffer[SoundBufferIndex], sizeof(SoundBuffer[0]));
         temp_r31 = OSEnableInterrupts();
         MixAudio(SoundBuffer[SoundBufferIndex], 0, 0xA0);
         DCFlushRange(SoundBuffer[SoundBufferIndex], sizeof(SoundBuffer[0]));
@@ -615,7 +803,7 @@ static void THPAudioMixCallback(void) {
             CurAudioBuffer = (u8*) AIGetDMAStartAddr() + 0x80000000;
         }
         SoundBufferIndex ^= 1;
-        AIInitDMA((u32) SoundBuffer[SoundBufferIndex], sizeof(SoundBuffer[0]));
+        AIInitDMA((uintptr_t) SoundBuffer[SoundBufferIndex], sizeof(SoundBuffer[0]));
         temp_r31 = OSEnableInterrupts();
         if (CurAudioBuffer) {
             DCInvalidateRange(CurAudioBuffer, sizeof(SoundBuffer[0]));
@@ -625,6 +813,7 @@ static void THPAudioMixCallback(void) {
         OSRestoreInterrupts(temp_r31);
     }
 }
+#endif
 
 s32 THPSimpleSetVolume(s32 left, s32 right) {
     s32 temp_r29;
@@ -642,6 +831,9 @@ s32 THPSimpleSetVolume(s32 left, s32 right) {
         if (right < 0) {
             right = 0;
         }
+#ifdef TARGET_PC
+        partyboard_audio_lock();
+#endif
         temp_r29 = OSDisableInterrupts();
         SimpleControl.unkC0 = left;
         if (right != 0) {
@@ -652,6 +844,9 @@ s32 THPSimpleSetVolume(s32 left, s32 right) {
             SimpleControl.unkBC = SimpleControl.unkC0;
         }
         OSRestoreInterrupts(temp_r29);
+#ifdef TARGET_PC
+        partyboard_audio_unlock();
+#endif
         return 1;
     }
     return 0;

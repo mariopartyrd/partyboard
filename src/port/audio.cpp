@@ -23,6 +23,7 @@ aurora::Module Log("partyboard::audio");
 std::recursive_mutex sAudioMutex;
 
 AIDCallback sDmaCallback = nullptr;
+PartyboardAudioOutput sCurrentOutput{};
 s32 sMasterVolume = 100;
 
 bool sDeviceOpened = false;
@@ -46,12 +47,12 @@ std::thread sReadThread;
 bool sReadStop = false;
 
 void output_callback(s16 *output, size_t frames, u32 rate, u32 channels) {
-    (void)rate;
-
     // 5 ms MusyX cycle
+    sCurrentOutput = {output, frames, rate, channels};
     if (sDmaCallback != nullptr) {
         sDmaCallback();
     }
+    sCurrentOutput = {};
 
     if (sMasterVolume < 100) {
         const s32 gain = sMasterVolume * 32768 / 100;
@@ -116,6 +117,15 @@ extern "C" {
 void partyboard_audio_lock(void) { sAudioMutex.lock(); }
 
 void partyboard_audio_unlock(void) { sAudioMutex.unlock(); }
+
+// Used in THP
+BOOL partyboard_audio_output_get(PartyboardAudioOutput *output) {
+    if (output == nullptr || sCurrentOutput.samples == nullptr) {
+        return FALSE;
+    }
+    *output = sCurrentOutput;
+    return TRUE;
+}
 
 void partyboard_audio_pre_init(void) {
     sMasterVolume = std::clamp(partyboard::getSettings().audio.masterVolume.getValue(), 0, 100);
