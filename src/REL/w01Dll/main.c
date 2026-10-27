@@ -725,7 +725,12 @@ static void CoasterPathUpdate(void)
     float time;
     s32 spaceId;
     s32 spaceIdLink;
+#ifdef TARGET_PC
+    /* BoardSpaceLinkTargetListGet clears BOARD_SPACE_LINKMAX entries: [3] lost the stack canary to it */
+    s16 linkTbl[BOARD_SPACE_LINKMAX];
+#else
     s16 linkTbl[3];
+#endif
     BoardSpace *space;
     BoardSpace *spaceLink;
 
