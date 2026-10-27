@@ -230,9 +230,16 @@ ANIMDATA *HuSprAnimRead(void *data)
         anim->useNum++;
         return anim;
     }
+    if (((u32 *)data)[2] == ANIM_DATA_ALLOCATION_VALID) {
+        /* this file block was read before: same as GC's second read of it, the same anim once more */
+        memcpy(&anim, (u8 *)data + 12, sizeof(anim));
+        anim->useNum++;
+        return anim;
+    }
     anim = HuMemDirectMalloc(HEAP_DATA, sizeof(ANIMDATA));
     byteswap_animdata(data, anim);
     anim->valid = ANIM_DATA_ALLOCATION_VALID;
+    anim->raw = data;
 #else
     if((uintptr_t)anim->bank & ~0xFFFF) {
         anim->useNum++;
@@ -293,6 +300,11 @@ ANIMDATA *HuSprAnimRead(void *data)
         bmp->data = (void *)((uintptr_t)bmp->data+(uintptr_t)data);
     }
     anim->useNum = 0;
+#ifdef BYTESWAPPING
+    /* mark the file block as read (its 20-byte header is no longer needed): bank offset, then the anim */
+    ((u32 *)data)[2] = ANIM_DATA_ALLOCATION_VALID;
+    memcpy((u8 *)data + 12, &anim, sizeof(anim));
+#endif
     return anim;
 }
 
@@ -478,6 +490,9 @@ void HuSprAnimKill(ANIMDATA *anim)
         HuMemDirectFree(anim->bank);
         HuMemDirectFree(anim->pat);
         HuMemDirectFree(anim->bmp);
+        if (anim->raw) {
+            HuMemDirectFree(anim->raw);
+        }
 #endif
         HuMemDirectFree(anim);
     }
@@ -697,6 +712,7 @@ ANIMDATA *HuSprAnimMake(s16 sizeX, s16 sizeY, s16 dataFmt)
     pat->layer = layer = HuMemDirectMalloc(HEAP_DATA, sizeof(ANIMLAYER));
     anim->bmp = bmp = HuMemDirectMalloc(HEAP_DATA, sizeof(ANIMBMP));
     anim->valid = ANIM_DATA_ALLOCATION_VALID;
+    anim->raw = NULL;
 #else
     anim = new_anim = HuMemDirectMalloc(HEAP_DATA, sizeof(ANIMDATA)+sizeof(ANIMBANK)+sizeof(ANIMFRAME)
                                             +sizeof(ANIMPAT)+sizeof(ANIMLAYER)+sizeof(ANIMBMP));

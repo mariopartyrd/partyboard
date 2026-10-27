@@ -93,6 +93,9 @@ typedef struct AnimData_s {
 /* 0x10 */ ANIMBMP *bmp;
 #ifdef BYTESWAPPING
     u32 valid;
+    /* The file block HuSprAnimRead converted (frames, layers and bitmaps still point into it), or NULL. On GC
+     * that block is the ANIMDATA itself, which HuSprAnimKill frees. */
+    void *raw;
 #endif
 } ANIMDATA; //sizeof 0x14
 
