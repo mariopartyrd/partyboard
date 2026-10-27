@@ -78,6 +78,12 @@ Process *HuPrcCreate(void (*func)(void), u16 prio, u32 stack_size, s32 extra_siz
     }
 #ifdef TARGET_PC
     stack_size *= 2;
+    /* The GC budgets do not cover PC code below the game: mstory3Dll's party-end save (SLSave through aurora's
+     * card, SDL and libc) needs about 20 KB on a 0x2000 process and overflowed into the malloc heap. These
+     * stacks are malloc'ed, outside the game heaps. */
+    if (stack_size < 0x10000) {
+        stack_size = 0x10000;
+    }
     alloc_size = HuMemMemoryAllocSizeGet(sizeof(Process)) + HuMemMemoryAllocSizeGet(extra_size);
 #else
     alloc_size = HuMemMemoryAllocSizeGet(sizeof(Process)) + HuMemMemoryAllocSizeGet(stack_size) + HuMemMemoryAllocSizeGet(extra_size);
