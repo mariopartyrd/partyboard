@@ -170,8 +170,27 @@ jobs:
       - name: Setup sccache
         uses: mozilla-actions/sccache-action@v0.0.10
 
+      # Fetch fixed Corrosion version to replace 0.6.1 used by nod.
+      # 0.6.1 has an issue that fails build on CI because Corrosion hardcodes the CLT SDK path.
+      # @TODO: When Corrosion makes a new release, and nod (encounter/nod) bumps its
+      # Corrosion version and aurora bumps its nod version, update aurora version and remove workaround.
+      - name: Fetch fixed Corrosion
+        if: matrix.platform == 'macos'
+        uses: actions/checkout@v6
+        with:
+          repository: corrosion-rs/corrosion
+          ref: 2522f7abad9eaa88b05d07fd492841c529ca2bf1
+          path: corrosion
+
       - name: Configure CMake
+        if: matrix.platform != 'macos'
         run: cmake --preset ${{matrix.preset}}
+
+      # @TODO: Delete this step and restore universal "Configure CMake" step
+      # when Corrosion bug is fixed as detailed in the comment of step "Fetch fixed Corrosion"
+      - name: Configure CMake (macOS)
+        if: matrix.platform == 'macos'
+        run: cmake --preset ${{matrix.preset}} -DFETCHCONTENT_SOURCE_DIR_CORROSION="$GITHUB_WORKSPACE/corrosion"
 
       - name: Build
         run: cmake --build --preset ${{matrix.preset}}
