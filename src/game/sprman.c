@@ -216,6 +216,53 @@ void HuSprPauseSet(BOOL value)
     HuSprPauseF = value;
 }
 
+#ifdef BYTESWAPPING
+// HuSprAnimRead byteswaps an animation's raw data in place, so reading the
+// same raw data twice (w01's item roulette makes four texture animations from
+// one file) swapped it back and read garbage offsets (#38). The `valid` check
+// below only recognizes the converted copy, so the raw data -> copy pairs are
+// remembered here; HuSprAnimKill drops a pair when it frees the copy.
+#define ANIM_RAW_MAX 64
+static struct {
+    void *raw;
+    ANIMDATA *anim;
+} animRawTbl[ANIM_RAW_MAX];
+
+static ANIMDATA *AnimRawFind(void *raw)
+{
+    s32 i;
+    for (i = 0; i < ANIM_RAW_MAX; i++) {
+        if (animRawTbl[i].raw == raw) {
+            return animRawTbl[i].anim;
+        }
+    }
+    return NULL;
+}
+
+static void AnimRawSet(void *raw, ANIMDATA *anim)
+{
+    s32 i;
+    for (i = 0; i < ANIM_RAW_MAX; i++) {
+        if (animRawTbl[i].raw == NULL || animRawTbl[i].raw == raw) {
+            animRawTbl[i].raw = raw;
+            animRawTbl[i].anim = anim;
+            return;
+        }
+    }
+}
+
+static void AnimRawDrop(ANIMDATA *anim)
+{
+    s32 i;
+    for (i = 0; i < ANIM_RAW_MAX; i++) {
+        if (animRawTbl[i].anim == anim) {
+            animRawTbl[i].raw = NULL;
+            animRawTbl[i].anim = NULL;
+        }
+    }
+}
+#endif
+
 ANIMDATA *HuSprAnimRead(void *data)
 {
     s16 i;
@@ -227,6 +274,10 @@ ANIMDATA *HuSprAnimRead(void *data)
 #ifdef BYTESWAPPING
     s16 j;
     if (anim->valid == ANIM_DATA_ALLOCATION_VALID) {
+        anim->useNum++;
+        return anim;
+    }
+    if ((anim = AnimRawFind(data)) != NULL) {
         anim->useNum++;
         return anim;
     }
@@ -293,6 +344,9 @@ ANIMDATA *HuSprAnimRead(void *data)
         bmp->data = (void *)((uintptr_t)bmp->data+(uintptr_t)data);
     }
     anim->useNum = 0;
+#ifdef BYTESWAPPING
+    AnimRawSet(data, anim);
+#endif
     return anim;
 }
 
@@ -475,6 +529,7 @@ void HuSprAnimKill(ANIMDATA *anim)
         }
 #endif
 #ifdef BYTESWAPPING
+        AnimRawDrop(anim);
         HuMemDirectFree(anim->bank);
         HuMemDirectFree(anim->pat);
         HuMemDirectFree(anim->bmp);
