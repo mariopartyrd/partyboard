@@ -69,7 +69,12 @@ s16 HuTHP3DCreateVol(char *path, s16 loop, float volume)
     s16 temp_r31;
 
     if (THPProc) {
+#ifdef NON_MATCHING
+        OSReport("Warning!! HuTHP3DCreateVol: THPProc is not NULL, what should we return here?");
+        return 0;
+#else
         return;
+#endif
     }
     THPStart = 0;
     THPProc = HuPrcCreate(THPTestProc, 0x64, 0x3000, 0);
