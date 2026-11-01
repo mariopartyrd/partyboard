@@ -16,6 +16,7 @@
 #include <msm/msmsys.h>
 
 #ifdef TARGET_PC
+#include "game/thpmain.h"
 #include "port/port_version.h"
 #endif
 
