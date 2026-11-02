@@ -58,6 +58,8 @@ bool initialize() noexcept
     load_font("N64Party-Monochromatic.otf");
     load_font("FOT-NewRodin Pro DB.otf");
 
+    input::register_input_layer();
+
     // Rml::Debugger::Initialise(aurora::rmlui::get_context());
     // Rml::Debugger::SetVisible(true);
 
@@ -72,6 +74,7 @@ void shutdown() noexcept
     sConnectedGamepads.clear();
     input::reset_input_state();
     input::release_input_block();
+    input::unregister_input_layer();
     sInitialized = false;
 }
 

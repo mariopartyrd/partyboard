@@ -77,7 +77,7 @@ Process *HuPrcCreate(void (*func)(void), u16 prio, u32 stack_size, s32 extra_siz
         stack_size = 2048;
     }
 #ifdef TARGET_PC
-    stack_size *= 2;
+    stack_size = stack_size * 2 > 0x100000 ? stack_size * 2 : 0x100000;
     alloc_size = HuMemMemoryAllocSizeGet(sizeof(Process)) + HuMemMemoryAllocSizeGet(extra_size);
 #else
     alloc_size = HuMemMemoryAllocSizeGet(sizeof(Process)) + HuMemMemoryAllocSizeGet(stack_size) + HuMemMemoryAllocSizeGet(extra_size);

@@ -425,6 +425,8 @@ extern "C" int port_main(int argc, char* argv[]) {
     } else {
         AuroraSetViewportPolicy(AURORA_VIEWPORT_STRETCH);
     }
+    // prevent board from going black intermittently for a few frames
+    AuroraSetDrawsBlocking(true);
     VISetFrameBufferScale(partyboard::getSettings().game.internalResolutionScale.getValue());
 
     // TODO PC

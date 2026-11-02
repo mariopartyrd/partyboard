@@ -12,6 +12,8 @@ using namespace std::string_view_literals;
 static bool versionInitialized;
 static GameVersion gameVersion;
 static DVDDiskID diskId;
+static char gameNameStr[sizeof(diskId.gameName) + 1];
+static char companyStr[sizeof(diskId.company) + 1];
 
 void init() {
     versionInitialized = true;
@@ -35,6 +37,9 @@ void init() {
         // TODO: Handle remaining valid versions.
         PartyBoardVersionLog.fatal("Unknown/unsupported game version in disc: {}", game);
     }
+
+    game.copy(gameNameStr, game.size());
+    company.copy(companyStr, company.size());
 
     PartyBoardVersionLog.info("Loaded game disc is {}{}", game, company);
 }
@@ -83,4 +88,16 @@ extern "C" BOOL partyboard_version_is_usa(void)
 extern "C" BOOL partyboard_version_is_ntsc(void)
 {
     return partyboard::version::isRegionUsa() || partyboard::version::isRegionJpn();
+}
+
+extern "C" const char* partyboard_version_get_game_name(void)
+{
+    partyboard::version::getGameVersion();
+    return partyboard::version::gameNameStr;
+}
+
+extern "C" const char* partyboard_version_get_company(void)
+{
+    partyboard::version::getGameVersion();
+    return partyboard::version::companyStr;
 }

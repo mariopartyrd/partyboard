@@ -73,4 +73,7 @@ BOOL partyboard_version_is_pal(void);
 BOOL partyboard_version_is_usa(void);
 BOOL partyboard_version_is_ntsc(void);
 
+const char* partyboard_version_get_game_name(void);
+const char* partyboard_version_get_company(void);
+
 #endif

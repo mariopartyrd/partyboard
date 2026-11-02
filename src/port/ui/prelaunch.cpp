@@ -28,7 +28,6 @@
 #include <thread>
 
 extern "C" {
-#include <game/card.h>
 #include <game/pad.h>
 }
 
@@ -639,8 +638,6 @@ Prelaunch::Prelaunch()
             //         (*handle)->releaseHandle();
             //     }
             // }
-
-            HuCardInit();
 
             PartyBoard_IsGameLaunched = true;
             hide(true);

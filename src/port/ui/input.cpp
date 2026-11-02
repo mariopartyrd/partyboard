@@ -8,11 +8,13 @@
 #include <SDL3/SDL_gamepad.h>
 #include <SDL3/SDL_timer.h>
 #include <SDL3/SDL_touch.h>
+#include <aurora/input.hpp>
 #include <aurora/rmlui.hpp>
 #include <dolphin/pad.h>
 
 #include <algorithm>
 #include <array>
+#include <utility>
 
 namespace partyboard::ui::input {
 namespace {
@@ -59,6 +61,7 @@ namespace {
     std::array<u32, PAD_MAX_CONTROLLERS> sPadHoldMasks;
     std::array<bool, PAD_MAX_CONTROLLERS> sMenuChordConsumed;
     TouchTapState sTouchMenuTap;
+    aurora::input::LayerId sInputLayer = aurora::input::kInvalidLayerId;
 
     double now_seconds() noexcept
     {
@@ -673,7 +676,33 @@ namespace {
         context.ProcessKeyDown(key, 0);
     }
 
+    aurora::input::EventResult on_input_layer_event(const aurora::input::InputEvent &event, void *) noexcept
+    {
+        if (event.source.kind != aurora::input::InputSource::Kind::Controller) {
+            aurora::rmlui::process_input(event);
+        }
+        return aurora::input::EventResult::Pass;
+    }
+
 } // namespace
+
+void register_input_layer() noexcept
+{
+    if (sInputLayer != aurora::input::kInvalidLayerId) {
+        return;
+    }
+
+    sInputLayer = aurora::input::register_layer({
+        .label = "partyboard.rmlui",
+        .priority = aurora::input::kRmlUiLayerPriority,
+        .onEvent = on_input_layer_event,
+    });
+}
+
+void unregister_input_layer() noexcept
+{
+    aurora::input::unregister_layer(std::exchange(sInputLayer, aurora::input::kInvalidLayerId));
+}
 
 void sync_input_block() noexcept
 {

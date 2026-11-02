@@ -4,6 +4,7 @@
 #include "version.h"
 
 #ifdef TARGET_PC
+#include "port/port_version.h"
 #include "port/settings.h"
 #endif
 
@@ -16,7 +17,7 @@ void HuCardInit(void)
 {
 #ifdef TARGET_PC
         CARDSetLoadType(partyboard_settings_card_file_type());
-        CARDInit("Party Board", "mariopartyrd");
+        CARDInit(partyboard_version_get_game_name(), partyboard_version_get_company());
 #else
 	CARDInit();
 #endif
